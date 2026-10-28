@@ -1,0 +1,18 @@
+{
+  "name": "nexo-enem-ai",
+  "private": true,
+  "packageManager": "pnpm@11.25.0",
+  "scripts": {
+    "dev": "pnpm --filter @nexo/shared build && pnpm --parallel --filter @nexo/api --filter @nexo/web dev",
+    "build": "pnpm --filter @nexo/shared build && pnpm --filter @nexo/api build && pnpm --filter @nexo/web build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm --filter @nexo/shared build && pnpm -r test",
+    "db:generate": "pnpm --filter @nexo/api prisma:generate",
+    "db:migrate": "pnpm --filter @nexo/api prisma:migrate",
+    "import:exams": "pnpm --filter @nexo/api import:exams"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}

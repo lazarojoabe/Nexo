@@ -1,0 +1,54 @@
+node_modules
+.next
+dist
+coverage
+.env
+.env.local
+*.log
+*.tsbuildinfo
+apps/api/uploads
+*** Add File: C:\Users\lazar\OneDrive\Documentos\PROJETOS\Nexo AI\Nexo\.env.example
+# Web (apps/web/.env.local)
+NEXT_PUBLIC_API_URL=http://localhost:3001
+
+# API (apps/api/.env)
+PORT=3001
+WEB_ORIGIN=http://localhost:3000
+DATABASE_URL=postgresql://postgres:password@localhost:5432/nexo
+# Supabase (opcional no modo demonstrativo)
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_JWT_SECRET=
+# Gemini — nunca use NEXT_PUBLIC_ para esta chave
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-2.0-flash
+AI_EVALUATIONS_PER_DAY=3
+*** Add File: C:\Users\lazar\OneDrive\Documentos\PROJETOS\Nexo AI\Nexo\docs\IMPLEMENTATION_PLAN.md
+# Plano de implementação — Nexo ENEM AI
+
+## Arquitetura
+
+Monorepo pnpm com `apps/web` (Next.js/App Router, PWA, interface mobile), `apps/api` (NestJS REST/Swagger) e `packages/shared` (contratos Zod e regras determinísticas). PostgreSQL/Supabase é a persistência prevista. Sem `DATABASE_URL`, a API inicia em modo demonstrativo, com questões declaradamente fictícias na memória para permitir validar a experiência sem custo ou credenciais.
+
+## Fases entregues
+
+1. Fundação: workspace, tipagem estrita, documentação, contratos, API e web.
+2. Quiz: listagem, sessão, correção determinística pelo gabarito persistido/em memória, histórico e teste de fluxo.
+3. Redação: criação, validação de imagem, revisão da transcrição, avaliação com adaptador Gemini e resposta segura quando indisponível.
+4. PWA: manifesto, service worker, offline e interface mobile-first.
+5. Validação: testes unitários dos pontos críticos e comandos de lint/typecheck/build.
+
+## Decisões e riscos
+
+- Não há caderno/gabarito do Inep no repositório. Portanto, nenhum conteúdo é atribuído ao Inep: há apenas exemplos demonstrativos. O importador aceita JSON revisado e registra origem/versão.
+- O processamento confiável de PDFs exige revisão humana por prova/cor/idioma; a importação não deve publicar registros que falhem validação.
+- A transcrição e a nota só ocorrem com `GEMINI_API_KEY`; o app preserva o texto e nunca inventa uma nota offline.
+- Supabase Auth/Storage deve ser configurado antes de uso multiusuário em produção. O modo demo não deve receber material sensível.
+
+## Critérios de aceite
+
+- Web e API iniciam com `pnpm dev`.
+- Quiz permite responder e recebe correção determinística.
+- Redação permite texto manual, revisão e tentativa de avaliação.
+- A PWA dispõe de manifesto e cache somente de recursos públicos estáticos.
+- Testes cobrem correção, totalização, validação de IA, autorização e fluxo de quiz.
