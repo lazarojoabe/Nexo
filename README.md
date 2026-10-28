@@ -10,7 +10,7 @@ pnpm install
 pnpm dev
 ```
 
-Abra `http://localhost:3000`. A documentação REST fica em `http://localhost:3001/api/docs`.
+Abra `http://localhost:3002`. A API NestJS fica em `http://localhost:3001` e a documentação REST em `http://localhost:3001/api/docs`.
 
 Para checagem: `pnpm lint && pnpm typecheck && pnpm test && pnpm build`.
 

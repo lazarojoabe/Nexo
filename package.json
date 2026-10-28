@@ -3,7 +3,7 @@
   "private": true,
   "packageManager": "pnpm@11.25.0",
   "scripts": {
-    "dev": "pnpm --filter @nexo/shared build && pnpm --parallel --filter @nexo/api --filter @nexo/web dev",
+    "dev": "pnpm --filter @nexo/shared build && pnpm --parallel --filter @nexo/api --filter @nexo/web dev:fixed-port",
     "build": "pnpm --filter @nexo/shared build && pnpm --filter @nexo/api build && pnpm --filter @nexo/web build",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
