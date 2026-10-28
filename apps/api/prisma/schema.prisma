@@ -1,0 +1,12 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+
+model UserProfile { id String @id; displayName String?; createdAt DateTime @default(now()); quizSessions QuizSession[]; essays Essay[] }
+model Exam { id String @id @default(cuid()); year Int; day Int; color String; language String?; version String; sourceUrl String?; sourceVersion String?; questions Question[]; @@unique([year, day, color, language, version]) }
+model Question { id String @id @default(cuid()); examId String; exam Exam @relation(fields:[examId], references:[id]); number Int; area String; statement String; explanation String?; imageUrl String?; isCancelled Boolean @default(false); correctOptionId String; options QuestionOption[]; attempts QuestionAttempt[]; @@index([examId, area]) }
+model QuestionOption { id String @id @default(cuid()); questionId String; question Question @relation(fields:[questionId], references:[id], onDelete:Cascade); label String; content String; @@unique([questionId,label]) }
+model QuizSession { id String @id @default(cuid()); userId String?; user UserProfile? @relation(fields:[userId], references:[id]); examId String?; createdAt DateTime @default(now()); attempts QuestionAttempt[]; @@index([userId,createdAt]) }
+model QuestionAttempt { id String @id @default(cuid()); sessionId String; session QuizSession @relation(fields:[sessionId],references:[id],onDelete:Cascade); questionId String; question Question @relation(fields:[questionId],references:[id]); optionId String; correct Boolean; answeredAt DateTime @default(now()); @@unique([sessionId,questionId]) }
+model Essay { id String @id @default(cuid()); userId String; user UserProfile @relation(fields:[userId],references:[id]); topic String; transcription String?; confirmedText String?; status String @default("draft"); createdAt DateTime @default(now()); images EssayImage[]; evaluation EssayEvaluation?; @@index([userId,createdAt]) }
+model EssayImage { id String @id @default(cuid()); essayId String; essay Essay @relation(fields:[essayId],references:[id],onDelete:Cascade); storagePath String; mimeType String; size Int; createdAt DateTime @default(now()) }
+model EssayEvaluation { id String @id @default(cuid()); essayId String @unique; essay Essay @relation(fields:[essayId],references:[id],onDelete:Cascade); totalScore Int; payload Json; provider String; createdAt DateTime @default(now()) }
