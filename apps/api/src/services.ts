@@ -1,11 +1,14 @@
 import { BadRequestException, Injectable, NotFoundException, OnModuleInit, Optional } from '@nestjs/common';
 import { essayEvaluationSchema, gradeAnswer } from '@nexo/shared';
 import { GeminiProvider } from './gemini.provider';
+import { HandwritingPreprocessor } from './handwriting-preprocessor';
 import { PrismaService } from './prisma.service';
 
 type Option = { id: string; label: string; content: string };
 type Question = { id: string; area: string; statement: string; explanation: string; correctOptionId: string; options: Option[]; source: string };
 type MemorySession = { questionIds: string[]; attempts: Map<string, { optionId: string; correct: boolean }> };
+type EssayImage = { mimeType: string; data: string; originalMimeType: string; originalData: string };
+type MemoryEssay = { id: string; userId: string; topic: string; transcription?: string; confirmedText?: string; images: EssayImage[]; evaluation?: unknown };
 
 const demoQuestion: Question = {
   id: 'demo-mat-1', area: 'Matemática', statement: 'Exemplo demonstrativo: qual é o resultado de 25% de 80?', explanation: '25% equivale a 1/4; portanto, 80 ÷ 4 = 20.', correctOptionId: 'demo-mat-1-b', source: 'Demonstração — não é questão do Inep',
@@ -86,13 +89,13 @@ export class QuizService implements OnModuleInit {
 
 @Injectable()
 export class EssayService {
-  constructor(private readonly gemini: GeminiProvider) {}
-  private essays = new Map<string, { id: string; userId: string; topic: string; transcription?: string; confirmedText?: string; images: { mimeType: string; data: string }[]; evaluation?: unknown }>();
-  create(userId: string, topic: string) { const id = crypto.randomUUID(); const essay = { id, userId, topic, images: [] as { mimeType: string; data: string }[] }; this.essays.set(id, essay); return { ...essay, images: 0 }; }
+  constructor(private readonly gemini: GeminiProvider, private readonly preprocessor: HandwritingPreprocessor) {}
+  private essays = new Map<string, MemoryEssay>();
+  create(userId: string, topic: string) { const id = crypto.randomUUID(); const essay: MemoryEssay = { id, userId, topic, images: [] }; this.essays.set(id, essay); return { ...essay, images: 0 }; }
   private owned(id: string, userId: string) { const essay = this.essays.get(id); if (!essay) throw new NotFoundException('Redação não encontrada.'); if (essay.userId !== userId) throw new NotFoundException('Redação não encontrada.'); return essay; }
-  addImage(id: string, userId: string, file?: Express.Multer.File) { const essay = this.owned(id, userId); if (!file) throw new BadRequestException('Envie uma imagem.'); if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype) || file.size > 8 * 1024 * 1024) throw new BadRequestException('Use JPEG, PNG ou WebP de até 8 MB.'); if (essay.images.length >= 5) throw new BadRequestException('Máximo de 5 imagens.'); essay.images.push({ mimeType: file.mimetype, data: file.buffer.toString('base64') }); return { accepted: true, images: essay.images.length }; }
+  async addImage(id: string, userId: string, file?: Express.Multer.File) { const essay = this.owned(id, userId); if (!file) throw new BadRequestException('Envie uma imagem.'); if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype) || file.size > 8 * 1024 * 1024) throw new BadRequestException('Use JPEG, PNG ou WebP de até 8 MB.'); if (essay.images.length >= 5) throw new BadRequestException('Máximo de 5 imagens.'); const processed = await this.preprocessor.enhance(file.buffer); essay.images.push({ mimeType: processed.mimeType, data: processed.data, originalMimeType: file.mimetype, originalData: file.buffer.toString('base64') }); return { accepted: true, images: essay.images.length, preprocessing: 'rotate, resize, grayscale, normalize, sharpen' }; }
   setText(id: string, userId: string, text: string) { const essay = this.owned(id, userId); if (text.trim().length < 20 || text.length > 8000) throw new BadRequestException('O texto deve ter entre 20 e 8000 caracteres.'); essay.confirmedText = text; return essay; }
-  async transcribe(id: string, userId: string) { const essay = this.owned(id, userId); if (!essay.images.length) throw new BadRequestException('Envie ao menos uma imagem antes de transcrever.'); return this.gemini.transcribe(essay.images); }
+  async transcribe(id: string, userId: string, consent: boolean) { const essay = this.owned(id, userId); if (!consent) throw new BadRequestException('É necessário consentir com o envio da imagem ao provedor de IA.'); if (!essay.images.length) throw new BadRequestException('Envie ao menos uma imagem antes de transcrever.'); const result = await this.gemini.transcribe(essay.images); essay.transcription = result.text; return result; }
   async evaluate(id: string, userId: string, consent: boolean) { const essay = this.owned(id, userId); if (!consent) throw new BadRequestException('É necessário consentir com o envio ao provedor de IA.'); if (!essay.confirmedText) throw new BadRequestException('Confirme ou digite a transcrição antes de avaliar.'); const evaluation = await this.gemini.evaluate(essay.topic, essay.confirmedText); essay.evaluation = evaluation; return { ...evaluation, disclaimer: 'Estimativa educacional por IA; não é nota oficial nem garantia de desempenho.' }; }
   get(id: string, userId: string) { const essay = this.owned(id, userId); return { ...essay, images: essay.images.length }; }
   validateProviderPayload(payload: unknown) { return essayEvaluationSchema.parse(payload); }

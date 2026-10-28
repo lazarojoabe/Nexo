@@ -37,7 +37,7 @@ export class EssayController {
   constructor(private readonly essays: EssayService) {}
   @Post() create(@Headers('x-user-id') userId: string | undefined, @Body() dto: CreateEssayDto) { return this.essays.create(demoUser(userId), dto.topic); }
   @Post(':id/images') @ApiConsumes('multipart/form-data') @UseInterceptors(FileInterceptor('image', { limits: { fileSize: 8 * 1024 * 1024 } })) image(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined, @UploadedFile() file?: Express.Multer.File) { return this.essays.addImage(id, demoUser(userId), file); }
-  @Post(':id/transcribe') @HttpCode(200) transcribe(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined) { return this.essays.transcribe(id, demoUser(userId)); }
+  @Post(':id/transcribe') @HttpCode(200) transcribe(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined, @Body() dto: EvaluateDto) { return this.essays.transcribe(id, demoUser(userId), dto.consent); }
   @Patch(':id/transcription') text(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined, @Body() dto: TextDto) { return this.essays.setText(id, demoUser(userId), dto.text); }
   @Post(':id/evaluate') @HttpCode(200) evaluate(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined, @Body() dto: EvaluateDto) { return this.essays.evaluate(id, demoUser(userId), dto.consent); }
   @Get(':id') get(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined) { return this.essays.get(id, demoUser(userId)); }

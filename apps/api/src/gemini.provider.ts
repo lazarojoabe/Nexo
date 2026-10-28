@@ -1,5 +1,6 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
-import { essayEvaluationSchema } from '@nexo/shared';
+import { essayEvaluationSchema, transcriptionSchema } from '@nexo/shared';
+import { enemRubric } from './essay-rubric';
 
 type ImagePart = { mimeType: string; data: string };
 const timeout = 25_000;
@@ -19,7 +20,8 @@ export class GeminiProvider {
       const json = await response.json() as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
       const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!text) throw new ServiceUnavailableException('A IA retornou uma resposta vazia. Tente novamente.');
-      return JSON.parse(text) as unknown;
+      const normalized = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+      return JSON.parse(normalized) as unknown;
     } catch (error) {
       if (error instanceof ServiceUnavailableException) throw error;
       throw new ServiceUnavailableException('A IA não respondeu a tempo. Tente novamente; seus dados foram preservados.');
@@ -27,11 +29,12 @@ export class GeminiProvider {
   }
 
   async transcribe(images: ImagePart[]) {
-    return this.generate([{ text: 'Transcreva esta redação manuscrita em português. Preserve erros, parágrafos e pontuação; não complete palavras ilegíveis. Retorne JSON {"text":"...","lowConfidenceSegments":["..."]}.' }, ...images.map((image) => ({ inlineData: { mimeType: image.mimeType, data: image.data } }))]);
+    const result = await this.generate([{ text: `Transcreva esta redação manuscrita em português brasileiro, respeitando a ordem das páginas. Preserve exatamente erros de ortografia, parágrafos, acentuação e pontuação visíveis. Não corrija, não resuma e não invente palavras: use [ilegível] quando necessário. Retorne exclusivamente JSON no formato {"text":"...","lowConfidenceSegments":[{"text":"trecho", "reason":"por que a leitura é incerta"}]}. A lista deve conter apenas trechos realmente incertos.` }, ...images.map((image) => ({ inlineData: { mimeType: image.mimeType, data: image.data } }))]);
+    return transcriptionSchema.parse(result);
   }
 
   async evaluate(topic: string, text: string) {
-    const raw = await this.generate([{ text: `Avalie de forma educacional e não oficial uma redação ENEM. Tema: ${topic}. Texto confirmado: ${text}. Retorne exclusivamente JSON com competencies.c1..c5, cada uma {score: 0|40|80|120|160|200, justification}; strengths, problems, improvementExamples e studyPlan. Não afirme ser nota oficial.` }]);
+    const raw = await this.generate([{ text: `${enemRubric}\nTema proposto: ${topic}\nTexto confirmado pelo estudante:\n${text}\n\nRetorne exclusivamente JSON com competencies.c1..c5, cada uma {score, justification, feedback:["ação objetiva"]}; strengths, problems, improvementExamples e studyPlan. Não afirme ser nota oficial.` }]);
     return essayEvaluationSchema.parse(raw);
   }
 }

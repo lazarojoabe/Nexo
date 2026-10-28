@@ -3,9 +3,18 @@ import { z } from 'zod';
 export const answerSchema = z.object({ optionId: z.string().min(1) });
 export const essayTextSchema = z.string().trim().min(20, 'Escreva ao menos 20 caracteres.').max(8000);
 
+export const transcriptionSchema = z.object({
+  text: z.string().max(8000),
+  lowConfidenceSegments: z.array(z.object({
+    text: z.string().min(1).max(300),
+    reason: z.string().max(240).optional(),
+  })).max(50),
+});
+
 export const competencySchema = z.object({
   score: z.union([z.literal(0), z.literal(40), z.literal(80), z.literal(120), z.literal(160), z.literal(200)]),
   justification: z.string().min(1).max(1200),
+  feedback: z.array(z.string().min(1).max(360)).min(1).max(4),
 });
 
 export const essayEvaluationSchema = z.object({
