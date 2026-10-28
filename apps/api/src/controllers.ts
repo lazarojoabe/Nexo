@@ -25,7 +25,7 @@ export class QuizController {
   constructor(private readonly quiz: QuizService) {}
   @Get('exams') exams() { return [{ id: 'demo-2026', year: 2026, label: 'Demonstração', source: 'Dados demonstrativos — não Inep' }]; }
   @Get('questions') questions(@Query('area') area?: string) { return this.quiz.listQuestions(area); }
-  @Get('questions/:id') question(@Param('id') id: string) { const { correctOptionId, ...question } = this.quiz.question(id); return question; }
+  @Get('questions/:id') async question(@Param('id') id: string) { const { correctOptionId, ...question } = await this.quiz.question(id); return question; }
   @Post('quiz-sessions') start(@Body() dto: StartQuizDto) { return this.quiz.createSession(dto.questionIds); }
   @Post('quiz-sessions/:id/answers') answer(@Param('id') id: string, @Body() dto: AnswerDto, @Query('questionId') questionId: string) { return this.quiz.answer(id, questionId, dto.optionId); }
   @Get('quiz-sessions/:id/results') results(@Param('id') id: string) { return this.quiz.results(id); }

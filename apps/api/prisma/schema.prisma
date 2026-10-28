@@ -61,6 +61,7 @@ model QuizSession {
   userId    String?
   user      UserProfile?      @relation(fields: [userId], references: [id])
   examId    String?
+  questionIds Json?
   createdAt DateTime          @default(now())
   attempts  QuestionAttempt[]
 
