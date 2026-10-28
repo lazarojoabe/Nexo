@@ -3,6 +3,7 @@ import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { IsArray, IsBoolean, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 import { EssayService, QuizService } from './services';
+import { PrismaService } from './prisma.service';
 
 class StartQuizDto { @IsOptional() @IsArray() @IsString({ each: true }) questionIds?: string[]; }
 class AnswerDto { @IsString() @MinLength(1) optionId!: string; }
@@ -13,7 +14,10 @@ function demoUser(header?: string) { return header || 'demo-user'; }
 
 @ApiTags('health')
 @Controller('health')
-export class HealthController { @Get() get() { return { status: 'ok', mode: process.env.DATABASE_URL ? 'configured' : 'demo' }; } }
+export class HealthController {
+  constructor(private readonly prisma: PrismaService) {}
+  @Get() get() { return { status: 'ok', mode: this.prisma.enabled ? 'configured' : 'demo' }; }
+}
 
 @ApiTags('quiz')
 @Controller()

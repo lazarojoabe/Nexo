@@ -1,0 +1,26 @@
+-- Initial schema generated from prisma/schema.prisma.
+CREATE SCHEMA IF NOT EXISTS "public";
+CREATE TABLE "UserProfile" ("id" TEXT NOT NULL, "displayName" TEXT, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "UserProfile_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "Exam" ("id" TEXT NOT NULL, "year" INTEGER NOT NULL, "day" INTEGER NOT NULL, "color" TEXT NOT NULL, "language" TEXT, "version" TEXT NOT NULL, "sourceUrl" TEXT, "sourceVersion" TEXT, CONSTRAINT "Exam_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "Question" ("id" TEXT NOT NULL, "examId" TEXT NOT NULL, "number" INTEGER NOT NULL, "area" TEXT NOT NULL, "statement" TEXT NOT NULL, "explanation" TEXT, "imageUrl" TEXT, "isCancelled" BOOLEAN NOT NULL DEFAULT false, "correctOptionId" TEXT NOT NULL, CONSTRAINT "Question_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "QuestionOption" ("id" TEXT NOT NULL, "questionId" TEXT NOT NULL, "label" TEXT NOT NULL, "content" TEXT NOT NULL, CONSTRAINT "QuestionOption_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "QuizSession" ("id" TEXT NOT NULL, "userId" TEXT, "examId" TEXT, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "QuizSession_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "QuestionAttempt" ("id" TEXT NOT NULL, "sessionId" TEXT NOT NULL, "questionId" TEXT NOT NULL, "optionId" TEXT NOT NULL, "correct" BOOLEAN NOT NULL, "answeredAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "QuestionAttempt_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "Essay" ("id" TEXT NOT NULL, "userId" TEXT NOT NULL, "topic" TEXT NOT NULL, "transcription" TEXT, "confirmedText" TEXT, "status" TEXT NOT NULL DEFAULT 'draft', "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "Essay_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "EssayImage" ("id" TEXT NOT NULL, "essayId" TEXT NOT NULL, "storagePath" TEXT NOT NULL, "mimeType" TEXT NOT NULL, "size" INTEGER NOT NULL, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "EssayImage_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "EssayEvaluation" ("id" TEXT NOT NULL, "essayId" TEXT NOT NULL, "totalScore" INTEGER NOT NULL, "payload" JSONB NOT NULL, "provider" TEXT NOT NULL, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "EssayEvaluation_pkey" PRIMARY KEY ("id"));
+CREATE UNIQUE INDEX "Exam_year_day_color_language_version_key" ON "Exam"("year", "day", "color", "language", "version");
+CREATE INDEX "Question_examId_area_idx" ON "Question"("examId", "area");
+CREATE UNIQUE INDEX "QuestionOption_questionId_label_key" ON "QuestionOption"("questionId", "label");
+CREATE INDEX "QuizSession_userId_createdAt_idx" ON "QuizSession"("userId", "createdAt");
+CREATE UNIQUE INDEX "QuestionAttempt_sessionId_questionId_key" ON "QuestionAttempt"("sessionId", "questionId");
+CREATE INDEX "Essay_userId_createdAt_idx" ON "Essay"("userId", "createdAt");
+CREATE UNIQUE INDEX "EssayEvaluation_essayId_key" ON "EssayEvaluation"("essayId");
+ALTER TABLE "Question" ADD CONSTRAINT "Question_examId_fkey" FOREIGN KEY ("examId") REFERENCES "Exam"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "QuestionOption" ADD CONSTRAINT "QuestionOption_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "QuizSession" ADD CONSTRAINT "QuizSession_userId_fkey" FOREIGN KEY ("userId") REFERENCES "UserProfile"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "QuestionAttempt" ADD CONSTRAINT "QuestionAttempt_sessionId_fkey" FOREIGN KEY ("sessionId") REFERENCES "QuizSession"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "QuestionAttempt" ADD CONSTRAINT "QuestionAttempt_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Essay" ADD CONSTRAINT "Essay_userId_fkey" FOREIGN KEY ("userId") REFERENCES "UserProfile"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "EssayImage" ADD CONSTRAINT "EssayImage_essayId_fkey" FOREIGN KEY ("essayId") REFERENCES "Essay"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "EssayEvaluation" ADD CONSTRAINT "EssayEvaluation_essayId_fkey" FOREIGN KEY ("essayId") REFERENCES "Essay"("id") ON DELETE CASCADE ON UPDATE CASCADE;
