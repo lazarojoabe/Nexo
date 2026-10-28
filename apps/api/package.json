@@ -12,7 +12,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
-    "import:exams": "tsx ../../scripts/import-exams/index.ts"
+    "import:exams": "tsx ../../scripts/import-exams/index.ts",
+    "exams:fetch": "tsx ../../scripts/import-exams/fetch.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.11",

@@ -33,10 +33,16 @@ export class QuizService implements OnModuleInit {
     });
   }
 
-  async listQuestions(area?: string) {
+  async listExams() {
+    if (!this.databaseEnabled || !this.prisma) return [{ id: 'demo-2026', year: 2026, day: 1, color: 'demonstração', language: 'pt-BR', version: 'demo-v1', source: 'Dados demonstrativos — não Inep', questionCount: 1 }];
+    const exams = await this.prisma.exam.findMany({ include: { _count: { select: { questions: true } } }, orderBy: [{ year: 'desc' }, { day: 'asc' }, { color: 'asc' }] });
+    return exams.map((exam) => ({ id: exam.id, year: exam.year, day: exam.day, color: exam.color, language: exam.language, version: exam.version, source: exam.sourceVersion ?? 'Material importado', sourceUrl: exam.sourceUrl, questionCount: exam._count.questions }));
+  }
+
+  async listQuestions(area?: string, examId?: string) {
     if (!this.databaseEnabled || !this.prisma) return this.withoutAnswer(demoQuestion);
-    const questions = await this.prisma.question.findMany({ where: { isCancelled: false, ...(area ? { area } : {}) }, include: { options: true, exam: true }, orderBy: { number: 'asc' } });
-    return questions.map((question) => ({ id: question.id, area: question.area, statement: question.statement, explanation: question.explanation ?? 'Explicação ainda não disponível.', imageUrl: question.imageUrl, source: question.exam.sourceVersion ?? 'Material importado', options: question.options.map((option) => ({ id: option.id, label: option.label, content: option.content })) }));
+    const questions = await this.prisma.question.findMany({ where: { isCancelled: false, ...(area ? { area } : {}), ...(examId ? { examId } : {}) }, include: { options: true, exam: true }, orderBy: [{ examId: 'asc' }, { number: 'asc' }] });
+    return questions.map((question) => ({ id: question.id, examId: question.examId, number: question.number, area: question.area, statement: question.statement, explanation: question.explanation ?? 'Explicação ainda não disponível.', imageUrl: question.imageUrl, source: question.exam.sourceVersion ?? 'Material importado', options: question.options.map((option) => ({ id: option.id, label: option.label, content: option.content })) }));
   }
 
   async question(id: string): Promise<Question> {
@@ -49,12 +55,18 @@ export class QuizService implements OnModuleInit {
     return { id: question.id, area: question.area, statement: question.statement, explanation: question.explanation ?? 'Explicação ainda não disponível.', correctOptionId: question.correctOptionId, source: question.exam.sourceVersion ?? 'Material importado', options: question.options.map((option) => ({ id: option.id, label: option.label, content: option.content })) };
   }
 
-  async createSession(questionIds?: string[]) {
-    const ids = questionIds?.length ? questionIds : [demoQuestion.id];
-    await Promise.all(ids.map((id) => this.question(id)));
-    if (!this.databaseEnabled || !this.prisma) { const id = crypto.randomUUID(); this.sessions.set(id, { questionIds: ids, attempts: new Map() }); return { id, questionIds: ids }; }
-    const session = await this.prisma.quizSession.create({ data: { questionIds: ids } });
-    return { id: session.id, questionIds: ids };
+  async createSession(questionIds?: string[], examId?: string) {
+    let ids = questionIds?.length ? questionIds : undefined;
+    if (!ids && this.databaseEnabled && this.prisma && examId) {
+      const selected = await this.prisma.question.findMany({ where: { examId, isCancelled: false }, select: { id: true }, orderBy: { number: 'asc' }, take: 10 });
+      if (!selected.length) throw new NotFoundException('Não há questões ativas nessa prova.');
+      ids = selected.map((question) => question.id);
+    }
+    const resolvedIds = ids?.length ? ids : [demoQuestion.id];
+    await Promise.all(resolvedIds.map((id) => this.question(id)));
+    if (!this.databaseEnabled || !this.prisma) { const id = crypto.randomUUID(); this.sessions.set(id, { questionIds: resolvedIds, attempts: new Map() }); return { id, questionIds: resolvedIds }; }
+    const session = await this.prisma.quizSession.create({ data: { examId, questionIds: resolvedIds } });
+    return { id: session.id, questionIds: resolvedIds, examId };
   }
 
   async answer(sessionId: string, questionId: string, optionId: string) {

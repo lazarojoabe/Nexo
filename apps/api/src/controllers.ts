@@ -5,7 +5,7 @@ import { IsArray, IsBoolean, IsOptional, IsString, MaxLength, MinLength } from '
 import { EssayService, QuizService } from './services';
 import { PrismaService } from './prisma.service';
 
-class StartQuizDto { @IsOptional() @IsArray() @IsString({ each: true }) questionIds?: string[]; }
+class StartQuizDto { @IsOptional() @IsString() examId?: string; @IsOptional() @IsArray() @IsString({ each: true }) questionIds?: string[]; }
 class AnswerDto { @IsString() @MinLength(1) optionId!: string; }
 class CreateEssayDto { @IsString() @MinLength(3) @MaxLength(300) topic!: string; }
 class TextDto { @IsString() @MinLength(20) @MaxLength(8000) text!: string; }
@@ -23,10 +23,10 @@ export class HealthController {
 @Controller()
 export class QuizController {
   constructor(private readonly quiz: QuizService) {}
-  @Get('exams') exams() { return [{ id: 'demo-2026', year: 2026, label: 'Demonstração', source: 'Dados demonstrativos — não Inep' }]; }
-  @Get('questions') questions(@Query('area') area?: string) { return this.quiz.listQuestions(area); }
+  @Get('exams') exams() { return this.quiz.listExams(); }
+  @Get('questions') questions(@Query('area') area?: string, @Query('examId') examId?: string) { return this.quiz.listQuestions(area, examId); }
   @Get('questions/:id') async question(@Param('id') id: string) { const { correctOptionId, ...question } = await this.quiz.question(id); return question; }
-  @Post('quiz-sessions') start(@Body() dto: StartQuizDto) { return this.quiz.createSession(dto.questionIds); }
+  @Post('quiz-sessions') start(@Body() dto: StartQuizDto) { return this.quiz.createSession(dto.questionIds, dto.examId); }
   @Post('quiz-sessions/:id/answers') answer(@Param('id') id: string, @Body() dto: AnswerDto, @Query('questionId') questionId: string) { return this.quiz.answer(id, questionId, dto.optionId); }
   @Get('quiz-sessions/:id/results') results(@Param('id') id: string) { return this.quiz.results(id); }
 }

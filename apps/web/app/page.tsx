@@ -3,6 +3,7 @@ import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 
 const api = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 type Question = { id: string; area: string; statement: string; explanation: string; source: string; options: { id: string; label: string; content: string }[] };
+type Exam = { id: string; year: number; day: number; color: string; source?: string; questionCount: number };
 type Step = 'home' | 'quiz' | 'essay' | 'progress';
 type QuizResult = { correct: boolean; correctOptionId: string; explanation: string };
 
@@ -30,6 +31,7 @@ function Icon({ name, size = 20 }: { name: 'home' | 'bolt' | 'pen' | 'chart' | '
 export default function Home() {
   const [step, setStep] = useState<Step>('home');
   const [question, setQuestion] = useState<Question>();
+  const [activeExam, setActiveExam] = useState<Exam>();
   const [session, setSession] = useState<string>();
   const [result, setResult] = useState<QuizResult>();
   const [selected, setSelected] = useState<string>();
@@ -49,6 +51,12 @@ export default function Home() {
   const greeting = useMemo(() => new Date().getHours() < 12 ? 'Bom dia' : new Date().getHours() < 18 ? 'Boa tarde' : 'Boa noite', []);
 
   async function startQuiz() {
+    setError(''); setResult(undefined); setSelected(undefined);
+    try { const exams = await request<Exam[]>('/exams'); const selectedExam = exams[0]; if (!selectedExam) throw new Error('Ainda não há provas disponíveis.'); const list = await request<Question[]>(`/questions?examId=${encodeURIComponent(selectedExam.id)}`); const first = list[0]; if (!first) throw new Error('Essa prova ainda não possui questões ativas.'); const created = await request<{ id: string }>(`/quiz-sessions`, { method: 'POST', body: JSON.stringify({ examId: selectedExam.id, questionIds: [first.id] }) }); setActiveExam(selectedExam); setQuestion(first); setSession(created.id); }
+    catch (e) { setError(e instanceof Error ? e.message : 'Erro inesperado.'); }
+  }
+
+  async function legacyStartQuiz() {
     setError(''); setResult(undefined); setSelected(undefined);
     try { const list = await request<Question[]>('/questions'); const first = list[0]; if (!first) throw new Error('Ainda não há questões disponíveis.'); const created = await request<{ id: string }>('/quiz-sessions', { method: 'POST', body: JSON.stringify({ questionIds: [first.id] }) }); setQuestion(first); setSession(created.id); }
     catch (e) { setError(e instanceof Error ? e.message : 'Erro inesperado.'); }
