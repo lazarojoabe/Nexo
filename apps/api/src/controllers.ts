@@ -1,11 +1,11 @@
 import { Body, Controller, Get, Headers, HttpCode, Param, Patch, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { IsArray, IsBoolean, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { ArrayMaxSize, IsArray, IsBoolean, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 import { EssayService, QuizService } from './services';
 import { PrismaService } from './prisma.service';
 
-class StartQuizDto { @IsOptional() @IsString() examId?: string; @IsOptional() @IsArray() @IsString({ each: true }) questionIds?: string[]; }
+class StartQuizDto { @IsOptional() @IsString() examId?: string; @IsOptional() @IsArray() @ArrayMaxSize(50) @IsString({ each: true }) questionIds?: string[]; }
 class AnswerDto { @IsString() @MinLength(1) optionId!: string; }
 class CreateEssayDto { @IsString() @MinLength(3) @MaxLength(300) topic!: string; }
 class TextDto { @IsString() @MinLength(20) @MaxLength(8000) text!: string; }
@@ -26,9 +26,9 @@ export class QuizController {
   @Get('exams') exams() { return this.quiz.listExams(); }
   @Get('questions') questions(@Query('area') area?: string, @Query('examId') examId?: string) { return this.quiz.listQuestions(area, examId); }
   @Get('questions/:id') async question(@Param('id') id: string) { const { correctOptionId, ...question } = await this.quiz.question(id); return question; }
-  @Post('quiz-sessions') start(@Body() dto: StartQuizDto) { return this.quiz.createSession(dto.questionIds, dto.examId); }
-  @Post('quiz-sessions/:id/answers') answer(@Param('id') id: string, @Body() dto: AnswerDto, @Query('questionId') questionId: string) { return this.quiz.answer(id, questionId, dto.optionId); }
-  @Get('quiz-sessions/:id/results') results(@Param('id') id: string) { return this.quiz.results(id); }
+  @Post('quiz-sessions') start(@Headers('x-user-id') userId: string | undefined, @Body() dto: StartQuizDto) { return this.quiz.createSession(dto.questionIds, dto.examId, demoUser(userId)); }
+  @Post('quiz-sessions/:id/answers') answer(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined, @Body() dto: AnswerDto, @Query('questionId') questionId: string) { return this.quiz.answer(id, questionId, dto.optionId, demoUser(userId)); }
+  @Get('quiz-sessions/:id/results') results(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined) { return this.quiz.results(id, demoUser(userId)); }
 }
 
 @ApiTags('essays')

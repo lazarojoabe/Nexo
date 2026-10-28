@@ -6,7 +6,7 @@ import { PrismaService } from './prisma.service';
 
 type Option = { id: string; label: string; content: string };
 type Question = { id: string; area: string; statement: string; explanation: string; correctOptionId: string; options: Option[]; source: string };
-type MemorySession = { questionIds: string[]; attempts: Map<string, { optionId: string; correct: boolean }> };
+type MemorySession = { userId?: string; questionIds: string[]; attempts: Map<string, { optionId: string; correct: boolean }> };
 type EssayImage = { mimeType: string; data: string; originalMimeType: string; originalData: string };
 type MemoryEssay = { id: string; userId: string; topic: string; transcription?: string; confirmedText?: string; images: EssayImage[]; evaluation?: unknown };
 
@@ -36,7 +36,8 @@ export class QuizService implements OnModuleInit {
   async listExams() {
     if (!this.databaseEnabled || !this.prisma) return [{ id: 'demo-2026', year: 2026, day: 1, color: 'demonstração', language: 'pt-BR', version: 'demo-v1', source: 'Dados demonstrativos — não Inep', questionCount: 1 }];
     const exams = await this.prisma.exam.findMany({ include: { _count: { select: { questions: true } } }, orderBy: [{ year: 'desc' }, { day: 'asc' }, { color: 'asc' }] });
-    return exams.map((exam) => ({ id: exam.id, year: exam.year, day: exam.day, color: exam.color, language: exam.language, version: exam.version, source: exam.sourceVersion ?? 'Material importado', sourceUrl: exam.sourceUrl, questionCount: exam._count.questions }));
+    const published = exams.filter((exam) => exam.id !== 'demo-2026');
+    return (published.length ? published : exams).map((exam) => ({ id: exam.id, year: exam.year, day: exam.day, color: exam.color, language: exam.language, version: exam.version, source: exam.sourceVersion ?? 'Material importado', sourceUrl: exam.sourceUrl, questionCount: exam._count.questions }));
   }
 
   async listQuestions(area?: string, examId?: string) {
@@ -55,7 +56,7 @@ export class QuizService implements OnModuleInit {
     return { id: question.id, area: question.area, statement: question.statement, explanation: question.explanation ?? 'Explicação ainda não disponível.', correctOptionId: question.correctOptionId, source: question.exam.sourceVersion ?? 'Material importado', options: question.options.map((option) => ({ id: option.id, label: option.label, content: option.content })) };
   }
 
-  async createSession(questionIds?: string[], examId?: string) {
+  async createSession(questionIds?: string[], examId?: string, userId?: string) {
     let ids = questionIds?.length ? questionIds : undefined;
     if (!ids && this.databaseEnabled && this.prisma && examId) {
       const selected = await this.prisma.question.findMany({ where: { examId, isCancelled: false }, select: { id: true }, orderBy: { number: 'asc' }, take: 10 });
@@ -64,34 +65,35 @@ export class QuizService implements OnModuleInit {
     }
     const resolvedIds = ids?.length ? ids : [demoQuestion.id];
     await Promise.all(resolvedIds.map((id) => this.question(id)));
-    if (!this.databaseEnabled || !this.prisma) { const id = crypto.randomUUID(); this.sessions.set(id, { questionIds: resolvedIds, attempts: new Map() }); return { id, questionIds: resolvedIds }; }
-    const session = await this.prisma.quizSession.create({ data: { examId, questionIds: resolvedIds } });
+    if (!this.databaseEnabled || !this.prisma) { const id = crypto.randomUUID(); this.sessions.set(id, { userId, questionIds: resolvedIds, attempts: new Map() }); return { id, questionIds: resolvedIds }; }
+    if (userId) await this.prisma.userProfile.upsert({ where: { id: userId }, update: {}, create: { id: userId } });
+    const session = await this.prisma.quizSession.create({ data: { examId, userId, questionIds: resolvedIds } });
     return { id: session.id, questionIds: resolvedIds, examId };
   }
 
-  async answer(sessionId: string, questionId: string, optionId: string) {
+  async answer(sessionId: string, questionId: string, optionId: string, userId?: string) {
     const question = await this.question(questionId);
     if (!question.options.some((option) => option.id === optionId)) throw new BadRequestException('Alternativa inválida.');
     const result = gradeAnswer(question.correctOptionId, optionId);
     if (!this.databaseEnabled || !this.prisma) {
-      const session = this.sessions.get(sessionId); if (!session || !session.questionIds.includes(questionId)) throw new NotFoundException('Sessão não encontrada.');
+      const session = this.sessions.get(sessionId); if (!session || (userId && session.userId !== userId) || !session.questionIds.includes(questionId)) throw new NotFoundException('Sessão não encontrada.');
       session.attempts.set(questionId, { optionId, correct: result.correct });
     } else {
       const session = await this.prisma.quizSession.findUnique({ where: { id: sessionId } });
       const ids = Array.isArray(session?.questionIds) ? session.questionIds.filter((id): id is string => typeof id === 'string') : [];
-      if (!session || !ids.includes(questionId)) throw new NotFoundException('Sessão não encontrada.');
+      if (!session || (userId && session.userId !== userId) || !ids.includes(questionId)) throw new NotFoundException('Sessão não encontrada.');
       await this.prisma.questionAttempt.upsert({ where: { sessionId_questionId: { sessionId, questionId } }, update: { optionId, correct: result.correct, answeredAt: new Date() }, create: { sessionId, questionId, optionId, correct: result.correct } });
     }
     return { ...result, explanation: question.explanation };
   }
 
-  async results(sessionId: string) {
+  async results(sessionId: string, userId?: string) {
     if (!this.databaseEnabled || !this.prisma) {
-      const session = this.sessions.get(sessionId); if (!session) throw new NotFoundException('Sessão não encontrada.');
+      const session = this.sessions.get(sessionId); if (!session || (userId && session.userId !== userId)) throw new NotFoundException('Sessão não encontrada.');
       const attempts = [...session.attempts.entries()].map(([questionId, value]) => ({ questionId, ...value })); return { answered: attempts.length, correct: attempts.filter((item) => item.correct).length, attempts };
     }
     const session = await this.prisma.quizSession.findUnique({ where: { id: sessionId }, include: { attempts: true } });
-    if (!session) throw new NotFoundException('Sessão não encontrada.');
+    if (!session || (userId && session.userId !== userId)) throw new NotFoundException('Sessão não encontrada.');
     const attempts = session.attempts.map((attempt) => ({ questionId: attempt.questionId, optionId: attempt.optionId, correct: attempt.correct }));
     return { answered: attempts.length, correct: attempts.filter((attempt) => attempt.correct).length, attempts };
   }

@@ -6,6 +6,7 @@ type Question = { id: string; area: string; statement: string; explanation: stri
 type Exam = { id: string; year: number; day: number; color: string; source?: string; questionCount: number };
 type Step = 'home' | 'quiz' | 'essay' | 'progress';
 type QuizResult = { correct: boolean; correctOptionId: string; explanation: string };
+type QuizSummary = { answered: number; correct: number };
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${api}${path}`, { ...init, headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) } });
@@ -32,8 +33,11 @@ export default function Home() {
   const [step, setStep] = useState<Step>('home');
   const [question, setQuestion] = useState<Question>();
   const [activeExam, setActiveExam] = useState<Exam>();
+  const [quizQuestions, setQuizQuestions] = useState<Question[]>([]);
+  const [questionIndex, setQuestionIndex] = useState(0);
   const [session, setSession] = useState<string>();
   const [result, setResult] = useState<QuizResult>();
+  const [quizSummary, setQuizSummary] = useState<QuizSummary>();
   const [selected, setSelected] = useState<string>();
   const [error, setError] = useState('');
   const [topic, setTopic] = useState('');
@@ -46,11 +50,17 @@ export default function Home() {
   const [streak, setStreak] = useState(3);
 
   useEffect(() => { if (step === 'quiz') void startQuiz(); }, [step]);
-  const answered = result ? 1 : 0;
-  const progressText = result ? '1 de 1 concluída' : '0 de 1 concluída';
+  const answered = result ? questionIndex + 1 : questionIndex;
+  const progressText = quizSummary ? `${quizSummary.correct} de ${quizSummary.answered} acertos` : `${answered} de ${quizQuestions.length || 10} concluídas`;
   const greeting = useMemo(() => new Date().getHours() < 12 ? 'Bom dia' : new Date().getHours() < 18 ? 'Boa tarde' : 'Boa noite', []);
 
   async function startQuiz() {
+    setError(''); setResult(undefined); setQuizSummary(undefined); setSelected(undefined); setQuestionIndex(0);
+    try { const exams = await request<Exam[]>('/exams'); const selectedExam = exams[0]; if (!selectedExam) throw new Error('Ainda não há provas disponíveis.'); const list = await request<Question[]>(`/questions?examId=${encodeURIComponent(selectedExam.id)}`); if (!list.length) throw new Error('Essa prova ainda não possui questões ativas.'); const created = await request<{ id: string; questionIds: string[] }>(`/quiz-sessions`, { method: 'POST', body: JSON.stringify({ examId: selectedExam.id }) }); const selectedQuestions = created.questionIds.map((id) => list.find((item) => item.id === id)).filter((item): item is Question => Boolean(item)); if (!selectedQuestions.length) throw new Error('Não foi possível montar esta sessão.'); setActiveExam(selectedExam); setQuizQuestions(selectedQuestions); setQuestion(selectedQuestions[0]); setSession(created.id); }
+    catch (e) { setError(e instanceof Error ? e.message : 'Erro inesperado.'); }
+  }
+
+  async function legacyStartQuizByExam() {
     setError(''); setResult(undefined); setSelected(undefined);
     try { const exams = await request<Exam[]>('/exams'); const selectedExam = exams[0]; if (!selectedExam) throw new Error('Ainda não há provas disponíveis.'); const list = await request<Question[]>(`/questions?examId=${encodeURIComponent(selectedExam.id)}`); const first = list[0]; if (!first) throw new Error('Essa prova ainda não possui questões ativas.'); const created = await request<{ id: string }>(`/quiz-sessions`, { method: 'POST', body: JSON.stringify({ examId: selectedExam.id, questionIds: [first.id] }) }); setActiveExam(selectedExam); setQuestion(first); setSession(created.id); }
     catch (e) { setError(e instanceof Error ? e.message : 'Erro inesperado.'); }
@@ -67,6 +77,7 @@ export default function Home() {
     try { const answerResult = await request<QuizResult>(`/quiz-sessions/${session}/answers?questionId=${question.id}`, { method: 'POST', body: JSON.stringify({ optionId }) }); setResult(answerResult); if (answerResult.correct) setStreak((value) => value + 1); }
     catch (e) { setError(e instanceof Error ? e.message : 'Erro inesperado.'); }
   }
+  async function nextQuizStep() { if (!session) return; if (questionIndex + 1 < quizQuestions.length) { const next = quizQuestions[questionIndex + 1]; setQuestionIndex((value) => value + 1); setQuestion(next); setResult(undefined); setSelected(undefined); return; } try { const summary = await request<QuizSummary>(`/quiz-sessions/${session}/results`); setQuizSummary(summary); } catch (e) { setError(e instanceof Error ? e.message : 'Erro inesperado.'); } }
   async function startEssay() { try { const essay = await request<{ id: string }>('/essays', { method: 'POST', body: JSON.stringify({ topic }) }); setEssayId(essay.id); setEssayMessage('Rascunho criado. Agora revise tudo com calma.'); } catch (e) { setEssayMessage(e instanceof Error ? e.message : 'Erro inesperado.'); } }
   async function saveText() { try { await request(`/essays/${essayId}/transcription`, { method: 'PATCH', body: JSON.stringify({ text }) }); setEssayMessage('Transcrição salva. Você pode pedir uma avaliação quando quiser.'); } catch (e) { setEssayMessage(e instanceof Error ? e.message : 'Erro inesperado.'); } }
   async function evaluate() { try { const evaluation = await request<{ totalScore: number }>(`/essays/${essayId}/evaluate`, { method: 'POST', body: JSON.stringify({ consent }) }); setEssayMessage(`Estimativa: ${evaluation.totalScore}/1000. Continue evoluindo!`); } catch (e) { setEssayMessage(e instanceof Error ? e.message : 'Erro inesperado.'); } }
@@ -86,6 +97,10 @@ export default function Home() {
   }
 
   function QuizView() {
+    return <section className="screen quiz-screen"><div className="screen-top"><button className="icon-button" onClick={() => setStep('home')} aria-label="Voltar"><Icon name="arrow" size={20} /></button><span className="screen-title">QUIZ RELÂMPAGO</span><span className="question-count">{progressText}</span></div><div className="progress-track"><span style={{ width: `${quizSummary ? 100 : Math.round((answered / Math.max(quizQuestions.length, 1)) * 100)}%` }} /></div>{error ? <p className="error">{error}</p> : quizSummary ? <div className="quiz-summary"><p className="eyebrow">SESSÃO CONCLUÍDA</p><h2>{quizSummary.correct} de {quizSummary.answered}<br /><em>respostas certas.</em></h2><p>Revise as explicações e tente novamente para fortalecer seu ritmo.</p><button className="primary-button" onClick={() => void startQuiz()}>Fazer outro quiz <Icon name="arrow" size={18} /></button></div> : question ? <><div className="subject-line"><span className="subject-dot" />{question.area}<span className="source-pill">{activeExam ? `${activeExam.year} · ${activeExam.color}` : 'Demonstração'}</span></div><h2 className="question-title">{question.statement}</h2><p className="question-hint">Escolha uma alternativa para continuar</p><div className="answer-list">{question.options.map((option) => { const correct = result && option.id === result.correctOptionId; const wrong = result && selected === option.id && !result.correct; return <button key={option.id} className={`answer ${correct ? 'is-correct' : ''} ${wrong ? 'is-wrong' : ''}`} disabled={!!result} onClick={() => void answer(option.id)}><span className="answer-letter">{option.label}</span><span>{option.content}</span>{correct && <Icon name="check" size={19} />}</button>; })}</div>{result && <div className={`answer-feedback ${result.correct ? 'positive' : ''}`}><span className="feedback-mark"><Icon name={result.correct ? 'check' : 'spark'} size={18} /></span><div><b>{result.correct ? 'Mandou bem!' : 'Quase lá — bora revisar?'}</b><p>{result.explanation}</p></div><button onClick={() => void nextQuizStep()} aria-label={questionIndex + 1 < quizQuestions.length ? 'Próxima questão' : 'Ver resultado'}><Icon name="arrow" size={18} /></button></div>}</> : <p className="question-hint">Carregando uma sessão…</p>}</section>;
+  }
+
+  function LegacyQuizView() {
     return <section className="screen quiz-screen"><div className="screen-top"><button className="icon-button" onClick={() => setStep('home')} aria-label="Voltar"><Icon name="arrow" size={20} /></button><span className="screen-title">QUIZ RELÂMPAGO</span><span className="question-count">{progressText}</span></div><div className="progress-track"><span style={{ width: `${answered ? 100 : 12}%` }} /></div>{error ? <p className="error">{error}</p> : question && <><div className="subject-line"><span className="subject-dot" />{question.area}<span className="source-pill">Demonstração</span></div><h2 className="question-title">{question.statement}</h2><p className="question-hint">Escolha uma alternativa para continuar</p><div className="answer-list">{question.options.map((option) => { const correct = result && option.id === result.correctOptionId; const wrong = result && selected === option.id && !result.correct; return <button key={option.id} className={`answer ${correct ? 'is-correct' : ''} ${wrong ? 'is-wrong' : ''}`} disabled={!!result} onClick={() => void answer(option.id)}><span className="answer-letter">{option.label}</span><span>{option.content}</span>{correct && <Icon name="check" size={19} />}</button>; })}</div>{result && <div className={`answer-feedback ${result.correct ? 'positive' : ''}`}><span className="feedback-mark"><Icon name={result.correct ? 'check' : 'spark'} size={18} /></span><div><b>{result.correct ? 'Mandou bem!' : 'Quase lá — bora revisar?'}</b><p>{result.explanation}</p></div><button onClick={() => void startQuiz()} aria-label="Nova questão"><Icon name="arrow" size={18} /></button></div>}</>}</section>;
   }
 

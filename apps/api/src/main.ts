@@ -10,7 +10,7 @@ async function bootstrap() {
   const localOrigins = ['http://localhost:3000', 'http://localhost:3002'];
   const configuredOrigins = process.env.WEB_ORIGIN?.split(',').map((origin) => origin.trim()).filter(Boolean) ?? [];
   app.enableCors({ origin: [...new Set([...localOrigins, ...configuredOrigins])] });
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
   const config = new DocumentBuilder().setTitle('Nexo ENEM AI').setVersion('0.1').build();
   SwaggerModule.setup('api/docs', app, SwaggerModule.createDocument(app, config));
   await app.listen(Number(process.env.PORT ?? 3001));
