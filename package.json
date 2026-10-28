@@ -10,6 +10,7 @@
     "test": "pnpm --filter @nexo/shared build && pnpm -r test",
     "db:generate": "pnpm --filter @nexo/api prisma:generate",
     "db:migrate": "pnpm --filter @nexo/api prisma:migrate",
+    "db:deploy": "pnpm --filter @nexo/api prisma:deploy",
     "import:exams": "pnpm --filter @nexo/api import:exams"
   },
   "devDependencies": {

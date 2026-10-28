@@ -14,7 +14,7 @@ Abra `http://localhost:3002`. A API NestJS fica em `http://localhost:3001` e a d
 
 Para checagem: `pnpm lint && pnpm typecheck && pnpm test && pnpm build`.
 
-Depois de configurar uma `DATABASE_URL` válida do Supabase, aplique o schema com `pnpm db:migrate` e gere o cliente Prisma com `pnpm db:generate`.
+Depois de configurar uma `DATABASE_URL` válida do Supabase, gere o cliente com `pnpm db:generate` e aplique a migration já versionada com `pnpm db:deploy`. Use `pnpm db:migrate` apenas para criar novas migrations durante desenvolvimento.
 
 ## Configuração
 
