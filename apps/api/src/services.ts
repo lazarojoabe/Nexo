@@ -1,9 +1,11 @@
-import { BadRequestException, HttpException, Injectable, Logger, NotFoundException, OnModuleInit, Optional, ServiceUnavailableException } from '@nestjs/common';
+import { BadRequestException, HttpException, Inject, Injectable, Logger, NotFoundException, OnModuleInit, Optional, ServiceUnavailableException } from '@nestjs/common';
 import { essayEvaluationSchema, gradeAnswer, transcriptionSchema } from '@nexo/shared';
-import { GeminiProvider } from './gemini.provider';
 import { HandwritingPreprocessor } from './handwriting-preprocessor';
 import { PrismaService } from './prisma.service';
 import { EssayStorageService } from './essay-storage.service';
+import { preAnalyzeEssay } from './essay-engine/pre-analysis';
+import { validateEssayEvaluation } from './essay-engine/evaluation-validation';
+import { ESSAY_AI_PROVIDER, type EssayAiProvider } from './essay-engine/provider';
 
 type Option = { id: string; label: string; content: string };
 type QuestionAsset = { id: string; url: string; placement: 'before_statement' | 'after_statement' | 'option'; optionLabel?: string | null; displayOrder: number; mimeType: string; altText: string };
@@ -159,9 +161,10 @@ export class QuizService implements OnModuleInit {
 @Injectable()
 export class EssayService {
   private readonly essays = new Map<string, MemoryEssay>();
+  private readonly activeEvaluations = new Set<string>();
   private readonly logger = new Logger(EssayService.name);
   constructor(
-    private readonly gemini: GeminiProvider,
+    @Inject(ESSAY_AI_PROVIDER) private readonly aiProvider: EssayAiProvider,
     private readonly preprocessor: HandwritingPreprocessor,
     private readonly storage: EssayStorageService,
     @Optional() private readonly prisma?: PrismaService,
@@ -209,11 +212,13 @@ export class EssayService {
     if (safeText.length < 20) throw new BadRequestException('O texto deve ter entre 20 e 8000 caracteres.');
     const essay = await this.owned(id, userId);
     if (!this.databaseEnabled || !this.prisma) {
-      essay.memory!.confirmedText = safeText;
-      essay.memory!.status = 'confirmed';
+      Object.assign(essay.memory!, { confirmedText: safeText, status: 'confirmed', evaluation: undefined, evaluatedAt: undefined });
       return this.memoryPayload(essay.memory!);
     }
-    const updated = await this.prisma.essay.update({ where: { id }, data: { confirmedText: safeText, status: 'confirmed' } });
+    const [updated] = await this.prisma.$transaction([
+      this.prisma.essay.update({ where: { id }, data: { confirmedText: safeText, status: 'confirmed', evaluatedAt: null } }),
+      this.prisma.essayEvaluation.deleteMany({ where: { essayId: id } }),
+    ]);
     return { id: updated.id, status: updated.status, confirmedText: updated.confirmedText };
   }
 
@@ -222,7 +227,9 @@ export class EssayService {
     const essay = await this.owned(id, userId);
     if (!essay.images.length) throw new BadRequestException('Envie ao menos uma imagem antes de transcrever.');
     const images = await this.runStage('storage_access', id, () => Promise.all(essay.images.sort((a, b) => a.page - b.page).map(async (image) => ({ mimeType: image.mimeType, data: (await this.storage.read(image.storagePath)).toString('base64') }))), 'Não foi possível acessar uma página enviada. Envie-a novamente.');
-    const result = await this.runStage('ai_transcription', id, async () => transcriptionSchema.parse(await this.gemini.transcribe(images)), 'Não foi possível transcrever a redação agora. Suas páginas foram preservadas; tente novamente em instantes.');
+    const transcriptionProvider = this.aiProvider as EssayAiProvider & { transcribe?: (pages: { mimeType: string; data: string }[]) => Promise<unknown> };
+    if (!transcriptionProvider.transcribe) throw new ServiceUnavailableException('O provedor de transcrição não está disponível. Suas páginas foram preservadas.');
+    const result = await this.runStage('ai_transcription', id, async () => transcriptionSchema.parse(await transcriptionProvider.transcribe!(images)), 'Não foi possível transcrever a redação agora. Suas páginas foram preservadas; tente novamente em instantes.');
     if (!this.databaseEnabled || !this.prisma) Object.assign(essay.memory!, { transcription: result.text, transcriptionResult: result, consentAt: new Date(), status: 'transcribed' });
     else await this.prisma.essay.update({ where: { id }, data: { transcription: result.text, transcriptionResult: result, consentAt: new Date(), status: 'transcribed' } });
     return result;
@@ -233,19 +240,31 @@ export class EssayService {
     const essay = await this.owned(id, userId);
     const confirmedText = essay.confirmedText;
     if (!confirmedText) throw new BadRequestException('Confirme ou digite a transcrição antes de avaliar.');
-    const evaluation = await this.runStage('ai_evaluation', id, async () => essayEvaluationSchema.parse(await this.gemini.evaluate(essay.topic, confirmedText)), 'Não foi possível avaliar a redação agora. Seu texto confirmado foi preservado; tente novamente em instantes.');
-    if (!this.databaseEnabled || !this.prisma) Object.assign(essay.memory!, { evaluation: { payload: evaluation }, status: 'evaluated', evaluatedAt: new Date(), consentAt: new Date() });
-    else await this.prisma.$transaction([
-      this.prisma.essay.update({ where: { id }, data: { status: 'evaluated', evaluatedAt: new Date(), consentAt: new Date() } }),
-      this.prisma.essayEvaluation.upsert({ where: { essayId: id }, update: { totalScore: evaluation.totalScore, payload: evaluation, provider: 'gemini' }, create: { essayId: id, totalScore: evaluation.totalScore, payload: evaluation, provider: 'gemini' } }),
-    ]);
-    return evaluation;
+    const existing = essay.evaluation?.payload ? essayEvaluationSchema.safeParse(essay.evaluation.payload) : undefined;
+    if (existing?.success) return existing.data;
+    if (this.activeEvaluations.has(id)) throw new BadRequestException('Uma avaliação desta redação já está em andamento. Aguarde alguns instantes.');
+    await this.assertDailyEvaluationLimit(userId);
+    this.activeEvaluations.add(id);
+    try {
+      const signals = preAnalyzeEssay(confirmedText);
+      const raw = await this.runStage('ai_evaluation', id, () => this.aiProvider.evaluate({ topic: essay.topic, text: confirmedText, signals }), 'Não foi possível avaliar a redação agora. Seu texto confirmado foi preservado; tente novamente em instantes.');
+      const evaluation = await this.runStage('ai_evaluation', id, async () => validateEssayEvaluation(raw, confirmedText, signals, this.aiProvider), 'A resposta da IA não passou na validação pedagógica. Seu texto foi preservado; tente novamente em instantes.');
+      const evaluatedAt = new Date();
+      if (!this.databaseEnabled || !this.prisma) Object.assign(essay.memory!, { evaluation: { payload: evaluation }, status: 'evaluated', evaluatedAt, consentAt: evaluatedAt });
+      else await this.prisma.$transaction([
+        this.prisma.essay.update({ where: { id }, data: { status: 'evaluated', evaluatedAt, consentAt: evaluatedAt } }),
+        this.prisma.essayEvaluation.upsert({ where: { essayId: id }, update: { totalScore: evaluation.totalScore, payload: evaluation, provider: evaluation.provider, model: evaluation.model, rubricVersion: evaluation.rubricVersion, confidence: evaluation.confidence, needsHumanReview: evaluation.needsHumanReview }, create: { essayId: id, totalScore: evaluation.totalScore, payload: evaluation, provider: evaluation.provider, model: evaluation.model, rubricVersion: evaluation.rubricVersion, confidence: evaluation.confidence, needsHumanReview: evaluation.needsHumanReview } }),
+      ]);
+      return evaluation;
+    } finally {
+      this.activeEvaluations.delete(id);
+    }
   }
 
   async get(id: string, userId: string) {
     const essay = await this.owned(id, userId);
     if (!this.databaseEnabled || !this.prisma) return this.memoryPayload(essay.memory!);
-    return { id: essay.id, topic: essay.topic, transcription: essay.transcription, confirmedText: essay.confirmedText, status: essay.status, createdAt: essay.createdAt, evaluatedAt: essay.evaluatedAt, images: essay.images.map(({ id: imageId, mimeType, size, page }) => ({ id: imageId, mimeType, size, page })), evaluation: essay.evaluation?.payload ?? null };
+    return { id: essay.id, topic: essay.topic, transcription: essay.transcription, confirmedText: essay.confirmedText, status: essay.status, createdAt: essay.createdAt, evaluatedAt: essay.evaluatedAt, images: essay.images.map(({ id: imageId, mimeType, size, page }) => ({ id: imageId, mimeType, size, page })), evaluation: this.presentEvaluation(essay.evaluation?.payload) };
   }
 
   async history(userId: string) {
@@ -296,6 +315,16 @@ export class EssayService {
 
   validateProviderPayload(payload: unknown) { return essayEvaluationSchema.parse(payload); }
 
+  private async assertDailyEvaluationLimit(userId: string) {
+    const configured = Number(process.env.AI_EVALUATIONS_PER_DAY ?? 3);
+    const limit = Number.isFinite(configured) ? Math.min(Math.max(Math.floor(configured), 1), 100) : 3;
+    const start = new Date(); start.setHours(0, 0, 0, 0);
+    const used = !this.databaseEnabled || !this.prisma
+      ? [...this.essays.values()].filter((essay) => essay.userId === userId && essay.evaluatedAt && essay.evaluatedAt >= start).length
+      : await this.prisma.essayEvaluation.count({ where: { createdAt: { gte: start }, essay: { userId } } });
+    if (used >= limit) throw new ServiceUnavailableException('O limite diário de avaliações foi atingido. Tente novamente amanhã; seu texto foi preservado.');
+  }
+
   private async runStage<T>(stage: 'validation' | 'storage' | 'storage_access' | 'ai_transcription' | 'ai_evaluation', essayId: string, action: () => Promise<T>, message: string): Promise<T> {
     try {
       return await action();
@@ -323,7 +352,13 @@ export class EssayService {
   }
 
   private memoryPayload(essay: MemoryEssay) {
-    return { id: essay.id, topic: essay.topic, transcription: essay.transcription, confirmedText: essay.confirmedText, status: essay.status, createdAt: essay.createdAt, evaluatedAt: essay.evaluatedAt, images: essay.images.map(({ id, mimeType, size, page }) => ({ id, mimeType, size, page })), evaluation: essay.evaluation?.payload ?? null };
+    return { id: essay.id, topic: essay.topic, transcription: essay.transcription, confirmedText: essay.confirmedText, status: essay.status, createdAt: essay.createdAt, evaluatedAt: essay.evaluatedAt, images: essay.images.map(({ id, mimeType, size, page }) => ({ id, mimeType, size, page })), evaluation: this.presentEvaluation(essay.evaluation?.payload) };
+  }
+
+  private presentEvaluation(payload: unknown) {
+    if (!payload) return null;
+    const parsed = essayEvaluationSchema.safeParse(payload);
+    return parsed.success ? parsed.data : null;
   }
 }
 

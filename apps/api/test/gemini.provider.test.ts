@@ -16,4 +16,12 @@ describe('provedor Gemini', () => {
     await expect(new GeminiProvider().evaluate('Tema técnico', 'Este é um texto de teste confirmado e com tamanho suficiente para a avaliação.'))
       .rejects.toThrow('A chave do Gemini foi recusada');
   });
+
+  it('rejeita JSON truncado sem expor a resposta do provedor', async () => {
+    process.env.GEMINI_API_KEY = 'test-key';
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: '{"competencies":[' }] } }] }), { status: 200 })));
+
+    await expect(new GeminiProvider().evaluate('Tema técnico', 'Texto confirmado com extensão suficiente para a avaliação.'))
+      .rejects.toThrow('avaliação incompleta');
+  });
 });

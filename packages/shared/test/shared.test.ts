@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { assertEvaluationGroundedInText, calculateEssayTotal, essayEvaluationSchema, examImportSchema, gradeAnswer } from '../src/index';
+import { assertEvaluationGroundedInText, calculateEssayTotal, essayEvaluationSchema, essayReferenceImportSchema, examImportSchema, gradeAnswer } from '../src/index';
 
 describe('regras críticas', () => {
   it('corrige somente contra o gabarito persistido', () => {
@@ -25,6 +25,11 @@ describe('regras críticas', () => {
     expect(() => essayEvaluationSchema.parse({ competencies: [{ ...competency, id: 1 }, { ...competency, id: 1 }, { ...competency, id: 2 }, { ...competency, id: 3 }, { ...competency, id: 4 }], generalFeedback: 'x', priorityActions: ['y'] })).toThrow();
   });
 
+  it('rejeita total informado que diverge das cinco competências', () => {
+    const competency = (id: 1 | 2 | 3 | 4 | 5) => ({ id, score: 120 as const, level: 'regular' as const, strengths: [], issues: ['Revisar.'], evidence: [], feedbackPoints: [{ category: 'clareza' as const, severity: 'atencao' as const, diagnosis: 'Revise a frase.', suggestion: 'Torne a ideia explícita.' }], actionableFeedback: ['Revisar.'] });
+    expect(() => essayEvaluationSchema.parse({ competencies: [competency(1), competency(2), competency(3), competency(4), competency(5)], totalScore: 1000, generalFeedback: 'Feedback.', priorityActions: ['Revisar.'] })).toThrow('nota total');
+  });
+
   it('rejeita trechos de feedback que não estão na redação confirmada', () => {
     const competency = (id: 1 | 2 | 3 | 4 | 5) => ({ id, score: 120 as const, level: 'regular' as const, strengths: [], issues: ['Revisar.'], evidence: [], feedbackPoints: [{ category: 'clareza' as const, severity: 'atencao' as const, excerpt: 'trecho inventado', diagnosis: 'Há um salto lógico.', suggestion: 'Explique a conexão.' }], actionableFeedback: ['Revisar.'] });
     const evaluation = essayEvaluationSchema.parse({ competencies: [competency(1), competency(2), competency(3), competency(4), competency(5)], generalFeedback: 'Feedback.', priorityActions: ['Revisar.'] });
@@ -43,5 +48,11 @@ describe('regras críticas', () => {
     const payload = { sourceUrl: 'https://www.gov.br/inep', sourceVersion: 'revisado', exam: { year: 2025, day: 1, color: 'azul', version: 'caderno-1' }, questions: [question] };
     expect(examImportSchema.parse(payload).questions[0].assets[0].optionLabel).toBe('B');
     expect(() => examImportSchema.parse({ ...payload, questions: [{ ...question, assets: [{ ...question.assets[0], optionLabel: 'Z' }] }] })).toThrow();
+  });
+
+  it('só aceita referência pedagógica com autorização confirmada', () => {
+    const reference = { topic: 'Tema', source: 'Acervo autorizado', license: 'Autorização registrada', authorizationConfirmed: true, authorizedExcerpt: 'Trecho demonstrativo autorizado com tamanho mínimo exigido.' };
+    expect(essayReferenceImportSchema.parse(reference).authorizationConfirmed).toBe(true);
+    expect(() => essayReferenceImportSchema.parse({ ...reference, authorizationConfirmed: false })).toThrow();
   });
 });

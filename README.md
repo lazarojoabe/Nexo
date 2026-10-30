@@ -12,16 +12,26 @@ pnpm dev
 
 Abra `http://localhost:3002`. A API NestJS fica em `http://localhost:3001` e a documentação REST em `http://localhost:3001/api/docs`.
 
+`pnpm dev` detecta uma instância já ativa nas duas portas e encerra sem erro. Caso apenas uma das portas esteja ocupada, ele informa a situação em vez de iniciar processos duplicados.
+
 Para checagem: `pnpm lint && pnpm typecheck && pnpm test && pnpm build`.
 
-Depois de configurar uma `DATABASE_URL` válida do Supabase, gere o cliente com `pnpm db:generate` e aplique a migration já versionada com `pnpm db:deploy`. Use `pnpm db:migrate` apenas para criar novas migrations durante desenvolvimento.
+Depois de configurar uma `DATABASE_URL` válida do Supabase, gere o cliente com `pnpm db:generate` e aplique as migrations versionadas com `pnpm db:deploy`. Use `pnpm db:migrate` apenas para criar novas migrations durante desenvolvimento. A migration `20261030000100_essay_engine_versions_and_calibration` adiciona metadados do motor, referências autorizadas e revisões humanas.
 
 ## Configuração
 
-Consulte [.env.example](.env.example), [arquitetura](docs/ARCHITECTURE.md) e [deploy](docs/DEPLOYMENT.md). Nunca use chaves com prefixo `NEXT_PUBLIC_`. Para produção, configure Supabase Auth/Storage privado, PostgreSQL e Gemini em seus planos gratuitos elegíveis.
+Consulte [.env.example](.env.example), [arquitetura](docs/ARCHITECTURE.md), [motor de redação](docs/AI_ESSAY_RECOGNITION.md) e [deploy](docs/DEPLOYMENT.md). Nunca use chaves com prefixo `NEXT_PUBLIC_`. Para produção, configure Supabase Auth/Storage privado, PostgreSQL e Gemini em seus planos gratuitos elegíveis.
+
+Para o motor de redação, configure `GEMINI_API_KEY`, `GEMINI_MODEL`, `GEMINI_TEMPERATURE`, `AI_PROVIDER_TIMEOUT_MS`, `AI_EVALUATIONS_PER_DAY` e `ESSAY_RUBRIC_VERSION`. A temperatura é limitada a 0,3 para reduzir variação. Referências pedagógicas só podem ser validadas quando houver origem/licença/autorização registradas:
+
+```bash
+pnpm --filter @nexo/api references:validate docs/ESSAY_REFERENCE_IMPORT_TEMPLATE.json
+```
 
 ## Limitações importantes
 
 - As provas importadas são armazenadas no banco e devem ser tratadas como material de treino; confira sempre a fonte e o edital oficial antes de publicar conteúdo.
 - Transcrição e avaliação exigem Gemini configurado, consentimento informado e a disponibilidade de cota gratuita. O app não inventa resultados quando o serviço está indisponível.
-- Antes de uso real multiusuário, substitua o cabeçalho demonstrativo `x-user-id` por validação de JWT do Supabase.
+- Em produção, a API exige `Authorization: Bearer <JWT>` HS256 validado com `SUPABASE_JWT_SECRET`; `x-user-id` funciona apenas no modo demonstrativo.
+- A devolutiva é uma estimativa educacional por IA, não uma nota oficial do Inep. Ela pode sinalizar baixa confiança e necessidade de revisão humana.
+- Não há calibração declarada: a próxima etapa é comparar avaliações com redações anonimizadas, consentidas e corrigidas por professores em várias faixas.

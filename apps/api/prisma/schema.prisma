@@ -13,6 +13,7 @@ model UserProfile {
   createdAt    DateTime      @default(now())
   quizSessions QuizSession[]
   essays       Essay[]
+  humanReviews HumanEssayReview[] @relation("HumanReviewer")
 }
 
 model Exam {
@@ -135,11 +136,58 @@ model EssayImage {
 }
 
 model EssayEvaluation {
-  id         String   @id @default(cuid())
-  essayId    String   @unique
-  essay      Essay    @relation(fields: [essayId], references: [id], onDelete: Cascade)
-  totalScore Int
-  payload    Json
-  provider   String
-  createdAt  DateTime @default(now())
+  id               String             @id @default(cuid())
+  essayId          String             @unique
+  essay            Essay              @relation(fields: [essayId], references: [id], onDelete: Cascade)
+  totalScore       Int
+  payload          Json
+  provider         String
+  model            String             @default("unknown")
+  rubricVersion    String             @default("enem-2026-simulation-v3")
+  confidence       String             @default("media")
+  needsHumanReview Boolean            @default(false)
+  createdAt        DateTime           @default(now())
+  humanReviews     HumanEssayReview[]
+
+  @@index([createdAt])
+  @@index([rubricVersion, model])
+}
+
+model EssayReference {
+  id                    String   @id @default(cuid())
+  topic                 String
+  year                  Int?
+  source                String
+  sourceUrl             String?
+  license               String
+  authorizationConfirmed Boolean @default(false)
+  reviewStatus          String   @default("pending")
+  competencyAnnotations Json?
+  tags                  String[] @default([])
+  authorizedExcerpt     String
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([reviewStatus, createdAt])
+  @@index([year])
+}
+
+model HumanEssayReview {
+  id                 String          @id @default(cuid())
+  evaluationId       String
+  evaluation         EssayEvaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  evaluatorUserId    String
+  evaluator          UserProfile     @relation("HumanReviewer", fields: [evaluatorUserId], references: [id])
+  competencyScores   Json
+  totalScore         Int
+  divergenceReason   String
+  status             String          @default("pending")
+  rubricVersion      String
+  model              String
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  @@index([evaluationId, createdAt])
+  @@index([evaluatorUserId, createdAt])
+  @@index([status])
 }

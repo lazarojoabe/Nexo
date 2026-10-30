@@ -1,38 +1,60 @@
 # Reconhecimento e correção de redação
 
-## O que foi reaproveitado do trabalho de PDI
-
-O projeto externo `pdi_trabalho_novo` foi usado como referência de engenharia, sem copiar o repositório pessoal para o produto. A etapa de imagem aproveita as ideias mais seguras do pipeline:
-
-- rotação e normalização da página;
-- conversão para escala de cinza;
-- redução de ruído e realce de traços;
-- preservação da ordem das páginas;
-- uso de baixa confiança para revisão humana.
-
-A segmentação agressiva por linhas, palavras, componentes conexos e remoção de linhas de caderno não é aplicada automaticamente nesta primeira versão. Ela pode apagar acentos, sinais de pontuação e trechos claros. Por isso, o modelo multimodal recebe uma imagem aprimorada, mas a pessoa mantém a última palavra sobre o texto transcrito.
-
-## Fluxo atual
+## Fluxo e consentimento
 
 1. A pessoa envia até cinco imagens JPEG, PNG ou WebP de até 8 MB.
-2. A API preserva o original e gera uma cópia aprimorada com `sharp`.
-3. Após consentimento, as cópias aprimoradas são enviadas ao Gemini para transcrição.
-4. A resposta é validada por schema: texto de até 8.000 caracteres e trechos com baixa confiança.
-5. O estudante revisa e salva a transcrição antes de pedir avaliação.
+2. A API preserva a página original e produz uma cópia aprimorada com `sharp`.
+3. Após consentimento explícito, cópias aprimoradas são enviadas ao provedor para transcrição.
+4. O estudante revisa, corrige e confirma o texto. A confirmação é obrigatória antes da avaliação.
+5. Após novo consentimento, somente o texto confirmado e o tema seguem ao provedor para uma devolutiva educacional.
 
-O reconhecimento não corrige o texto automaticamente. Quando a imagem não permite leitura, o prompt instrui a IA a usar `[ilegível]`, evitando invenções silenciosas.
+Antes de marcar o consentimento, a interface deve explicar a finalidade (transcrever/avaliar), o provedor envolvido e que a estimativa não é nota oficial. Nunca envie imagem ou texto a um provedor sem essa ação afirmativa.
 
-## Correção no modelo ENEM
+## Reconhecimento
 
-A avaliação usa a versão de prompt `enem-2026-simulation-v1`, com as cinco competências, faixas de 0 a 200 em incrementos de 40, justificativa baseada em evidências e próximos passos para chegar a 200. A resposta estruturada é validada antes de ser exibida.
+O pré-processamento prioriza preservação: rotação, escala de cinza, contraste e nitidez. Segmentação agressiva por linhas ou palavras não é aplicada automaticamente porque pode apagar acentos e pontuação. Se a leitura for incerta, a transcrição usa `[trecho ilegível]`; isso reduz a confiança da avaliação e pode recomendar revisão humana, sem penalização automática.
 
-Isso é uma camada de tutoria e não um treinamento/fine-tuning do modelo. O produto deve continuar exibindo que a nota é uma estimativa educacional, não uma nota oficial do Inep.
+## Avaliação pedagógica ENEM
+
+O motor usa a rubrica `enem-2026-simulation-v3` e as cinco competências nas faixas 0, 40, 80, 120, 160 ou 200. A nota total é sempre a soma das cinco competências e é exibida como **estimativa educacional por IA — não é nota oficial do Inep**.
+
+Cada trecho citado é verificado no texto confirmado, aceitando apenas normalização Unicode e espaços. Respostas JSON truncadas, inválidas, com competências ausentes/duplicadas, nota fora da escala, total divergente ou citação inventada são descartadas. A resposta exibida contém ações de revisão, não uma redação pronta ou parágrafos para copiar.
+
+O texto da redação é dado não confiável. Instruções inseridas nele são ignoradas como comandos e analisadas apenas como conteúdo. O produto não penaliza posição política, religiosa, filosófica ou ideológica por si só.
+
+## Privacidade, retenção e exclusão
+
+- A API não registra redações completas, prompts completos ou respostas completas em logs.
+- Em produção, imagens devem usar bucket privado e acesso autenticado. Não usar o fallback local/memória como armazenamento de produção.
+- O proprietário deve definir prazo de retenção, mecanismo de exclusão e canal para pedidos do titular antes do uso público. A exclusão deve abranger imagens originais/processadas, texto, avaliação e revisões relacionadas.
+- Para desenvolvimento sem banco, os dados existem somente no processo e o modo é demonstrativo; não é garantia de retenção nem de privacidade de produção.
+- Em produção, use JWT Supabase HS256 válido no cabeçalho `Authorization`; a API rejeita `x-user-id` nesse ambiente. Configure `SUPABASE_JWT_SECRET` e, quando necessário, `SUPABASE_JWT_AUDIENCE`.
+
+## Configuração do provedor
+
+`GEMINI_API_KEY` habilita o provedor atual. `GEMINI_MODEL`, `GEMINI_TEMPERATURE` (máximo 0,3), `AI_PROVIDER_TIMEOUT_MS`, `AI_EVALUATIONS_PER_DAY` e `ESSAY_RUBRIC_VERSION` são configuráveis por ambiente. O timeout é limitado entre 5 e 120 segundos. Falhas preservam o trabalho do estudante e retornam uma mensagem segura.
+
+## Referências autorizadas e RAG futuro
+
+Não há download ou scraping de redações, apostilas ou materiais protegidos. Para validar um lote de referências cujo uso esteja autorizado:
+
+```bash
+pnpm --filter @nexo/api references:validate docs/ESSAY_REFERENCE_IMPORT_TEMPLATE.json
+```
+
+Cada item exige tema, origem, licença, confirmação de autorização, status, anotações, tags e trecho autorizado. A validação não importa nem publica conteúdo. Quando houver fluxo administrativo autenticado, o lote validado poderá ser revisado e inserido em `EssayReference`.
+
+Evolução planejada:
+
+1. referências curadas e busca simples por tema/tags;
+2. avaliar qualidade e volume antes de introduzir `pgvector`/RAG;
+3. usar referências para contextualizar feedback, nunca para copiar resposta pronta;
+4. registrar versão e origem de qualquer referência utilizada.
+
+## Calibração humana
+
+`HumanEssayReview` e `calculateCalibrationMetrics` preparam a comparação de notas da IA e professor: diferença absoluta por competência, diferença total, distribuição e taxa de baixa confiança/revisão. O sistema não é declarado calibrado sem uma base humana revisada.
+
+Redações nota 1000 isoladas não bastam para treinar um corretor. Antes de qualquer fine-tuning — que não faz parte deste projeto — são necessários dados anonimizados e consentidos de várias faixas, tema, notas por competência, justificativas de corretores, controle de qualidade, base legal, divisão treino/validação/teste e avaliação cega por especialistas.
 
 Referências oficiais: [Cartilha do Enem 2026](https://www.gov.br/inep/pt-br/centrais-de-conteudo/noticias/enem/enem-2026-cartilha-da-redacao-esta-disponivel) e [documentos e manuais do Enem](https://www.gov.br/inep/pt-br/areas-de-atuacao/avaliacao-e-exames-educacionais/enem/outros-documentos).
-
-## Próxima evolução recomendada
-
-- migrar as imagens originais e aprimoradas da memória para um bucket privado do Supabase Storage;
-- guardar versão da transcrição, confiança e revisão do estudante no banco;
-- adicionar um modo opcional para folha pautada, com remoção de linhas apenas quando a detecção tiver alta confiança;
-- comparar avaliações ao longo do tempo por competência, sem transformar a nota em diagnóstico definitivo.

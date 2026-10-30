@@ -36,6 +36,23 @@ describe('fluxo de redação', () => {
     await expect(essays.addImage(essay.id, 'another-student', file)).rejects.toThrow('não encontrada');
   });
 
+  it('aplica limite diário sem apagar o texto confirmado', async () => {
+    const previousLimit = process.env.AI_EVALUATIONS_PER_DAY;
+    process.env.AI_EVALUATIONS_PER_DAY = '1';
+    try {
+      const essays = service();
+      const first = await essays.create('student', 'Primeiro tema');
+      const second = await essays.create('student', 'Segundo tema');
+      await essays.setText(first.id, 'student', 'Este é o primeiro texto confirmado, suficientemente longo para avaliação.');
+      await essays.setText(second.id, 'student', 'Este é o segundo texto confirmado, suficientemente longo para avaliação.');
+      await essays.evaluate(first.id, 'student', true);
+      await expect(essays.evaluate(second.id, 'student', true)).rejects.toThrow('limite diário');
+      expect((await essays.get(second.id, 'student')).confirmedText).toContain('segundo texto');
+    } finally {
+      process.env.AI_EVALUATIONS_PER_DAY = previousLimit;
+    }
+  });
+
   it('aceita JPEG válido mesmo quando o navegador informa um MIME impreciso', async () => {
     const essays = service();
     const essay = await essays.create('student', 'Tema de redação');

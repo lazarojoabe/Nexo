@@ -4,13 +4,13 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ArrayMaxSize, IsArray, IsBoolean, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 import { EssayService, QuizService } from './services';
 import { PrismaService } from './prisma.service';
+import { AuthIdentityService } from './auth-identity.service';
 
 class StartQuizDto { @IsOptional() @IsString() examId?: string; @IsOptional() @IsString() area?: string; @IsOptional() @IsArray() @ArrayMaxSize(90) @IsString({ each: true }) questionIds?: string[]; }
 class AnswerDto { @IsString() @MinLength(1) optionId!: string; }
 class CreateEssayDto { @IsString() @MinLength(3) @MaxLength(300) topic!: string; }
 class TextDto { @IsString() @MinLength(20) @MaxLength(8000) text!: string; }
 class EvaluateDto { @IsBoolean() consent!: boolean; }
-function demoUser(header?: string) { return header || 'demo-user'; }
 
 @ApiTags('health')
 @Controller('health')
@@ -22,27 +22,27 @@ export class HealthController {
 @ApiTags('quiz')
 @Controller()
 export class QuizController {
-  constructor(private readonly quiz: QuizService) {}
+  constructor(private readonly quiz: QuizService, private readonly identity: AuthIdentityService) {}
   @Get('exams') exams() { return this.quiz.listExams(); }
   @Get('questions') questions(@Query('area') area?: string, @Query('examId') examId?: string) { return this.quiz.listQuestions(area, examId); }
   @Get('questions/:id') async question(@Param('id') id: string) { const { correctOptionId, ...question } = await this.quiz.question(id); return question; }
-  @Get('dashboard') dashboard(@Headers('x-user-id') userId: string | undefined) { return this.quiz.dashboard(demoUser(userId)); }
-  @Post('quiz-sessions') start(@Headers('x-user-id') userId: string | undefined, @Body() dto: StartQuizDto) { return this.quiz.createSession(dto.questionIds, dto.examId, demoUser(userId), dto.area); }
-  @Get('quiz-sessions/:id') session(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined) { return this.quiz.session(id, demoUser(userId)); }
-  @Post('quiz-sessions/:id/answers') answer(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined, @Body() dto: AnswerDto, @Query('questionId') questionId: string) { return this.quiz.answer(id, questionId, dto.optionId, demoUser(userId)); }
-  @Get('quiz-sessions/:id/results') results(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined) { return this.quiz.results(id, demoUser(userId)); }
+  @Get('dashboard') dashboard(@Headers('authorization') authorization: string | undefined, @Headers('x-user-id') demoUserId: string | undefined) { return this.quiz.dashboard(this.identity.userId(authorization, demoUserId)); }
+  @Post('quiz-sessions') start(@Headers('authorization') authorization: string | undefined, @Headers('x-user-id') demoUserId: string | undefined, @Body() dto: StartQuizDto) { return this.quiz.createSession(dto.questionIds, dto.examId, this.identity.userId(authorization, demoUserId), dto.area); }
+  @Get('quiz-sessions/:id') session(@Param('id') id: string, @Headers('authorization') authorization: string | undefined, @Headers('x-user-id') demoUserId: string | undefined) { return this.quiz.session(id, this.identity.userId(authorization, demoUserId)); }
+  @Post('quiz-sessions/:id/answers') answer(@Param('id') id: string, @Headers('authorization') authorization: string | undefined, @Headers('x-user-id') demoUserId: string | undefined, @Body() dto: AnswerDto, @Query('questionId') questionId: string) { return this.quiz.answer(id, questionId, dto.optionId, this.identity.userId(authorization, demoUserId)); }
+  @Get('quiz-sessions/:id/results') results(@Param('id') id: string, @Headers('authorization') authorization: string | undefined, @Headers('x-user-id') demoUserId: string | undefined) { return this.quiz.results(id, this.identity.userId(authorization, demoUserId)); }
 }
 
 @ApiTags('essays')
 @Controller('essays')
 export class EssayController {
-  constructor(private readonly essays: EssayService) {}
-  @Post() create(@Headers('x-user-id') userId: string | undefined, @Body() dto: CreateEssayDto) { return this.essays.create(demoUser(userId), dto.topic); }
-  @Get() history(@Headers('x-user-id') userId: string | undefined) { return this.essays.history(demoUser(userId)); }
-  @Post(':id/images') @ApiConsumes('multipart/form-data') @UseInterceptors(FileInterceptor('image', { limits: { fileSize: 8 * 1024 * 1024 } })) image(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined, @UploadedFile() file?: Express.Multer.File) { return this.essays.addImage(id, demoUser(userId), file); }
-  @Post(':id/transcribe') @HttpCode(200) transcribe(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined, @Body() dto: EvaluateDto) { return this.essays.transcribe(id, demoUser(userId), dto.consent); }
-  @Patch(':id/transcription') text(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined, @Body() dto: TextDto) { return this.essays.setText(id, demoUser(userId), dto.text); }
-  @Post(':id/evaluate') @HttpCode(200) evaluate(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined, @Body() dto: EvaluateDto) { return this.essays.evaluate(id, demoUser(userId), dto.consent); }
-  @Get(':id') get(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined) { return this.essays.get(id, demoUser(userId)); }
-  @Get(':id/evaluation') evaluation(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined) { return this.essays.evaluation(id, demoUser(userId)); }
+  constructor(private readonly essays: EssayService, private readonly identity: AuthIdentityService) {}
+  @Post() create(@Headers('authorization') authorization: string | undefined, @Headers('x-user-id') demoUserId: string | undefined, @Body() dto: CreateEssayDto) { return this.essays.create(this.identity.userId(authorization, demoUserId), dto.topic); }
+  @Get() history(@Headers('authorization') authorization: string | undefined, @Headers('x-user-id') demoUserId: string | undefined) { return this.essays.history(this.identity.userId(authorization, demoUserId)); }
+  @Post(':id/images') @ApiConsumes('multipart/form-data') @UseInterceptors(FileInterceptor('image', { limits: { fileSize: 8 * 1024 * 1024 } })) image(@Param('id') id: string, @Headers('authorization') authorization: string | undefined, @Headers('x-user-id') demoUserId: string | undefined, @UploadedFile() file?: Express.Multer.File) { return this.essays.addImage(id, this.identity.userId(authorization, demoUserId), file); }
+  @Post(':id/transcribe') @HttpCode(200) transcribe(@Param('id') id: string, @Headers('authorization') authorization: string | undefined, @Headers('x-user-id') demoUserId: string | undefined, @Body() dto: EvaluateDto) { return this.essays.transcribe(id, this.identity.userId(authorization, demoUserId), dto.consent); }
+  @Patch(':id/transcription') text(@Param('id') id: string, @Headers('authorization') authorization: string | undefined, @Headers('x-user-id') demoUserId: string | undefined, @Body() dto: TextDto) { return this.essays.setText(id, this.identity.userId(authorization, demoUserId), dto.text); }
+  @Post(':id/evaluate') @HttpCode(200) evaluate(@Param('id') id: string, @Headers('authorization') authorization: string | undefined, @Headers('x-user-id') demoUserId: string | undefined, @Body() dto: EvaluateDto) { return this.essays.evaluate(id, this.identity.userId(authorization, demoUserId), dto.consent); }
+  @Get(':id') get(@Param('id') id: string, @Headers('authorization') authorization: string | undefined, @Headers('x-user-id') demoUserId: string | undefined) { return this.essays.get(id, this.identity.userId(authorization, demoUserId)); }
+  @Get(':id/evaluation') evaluation(@Param('id') id: string, @Headers('authorization') authorization: string | undefined, @Headers('x-user-id') demoUserId: string | undefined) { return this.essays.evaluation(id, this.identity.userId(authorization, demoUserId)); }
 }

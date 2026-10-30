@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { existsSync } from 'node:fs';
+import { connect } from 'node:net';
 import { resolve } from 'node:path';
 import { static as serveStatic } from 'express';
 import { ValidationPipe } from '@nestjs/common';
@@ -25,6 +26,11 @@ for (const envFile of envFiles) {
 }
 
 async function bootstrap() {
+  const port = Number(process.env.PORT ?? 3001);
+  if (await isPortInUse(port)) {
+    console.warn(`A API Nexo já está em execução na porta ${port}; esta instância não será iniciada.`);
+    return;
+  }
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const workspaceRoot = existsSync(resolve(process.cwd(), 'apps', 'api')) ? process.cwd() : resolve(process.cwd(), '..', '..');
   const examAssetDirectory = resolve(process.env.EXAM_ASSET_DIR ?? resolve(workspaceRoot, 'data', 'exam-assets'));
@@ -42,6 +48,32 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
   const config = new DocumentBuilder().setTitle('Nexo ENEM AI').setVersion('0.1').build();
   SwaggerModule.setup('api/docs', app, SwaggerModule.createDocument(app, config));
-  await app.listen(Number(process.env.PORT ?? 3001));
+  try {
+    await app.listen(port);
+  } catch (error) {
+    if (isAddressInUse(error)) {
+      await app.close();
+      console.warn(`A API Nexo já está em execução na porta ${port}; esta instância não será iniciada.`);
+      return;
+    }
+    throw error;
+  }
 }
-bootstrap();
+
+function isAddressInUse(error: unknown): error is NodeJS.ErrnoException {
+  return typeof error === 'object' && error !== null && 'code' in error && error.code === 'EADDRINUSE';
+}
+
+function isPortInUse(port: number) {
+  return new Promise<boolean>((resolve) => {
+    const socket = connect({ host: '127.0.0.1', port });
+    socket.once('connect', () => { socket.destroy(); resolve(true); });
+    socket.once('error', () => { socket.destroy(); resolve(false); });
+  });
+}
+
+bootstrap().catch((error: unknown) => {
+  const message = error instanceof Error ? error.message : 'Falha ao iniciar a API.';
+  console.error(`Falha ao iniciar a API: ${message}`);
+  process.exitCode = 1;
+});

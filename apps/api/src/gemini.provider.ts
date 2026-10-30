@@ -1,21 +1,32 @@
 import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
-import { assertEvaluationGroundedInText, essayEvaluationSchema, transcriptionSchema } from '@nexo/shared';
-import { enemRubric } from './essay-rubric';
+import { transcriptionSchema } from '@nexo/shared';
+import { buildEvaluationPrompt } from './essay-engine/evaluation-context';
+import { preAnalyzeEssay } from './essay-engine/pre-analysis';
+import type { EssayAiProvider, EssayEvaluationRequest } from './essay-engine/provider';
 
 type ImagePart = { mimeType: string; data: string };
-const timeout = 60_000;
 
 @Injectable()
-export class GeminiProvider {
+export class GeminiProvider implements EssayAiProvider {
   private readonly logger = new Logger(GeminiProvider.name);
   private key = process.env.GEMINI_API_KEY;
   private model = process.env.GEMINI_MODEL ?? 'gemini-2.0-flash';
+  readonly providerName = 'gemini';
+  get modelName() { return this.model; }
+  private get timeout() {
+    const configured = Number(process.env.AI_PROVIDER_TIMEOUT_MS ?? 60_000);
+    return Number.isFinite(configured) ? Math.min(Math.max(configured, 5_000), 120_000) : 60_000;
+  }
+  private get temperature() {
+    const configured = Number(process.env.GEMINI_TEMPERATURE ?? 0.2);
+    return Number.isFinite(configured) ? Math.min(Math.max(configured, 0), 0.3) : 0.2;
+  }
 
   private async generate(parts: unknown[], operation: 'transcription' | 'evaluation') {
     if (!this.key) throw new ServiceUnavailableException('Serviço de IA indisponível. Configure GEMINI_API_KEY; seus dados foram preservados.');
-    const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), timeout);
+    const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), this.timeout);
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.key}`, { method: 'POST', signal: controller.signal, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ contents: [{ role: 'user', parts }], generationConfig: { responseMimeType: 'application/json', temperature: 0.2 } }) });
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.key}`, { method: 'POST', signal: controller.signal, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ contents: [{ role: 'user', parts }], generationConfig: { responseMimeType: 'application/json', temperature: this.temperature } }) });
       if (response.status === 429) throw new ServiceUnavailableException('A cota gratuita de IA foi atingida. Tente novamente mais tarde; seus dados foram preservados.');
       if (!response.ok) {
         this.logger.warn(`gemini_request_failure operation=${operation} status=${response.status}`);
@@ -27,7 +38,7 @@ export class GeminiProvider {
       const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!text) throw new ServiceUnavailableException('A IA retornou uma resposta vazia. Tente novamente.');
       const normalized = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-      return JSON.parse(normalized) as unknown;
+      try { return JSON.parse(normalized) as unknown; } catch { throw new ServiceUnavailableException('A IA retornou uma avaliação incompleta. Tente novamente; seu texto foi preservado.'); }
     } catch (error) {
       if (error instanceof ServiceUnavailableException) throw error;
       throw new ServiceUnavailableException('A IA não respondeu a tempo. Tente novamente; seus dados foram preservados.');
@@ -39,12 +50,13 @@ export class GeminiProvider {
     return transcriptionSchema.parse(result);
   }
 
-  async evaluate(topic: string, text: string) {
-    const raw = await this.generate([{ text: `${enemRubric}\nTema proposto: ${topic}\nTexto confirmado pelo estudante:\n${text}\n\nRetorne exclusivamente este JSON: {"competencies":[{"id":1,"score":0,"level":"insuficiente","strengths":["..."],"issues":["..."],"evidence":[{"excerpt":"citação curta e literal do texto","explanation":"..."}],"feedbackPoints":[{"category":"argumentacao","severity":"prioridade","excerpt":"citação literal opcional","diagnosis":"...","suggestion":"..."}],"actionableFeedback":["..."]}],"generalFeedback":"...","priorityActions":["..."],"interventionProposal":{"agent":"...","action":"...","means":"...","purpose":"...","detail":"..."}}. Inclua uma entrada para cada id de 1 a 5; score deve ser somente 0,40,80,120,160 ou 200. Não inclua excerpt se não puder copiá-lo literalmente do texto.` }], 'evaluation');
-    try {
-      return assertEvaluationGroundedInText(essayEvaluationSchema.parse(raw), text);
-    } catch {
-      throw new ServiceUnavailableException('A resposta da IA não passou na validação de trechos. Tente novamente; seu texto foi preservado.');
-    }
+  async evaluate(request: EssayEvaluationRequest): Promise<unknown>;
+  /** Compatibility overload for direct provider callers; domain validation remains in EssayService. */
+  async evaluate(topic: string, text: string): Promise<unknown>;
+  async evaluate(requestOrTopic: EssayEvaluationRequest | string, legacyText?: string) {
+    const request = typeof requestOrTopic === 'string'
+      ? { topic: requestOrTopic, text: legacyText ?? '', signals: preAnalyzeEssay(legacyText ?? '') }
+      : requestOrTopic;
+    return this.generate([{ text: buildEvaluationPrompt(request) }], 'evaluation');
   }
 }

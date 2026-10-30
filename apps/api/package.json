@@ -16,7 +16,8 @@
     "import:exams": "tsx ../../scripts/import-exams/index.ts",
     "exams:fetch": "tsx ../../scripts/import-exams/fetch.ts",
     "exams:download": "tsx ../../scripts/import-exams/download-official.ts",
-    "exams:assets": "python ../../scripts/import-exams/extract_question_assets.py"
+    "exams:assets": "python ../../scripts/import-exams/extract_question_assets.py",
+    "references:validate": "tsx ../../scripts/validate-essay-references.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.11",

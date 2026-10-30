@@ -89,6 +89,23 @@ export const enemScoreSchema = z.union([
   z.literal(0), z.literal(40), z.literal(80), z.literal(120), z.literal(160), z.literal(200),
 ]);
 
+export const essayConfidenceSchema = z.enum(['alta', 'media', 'baixa']);
+export const essayAnalysisSignalsSchema = z.object({
+  characterCount: z.number().int().nonnegative(),
+  wordCount: z.number().int().nonnegative(),
+  sentenceCount: z.number().int().nonnegative(),
+  paragraphCount: z.number().int().nonnegative(),
+  hasIllegibleExcerpt: z.boolean(),
+  isVeryShort: z.boolean(),
+  hasIncompleteStructure: z.boolean(),
+  hasExcessiveRepetition: z.boolean(),
+  hasApparentConclusion: z.boolean(),
+  hasInterventionIndicators: z.boolean(),
+  hasPromptInjectionAttempt: z.boolean(),
+  needsHumanReview: z.boolean(),
+  reviewReasons: z.array(z.string().min(1).max(240)).max(10),
+});
+
 export const feedbackPointSchema = z.object({
   category: z.enum(['norma_culta', 'pontuacao', 'coesao', 'clareza', 'repertorio', 'argumentacao', 'tema', 'proposta_intervencao']),
   severity: z.enum(['prioridade', 'atencao', 'evolucao']),
@@ -122,10 +139,26 @@ export const essayEvaluationSchema = z.object({
     purpose: z.string().min(1).max(360),
     detail: z.string().min(1).max(360).optional(),
   }).optional(),
+  // These fields are supplied by the application after the provider response is
+  // validated. Defaults preserve safe reads of evaluations persisted before v3.
+  rubricVersion: z.string().min(1).max(120).default('enem-2026-simulation-v2'),
+  provider: z.string().min(1).max(80).default('gemini'),
+  model: z.string().min(1).max(160).default('unknown'),
+  confidence: essayConfidenceSchema.default('media'),
+  needsHumanReview: z.boolean().default(false),
+  reviewReasons: z.array(z.string().min(1).max(240)).max(10).default([]),
+  limitations: z.array(z.string().min(1).max(360)).max(10).default([]),
+  analysisSignals: essayAnalysisSignalsSchema.optional(),
+  evaluatedAt: z.string().datetime().optional(),
+  totalScore: z.number().int().min(0).max(1000).optional(),
 }).superRefine((value, context) => {
   const ids = value.competencies.map((competency) => competency.id).sort();
   if (ids.join(',') !== '1,2,3,4,5') {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ['competencies'], message: 'A avaliação deve conter exatamente as cinco competências do ENEM.' });
+  }
+  const calculatedTotal = value.competencies.reduce((sum, competency) => sum + competency.score, 0);
+  if (value.totalScore !== undefined && value.totalScore !== calculatedTotal) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ['totalScore'], message: 'A nota total deve ser a soma das cinco competências.' });
   }
 }).transform((value) => ({
   ...value,
@@ -134,6 +167,22 @@ export const essayEvaluationSchema = z.object({
 }));
 
 export type EssayEvaluation = z.infer<typeof essayEvaluationSchema>;
+export type EssayAnalysisSignals = z.infer<typeof essayAnalysisSignalsSchema>;
+
+export const essayReferenceImportSchema = z.object({
+  topic: z.string().trim().min(3).max(300),
+  year: z.number().int().min(1998).max(2100).optional(),
+  source: z.string().trim().min(3).max(300),
+  sourceUrl: z.string().url().optional(),
+  license: z.string().trim().min(3).max(300),
+  authorizationConfirmed: z.literal(true),
+  reviewStatus: z.enum(['pending', 'approved', 'rejected']).default('pending'),
+  competencyAnnotations: z.record(z.string(), z.string().max(1600)).default({}),
+  tags: z.array(z.string().trim().min(1).max(80)).max(20).default([]),
+  authorizedExcerpt: z.string().trim().min(20).max(8000),
+});
+
+export type EssayReferenceImport = z.infer<typeof essayReferenceImportSchema>;
 
 /** Keeps feedback anchored to the student's actual draft, allowing only whitespace changes. */
 export function assertEvaluationGroundedInText(evaluation: EssayEvaluation, text: string) {

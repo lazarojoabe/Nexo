@@ -1,0 +1,16 @@
+[
+  {
+    "topic": "Tema da redação autorizada",
+    "year": 2026,
+    "source": "Coleção própria com autorização documentada",
+    "sourceUrl": "https://example.com/origem-autorizada",
+    "license": "Autorização do titular arquivada em registro interno",
+    "authorizationConfirmed": true,
+    "reviewStatus": "pending",
+    "competencyAnnotations": {
+      "C2": "Anotação pedagógica curta e verificada."
+    },
+    "tags": ["demonstracao", "referencia-autorizada"],
+    "authorizedExcerpt": "Este é somente um trecho demonstrativo com extensão suficiente para validar o formato de importação."
+  }
+]
