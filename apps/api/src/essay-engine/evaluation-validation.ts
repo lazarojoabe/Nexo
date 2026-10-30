@@ -3,7 +3,12 @@ import type { EssayAiProvider } from './provider';
 import { ENEM_RUBRIC_VERSION } from './rubric';
 
 export function validateEssayEvaluation(raw: unknown, text: string, signals: EssayAnalysisSignals, provider: Pick<EssayAiProvider, 'providerName' | 'modelName'>) {
-  const parsed = essayEvaluationSchema.parse(raw);
+  // A provider sometimes paraphrases an excerpt while otherwise returning a
+  // valid assessment. Never show a paraphrase as if it came from the student:
+  // remove only that optional citation and keep the independently valid
+  // pedagogical feedback. This avoids discarding an entire evaluation for a
+  // non-authoritative display field.
+  const parsed = removeUngroundedExcerpts(essayEvaluationSchema.parse(raw), text);
   const reviewReasons = [...new Set([...signals.reviewReasons, ...parsed.reviewReasons])].slice(0, 10);
   const needsHumanReview = signals.needsHumanReview || parsed.needsHumanReview;
   const limitations = [...new Set([
@@ -26,4 +31,24 @@ export function validateEssayEvaluation(raw: unknown, text: string, signals: Ess
     evaluatedAt: new Date().toISOString(),
   });
   return assertEvaluationGroundedInText(evaluation, text);
+}
+
+function removeUngroundedExcerpts(evaluation: ReturnType<typeof essayEvaluationSchema.parse>, text: string) {
+  const normalizedText = normalizeExcerpt(text);
+  return {
+    ...evaluation,
+    competencies: evaluation.competencies.map((competency) => ({
+      ...competency,
+      evidence: competency.evidence.filter((item) => normalizedText.includes(normalizeExcerpt(item.excerpt))),
+      feedbackPoints: competency.feedbackPoints.map((point) => {
+        if (!point.excerpt || normalizedText.includes(normalizeExcerpt(point.excerpt))) return point;
+        const { excerpt: _excerpt, ...withoutExcerpt } = point;
+        return withoutExcerpt;
+      }),
+    })),
+  };
+}
+
+function normalizeExcerpt(value: string) {
+  return value.normalize('NFC').replace(/\s+/g, ' ').trim();
 }

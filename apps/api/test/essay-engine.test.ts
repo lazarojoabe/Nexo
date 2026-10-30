@@ -51,6 +51,17 @@ describe('motor pedagógico de redação', () => {
     expect(evaluation.analysisSignals?.hasIllegibleExcerpt).toBe(true);
   });
 
+  it('omite citação parafraseada sem descartar uma devolutiva válida', () => {
+    const raw = response();
+    raw.competencies[0].evidence = [{ excerpt: 'citação que não está na redação', explanation: 'Não deve ser exibida.' }];
+    raw.competencies[0].feedbackPoints[0].excerpt = 'outro trecho inventado';
+
+    const evaluation = validateEssayEvaluation(raw, text, preAnalyzeEssay(text), provider);
+
+    expect(evaluation.competencies[0].evidence).toEqual([]);
+    expect(evaluation.competencies[0].feedbackPoints[0].excerpt).toBeUndefined();
+  });
+
   it('agrega calibração, distribuição e taxas sem reter textos', () => {
     const metrics = calculateEssayQualityMetrics([{ totalScore: 600, competencyScores: [120, 120, 120, 120, 120], confidence: 'baixa', needsHumanReview: true, rubricVersion: 'v3', model: 'm1', humanReview: { totalScore: 640, competencyScores: [120, 120, 120, 120, 160] } }]);
     expect(metrics.lowConfidenceRate).toBe(1);
