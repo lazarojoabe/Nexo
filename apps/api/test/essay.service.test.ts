@@ -89,4 +89,31 @@ describe('fluxo de redação', () => {
     await expect(essays.transcribe(essay.id, 'student', true)).rejects.toThrow('Suas páginas foram preservadas');
     await expect(essays.get(essay.id, 'student')).resolves.toMatchObject({ status: 'draft', images: [{ page: 1 }] });
   });
+
+  it('persiste a leitura fiel e a versão normalizada sem perder a estrutura', async () => {
+    const essays = new EssayService(
+      {
+        transcribe: async () => ({ rawText: 'Há obs-\ntáculos.\n\nFim.', paragraphs: [{ index: 1, rawText: 'Há obs-\ntáculos.', confidence: 0.99, lineRange: { start: 1, end: 2 } }, { index: 2, rawText: 'Fim.', confidence: 0.99, lineRange: { start: 4, end: 4 } }], uncertainTerms: [], overallConfidence: 0.99, requiresReview: false }),
+        verifyTranscription: async () => ({ divergences: [], overallConfidence: 0.99 }),
+        evaluate: async () => validEvaluation,
+      } as never,
+      { enhance: async () => ({ originalMimeType: 'image/jpeg' as const, mimeType: 'image/jpeg' as const, data: Buffer.from('processed').toString('base64'), enhanced: true }) } as never,
+      { save: async () => ({ originalPath: 'original.jpg', processedPath: 'processed.jpg' }), read: async () => Buffer.from('processed'), remove: async () => undefined } as never,
+    );
+    const essay = await essays.create('student', 'Tema de redação');
+    const file = { mimetype: 'image/jpeg', size: 200, buffer: Buffer.from('original') } as Express.Multer.File;
+    await essays.addImage(essay.id, 'student', file);
+
+    await expect(essays.transcribe(essay.id, 'student', true)).resolves.toMatchObject({ rawText: 'Há obs-\ntáculos.\n\nFim.', normalizedText: 'Há obstáculos.\n\nFim.', paragraphs: [{ index: 1 }, { index: 2 }] });
+    await expect(essays.get(essay.id, 'student')).resolves.toMatchObject({ transcription: 'Há obstáculos.\n\nFim.', transcriptionResult: { rawText: 'Há obs-\ntáculos.\n\nFim.', normalizedText: 'Há obstáculos.\n\nFim.' } });
+  });
+
+  it('apresenta registros antigos de transcrição como revisão necessária', async () => {
+    const essays = service();
+    const essay = await essays.create('student', 'Tema de redação');
+    const memory = essays as unknown as { essays: Map<string, { transcription?: string }> };
+    memory.essays.get(essay.id)!.transcription = 'Texto de uma transcrição antiga com tamanho suficiente.';
+
+    await expect(essays.get(essay.id, 'student')).resolves.toMatchObject({ transcriptionResult: { rawText: 'Texto de uma transcrição antiga com tamanho suficiente.', requiresReview: true } });
+  });
 });

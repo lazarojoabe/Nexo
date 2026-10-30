@@ -136,7 +136,7 @@ export default function Home() {
   async function transcribeEssay() {
     if (!essayId || !consent || uploadedCount < 1) return;
     setTranscribing(true); setEssayError('');
-    try { const result = await api.transcribe(essayId, consent); setTranscription(result); setTranscribedText(result.text); setEssayPhase('review'); } catch (error) { setEssayError(message(error)); } finally { setTranscribing(false); }
+    try { const result = await api.transcribe(essayId, consent); setTranscription(result); setTranscribedText(result.normalizedText); setEssayPhase('review'); } catch (error) { setEssayError(message(error)); } finally { setTranscribing(false); }
   }
 
   async function confirmText() {
@@ -169,10 +169,10 @@ export default function Home() {
   }
 
   function restoreEssay(essay: EssayDetail) {
-    const restoredText = essay.confirmedText ?? essay.transcription ?? '';
+    const restoredText = essay.confirmedText ?? essay.transcriptionResult?.normalizedText ?? essay.transcription ?? '';
     setEssayId(essay.id); setTopic(essay.topic); setEssayFiles([]); setUploadedCount(essay.images.length); setTranscribedText(restoredText); setConsent(Boolean(restoredText)); setEvaluation(essay.evaluation ?? undefined);
-    setTranscription(essay.transcription ? { text: essay.transcription, lowConfidenceSegments: [] } : undefined);
-    setEssayPhase(essay.evaluation ? 'evaluation' : essay.confirmedText ? 'confirmed' : essay.transcription ? 'review' : 'images');
+    setTranscription(essay.transcriptionResult ?? undefined);
+    setEssayPhase(essay.evaluation ? 'evaluation' : essay.confirmedText ? 'confirmed' : (essay.transcriptionResult || essay.transcription) ? 'review' : 'images');
   }
 
   function chooseEssay() { setView('essay'); setEssayError(''); void loadEssayHistory(); }

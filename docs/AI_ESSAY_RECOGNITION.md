@@ -14,6 +14,19 @@ Antes de marcar o consentimento, a interface deve explicar a finalidade (transcr
 
 O pré-processamento prioriza preservação: rotação, escala de cinza, contraste e nitidez. Segmentação agressiva por linhas ou palavras não é aplicada automaticamente porque pode apagar acentos e pontuação. Se a leitura for incerta, a transcrição usa `[trecho ilegível]`; isso reduz a confiança da avaliação e pode recomendar revisão humana, sem penalização automática.
 
+### Transcrição fiel, normalização visual e revisão
+
+A transcrição manuscrita possui duas versões persistidas:
+
+- `rawText` é a leitura fiel da página, preservando linhas físicas, hífens no final da linha e a estrutura visual detectada.
+- `normalizedText` é a versão de leitura usada na revisão. Ela pode unir somente uma palavra claramente partida pela mudança física de linha, por exemplo `obs-\ntáculos` → `obstáculos`. Ela não corrige ortografia, gramática, concordância, pontuação, repertório ou escolha lexical do estudante.
+
+O contrato também contém `paragraphs` (com intervalo de linhas), `corrections`, `uncertainTerms`, confiança total e a marcação `requiresReview`. As correções ficam visíveis: uma alteração automática por quebra de linha não é uma correção da escrita do estudante.
+
+O provedor realiza duas leituras de imagem. A primeira transcreve fielmente e identifica blocos visuais por recuo, espaçamento e margens; a segunda só aponta divergências. Uma palavra semanticamente relevante só muda automaticamente quando a segunda leitura tiver evidência visual explícita e confiança muito alta (≥ 98,5%). Em qualquer outro caso, o termo fica destacado para confirmação humana. A interface permite editar o texto e unir ou separar parágrafos antes da avaliação.
+
+O texto confirmado, mais a lista de parágrafos confirmados, segue para a avaliação ENEM. Isso conserva a organização produzida pelo estudante sem forçar uma quantidade de parágrafos.
+
 ## Avaliação pedagógica ENEM
 
 O motor usa a rubrica `enem-2026-simulation-v3` e as cinco competências nas faixas 0, 40, 80, 120, 160 ou 200. A nota total é sempre a soma das cinco competências e é exibida como **estimativa educacional por IA — não é nota oficial do Inep**.
@@ -32,7 +45,7 @@ O texto da redação é dado não confiável. Instruções inseridas nele são i
 
 ## Configuração do provedor
 
-`GEMINI_API_KEY` habilita o provedor atual. `GEMINI_MODEL`, `GEMINI_TEMPERATURE` (máximo 0,3), `AI_PROVIDER_TIMEOUT_MS`, `AI_EVALUATIONS_PER_DAY` e `ESSAY_RUBRIC_VERSION` são configuráveis por ambiente. O timeout é limitado entre 5 e 120 segundos. Falhas preservam o trabalho do estudante e retornam uma mensagem segura.
+`GEMINI_API_KEY` habilita o provedor atual. `GEMINI_MODEL`, `GEMINI_TEMPERATURE` (máximo 0,2; padrão 0,1 para leitura mais reprodutível), `AI_PROVIDER_TIMEOUT_MS`, `AI_EVALUATIONS_PER_DAY` e `ESSAY_RUBRIC_VERSION` são configuráveis por ambiente. O timeout é limitado entre 5 e 120 segundos. Falhas preservam o trabalho do estudante e retornam uma mensagem segura.
 
 ## Referências autorizadas e RAG futuro
 

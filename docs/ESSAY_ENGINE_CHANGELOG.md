@@ -1,5 +1,22 @@
 # Changelog do motor de redação
 
+## 2026-10-30 — Fidelidade de transcrição manuscrita
+
+### Mudanças
+
+- Contrato tipado de transcrição com leitura fiel (`rawText`), leitura normalizada, parágrafos, intervalos de linhas, correções rastreáveis, termos incertos, confiança e revisão obrigatória.
+- Duas leituras independentes da imagem: a segunda somente confronta divergências e não reescreve a redação.
+- Normalização determinística e conservadora para quebras visuais de linha; não há corretor ortográfico ou ajuste gramatical.
+- Persistência explícita dos metadados de transcrição, com migration compatível com registros legados.
+- Revisão mostra a imagem original e o texto normalizado, destaca incertezas, permite unir/separar parágrafos e exibe alterações automáticas de forma expansível.
+- A avaliação recebe o texto confirmado e sua estrutura de parágrafos.
+
+### Segurança e limites
+
+- Logs de falha continuam registrando apenas etapa, identificador e tipo do erro — nunca imagens ou texto integral.
+- Palavras só são alteradas por confirmação visual explícita e confiança de pelo menos 98,5%; todo o restante exige revisão do estudante.
+- A detecção visual de parágrafos depende da qualidade da foto. A confirmação do estudante permanece a fonte final antes da avaliação.
+
 ## 2026-10-30 — Motor pedagógico v3
 
 ### Mudanças

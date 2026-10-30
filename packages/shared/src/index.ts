@@ -3,19 +3,93 @@ import { z } from 'zod';
 export const answerSchema = z.object({ optionId: z.string().min(1) });
 export const essayTextSchema = z.string().trim().min(20, 'Escreva ao menos 20 caracteres.').max(8000);
 
-export const transcriptionSchema = z.object({
-  text: z.string().max(8000),
-  pages: z.array(z.object({
-    page: z.number().int().positive(),
-    text: z.string().max(8000),
-    confidence: z.number().min(0).max(1).optional(),
-  })).max(5).optional(),
-  lowConfidenceSegments: z.array(z.object({
-    text: z.string().min(1).max(300),
-    reason: z.string().max(240).optional(),
-    page: z.number().int().positive().optional(),
-  })).max(50),
+const transcriptionLineRangeSchema = z.object({
+  start: z.number().int().positive(),
+  end: z.number().int().positive(),
+}).refine((range) => range.end >= range.start, 'O fim da faixa de linhas deve ser maior ou igual ao início.');
+
+export const transcriptionParagraphSchema = z.object({
+  index: z.number().int().positive(),
+  rawText: z.string().min(1).max(8000),
+  normalizedText: z.string().min(1).max(8000),
+  confidence: z.number().min(0).max(1),
+  lineRange: transcriptionLineRangeSchema,
 });
+
+export const transcriptionCorrectionSchema = z.object({
+  original: z.string().min(1).max(600),
+  normalized: z.string().min(1).max(600),
+  type: z.enum(['line_break_join', 'visual_ocr_correction']),
+  confidence: z.number().min(0).max(1),
+  requiresReview: z.boolean(),
+  reason: z.string().min(1).max(240),
+});
+
+export const uncertainTermSchema = z.object({
+  observed: z.string().min(1).max(300),
+  suggestion: z.string().min(1).max(300),
+  confidence: z.number().min(0).max(1),
+  requiresReview: z.boolean(),
+});
+
+/**
+ * The durable transcription contract. `text` and `lowConfidenceSegments` are
+ * retained as derived aliases for older API clients; new code must use the
+ * explicit raw/normalized fields.
+ */
+export const transcriptionSchema = z.object({
+  rawText: z.string().max(8000),
+  normalizedText: z.string().max(8000),
+  paragraphs: z.array(transcriptionParagraphSchema).max(50),
+  corrections: z.array(transcriptionCorrectionSchema).max(100),
+  uncertainTerms: z.array(uncertainTermSchema).max(50),
+  overallConfidence: z.number().min(0).max(1),
+  requiresReview: z.boolean(),
+}).superRefine((value, context) => {
+  value.paragraphs.forEach((paragraph, index) => {
+    if (paragraph.index !== index + 1) context.addIssue({ code: z.ZodIssueCode.custom, path: ['paragraphs', index, 'index'], message: 'Os parágrafos devem ser indexados em ordem a partir de 1.' });
+  });
+}).transform((value) => ({
+  ...value,
+  // Deprecated aliases preserve the previous HTTP response shape during the
+  // client migration. They are generated, never accepted as provider input.
+  text: value.normalizedText,
+  lowConfidenceSegments: value.uncertainTerms.map((term) => ({ text: term.observed, reason: term.suggestion === term.observed ? 'Leitura visual incerta.' : `Possível leitura: ${term.suggestion}` })),
+}));
+
+/** First, faithful visual pass returned by a handwriting provider. */
+export const transcriptionFirstPassSchema = z.object({
+  rawText: z.string().min(1).max(8000),
+  paragraphs: z.array(z.object({
+    index: z.number().int().positive(),
+    rawText: z.string().min(1).max(8000),
+    confidence: z.number().min(0).max(1),
+    lineRange: transcriptionLineRangeSchema,
+  })).min(1).max(50),
+  uncertainTerms: z.array(uncertainTermSchema).max(50).default([]),
+  overallConfidence: z.number().min(0).max(1),
+  requiresReview: z.boolean().default(false),
+}).superRefine((value, context) => {
+  value.paragraphs.forEach((paragraph, index) => {
+    if (paragraph.index !== index + 1) context.addIssue({ code: z.ZodIssueCode.custom, path: ['paragraphs', index, 'index'], message: 'Os parágrafos devem ser indexados em ordem a partir de 1.' });
+  });
+});
+
+/** Second, independent visual pass. It may report discrepancies, never rewrite the essay. */
+export const transcriptionVerificationSchema = z.object({
+  divergences: z.array(z.object({
+    observed: z.string().min(1).max(300),
+    suggestion: z.string().min(1).max(300),
+    confidence: z.number().min(0).max(1),
+    visuallyConfirmed: z.boolean(),
+    reason: z.string().min(1).max(240),
+  })).max(50),
+  overallConfidence: z.number().min(0).max(1),
+});
+
+export type Transcription = z.infer<typeof transcriptionSchema>;
+export type TranscriptionFirstPass = z.infer<typeof transcriptionFirstPassSchema>;
+export type TranscriptionVerification = z.infer<typeof transcriptionVerificationSchema>;
 
 export const optionLabelSchema = z.enum(['A', 'B', 'C', 'D', 'E']);
 

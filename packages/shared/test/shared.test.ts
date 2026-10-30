@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { assertEvaluationGroundedInText, calculateEssayTotal, essayEvaluationSchema, essayReferenceImportSchema, examImportSchema, gradeAnswer } from '../src/index';
+import { assertEvaluationGroundedInText, calculateEssayTotal, essayEvaluationSchema, essayReferenceImportSchema, examImportSchema, gradeAnswer, transcriptionSchema } from '../src/index';
 
 describe('regras críticas', () => {
   it('corrige somente contra o gabarito persistido', () => {
@@ -54,5 +54,11 @@ describe('regras críticas', () => {
     const reference = { topic: 'Tema', source: 'Acervo autorizado', license: 'Autorização registrada', authorizationConfirmed: true, authorizedExcerpt: 'Trecho demonstrativo autorizado com tamanho mínimo exigido.' };
     expect(essayReferenceImportSchema.parse(reference).authorizationConfirmed).toBe(true);
     expect(() => essayReferenceImportSchema.parse({ ...reference, authorizationConfirmed: false })).toThrow();
+  });
+
+  it('valida o contrato estruturado e rejeita uma transcrição incompleta', () => {
+    const payload = { rawText: 'Linha fiel', normalizedText: 'Linha fiel', paragraphs: [{ index: 1, rawText: 'Linha fiel', normalizedText: 'Linha fiel', confidence: 0.98, lineRange: { start: 1, end: 1 } }], corrections: [], uncertainTerms: [], overallConfidence: 0.98, requiresReview: false };
+    expect(transcriptionSchema.parse(payload)).toMatchObject({ text: 'Linha fiel', normalizedText: 'Linha fiel' });
+    expect(() => transcriptionSchema.parse({ rawText: 'somente o texto antigo' })).toThrow();
   });
 });

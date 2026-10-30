@@ -5,6 +5,7 @@ import './quiz-session.css';
 import './quiz-navigator.css';
 import './question-assets.css';
 import './exam-selector.css';
+import './transcription-fidelity.css';
 import { ServiceWorker } from './service-worker';
 
 export const metadata: Metadata = { title: 'Nexo ENEM', description: 'Preparação inteligente e cuidadosa para o ENEM.', manifest: '/manifest.webmanifest', icons: { icon: '/icon.svg', shortcut: '/icon.svg', apple: '/icon.svg' }, appleWebApp: { capable: true, title: 'Nexo ENEM' } };

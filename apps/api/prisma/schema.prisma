@@ -111,6 +111,13 @@ model Essay {
   topic         String
   transcription String?
   transcriptionResult Json?
+  rawTranscription String?
+  normalizedTranscription String?
+  transcriptionParagraphs Json?
+  transcriptionCorrections Json?
+  transcriptionUncertainTerms Json?
+  transcriptionConfidence Float?
+  transcriptionRequiresReview Boolean?
   confirmedText String?
   consentAt     DateTime?
   status        String           @default("draft")

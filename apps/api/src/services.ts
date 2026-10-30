@@ -1,11 +1,13 @@
 import { BadRequestException, HttpException, Inject, Injectable, Logger, NotFoundException, OnModuleInit, Optional, ServiceUnavailableException } from '@nestjs/common';
-import { essayEvaluationSchema, gradeAnswer, transcriptionSchema } from '@nexo/shared';
+import { essayEvaluationSchema, gradeAnswer, transcriptionFirstPassSchema, transcriptionSchema, transcriptionVerificationSchema } from '@nexo/shared';
 import { HandwritingPreprocessor } from './handwriting-preprocessor';
 import { PrismaService } from './prisma.service';
 import { EssayStorageService } from './essay-storage.service';
 import { preAnalyzeEssay } from './essay-engine/pre-analysis';
 import { validateEssayEvaluation } from './essay-engine/evaluation-validation';
 import { ESSAY_AI_PROVIDER, type EssayAiProvider } from './essay-engine/provider';
+import { buildStructuredTranscription } from './handwriting-normalizer';
+import type { HandwritingAiProvider } from './essay-engine/provider';
 
 type Option = { id: string; label: string; content: string };
 type QuestionAsset = { id: string; url: string; placement: 'before_statement' | 'after_statement' | 'option'; optionLabel?: string | null; displayOrder: number; mimeType: string; altText: string };
@@ -227,11 +229,30 @@ export class EssayService {
     const essay = await this.owned(id, userId);
     if (!essay.images.length) throw new BadRequestException('Envie ao menos uma imagem antes de transcrever.');
     const images = await this.runStage('storage_access', id, () => Promise.all(essay.images.sort((a, b) => a.page - b.page).map(async (image) => ({ mimeType: image.mimeType, data: (await this.storage.read(image.storagePath)).toString('base64') }))), 'Não foi possível acessar uma página enviada. Envie-a novamente.');
-    const transcriptionProvider = this.aiProvider as EssayAiProvider & { transcribe?: (pages: { mimeType: string; data: string }[]) => Promise<unknown> };
+    const transcriptionProvider = this.aiProvider as Partial<HandwritingAiProvider>;
     if (!transcriptionProvider.transcribe) throw new ServiceUnavailableException('O provedor de transcrição não está disponível. Suas páginas foram preservadas.');
-    const result = await this.runStage('ai_transcription', id, async () => transcriptionSchema.parse(await transcriptionProvider.transcribe!(images)), 'Não foi possível transcrever a redação agora. Suas páginas foram preservadas; tente novamente em instantes.');
-    if (!this.databaseEnabled || !this.prisma) Object.assign(essay.memory!, { transcription: result.text, transcriptionResult: result, consentAt: new Date(), status: 'transcribed' });
-    else await this.prisma.essay.update({ where: { id }, data: { transcription: result.text, transcriptionResult: result, consentAt: new Date(), status: 'transcribed' } });
+    const firstPass = await this.runStage('ai_transcription', id, async () => transcriptionFirstPassSchema.parse(await transcriptionProvider.transcribe!(images)), 'Não foi possível transcrever a redação agora. Suas páginas foram preservadas; tente novamente em instantes.');
+    const verification = transcriptionProvider.verifyTranscription
+      ? await this.runStage('ai_verification', id, async () => transcriptionVerificationSchema.parse(await transcriptionProvider.verifyTranscription!(images, firstPass)), 'Não foi possível conferir visualmente a transcrição agora. Suas páginas foram preservadas; tente novamente em instantes.')
+      // A legacy provider cannot silently skip the independent check: retain
+      // compatibility, but force review through a conservative confidence.
+      : { divergences: [], overallConfidence: Math.min(firstPass.overallConfidence, 0.5) };
+    const result = buildStructuredTranscription(firstPass, verification);
+    const now = new Date();
+    if (!this.databaseEnabled || !this.prisma) Object.assign(essay.memory!, { transcription: result.normalizedText, transcriptionResult: result, consentAt: now, status: 'transcribed' });
+    else await this.prisma.essay.update({ where: { id }, data: {
+      transcription: result.normalizedText,
+      transcriptionResult: result,
+      rawTranscription: result.rawText,
+      normalizedTranscription: result.normalizedText,
+      transcriptionParagraphs: result.paragraphs,
+      transcriptionCorrections: result.corrections,
+      transcriptionUncertainTerms: result.uncertainTerms,
+      transcriptionConfidence: result.overallConfidence,
+      transcriptionRequiresReview: result.requiresReview,
+      consentAt: now,
+      status: 'transcribed',
+    } });
     return result;
   }
 
@@ -247,7 +268,8 @@ export class EssayService {
     this.activeEvaluations.add(id);
     try {
       const signals = preAnalyzeEssay(confirmedText);
-      const raw = await this.runStage('ai_evaluation', id, () => this.aiProvider.evaluate({ topic: essay.topic, text: confirmedText, signals }), 'Não foi possível avaliar a redação agora. Seu texto confirmado foi preservado; tente novamente em instantes.');
+      const paragraphs = confirmedTextToParagraphs(confirmedText);
+      const raw = await this.runStage('ai_evaluation', id, () => this.aiProvider.evaluate({ topic: essay.topic, text: confirmedText, paragraphs, signals }), 'Não foi possível avaliar a redação agora. Seu texto confirmado foi preservado; tente novamente em instantes.');
       const evaluation = await this.runStage('ai_evaluation', id, async () => validateEssayEvaluation(raw, confirmedText, signals, this.aiProvider), 'A resposta da IA não passou na validação pedagógica. Seu texto foi preservado; tente novamente em instantes.');
       const evaluatedAt = new Date();
       if (!this.databaseEnabled || !this.prisma) Object.assign(essay.memory!, { evaluation: { payload: evaluation }, status: 'evaluated', evaluatedAt, consentAt: evaluatedAt });
@@ -264,7 +286,7 @@ export class EssayService {
   async get(id: string, userId: string) {
     const essay = await this.owned(id, userId);
     if (!this.databaseEnabled || !this.prisma) return this.memoryPayload(essay.memory!);
-    return { id: essay.id, topic: essay.topic, transcription: essay.transcription, confirmedText: essay.confirmedText, status: essay.status, createdAt: essay.createdAt, evaluatedAt: essay.evaluatedAt, images: essay.images.map(({ id: imageId, mimeType, size, page }) => ({ id: imageId, mimeType, size, page })), evaluation: this.presentEvaluation(essay.evaluation?.payload) };
+    return { id: essay.id, topic: essay.topic, transcription: essay.transcription, transcriptionResult: this.presentTranscription(essay.transcriptionResult, essay.transcription), confirmedText: essay.confirmedText, status: essay.status, createdAt: essay.createdAt, evaluatedAt: essay.evaluatedAt, images: essay.images.map(({ id: imageId, mimeType, size, page }) => ({ id: imageId, mimeType, size, page })), evaluation: this.presentEvaluation(essay.evaluation?.payload) };
   }
 
   async history(userId: string) {
@@ -325,7 +347,7 @@ export class EssayService {
     if (used >= limit) throw new ServiceUnavailableException('O limite diário de avaliações foi atingido. Tente novamente amanhã; seu texto foi preservado.');
   }
 
-  private async runStage<T>(stage: 'validation' | 'storage' | 'storage_access' | 'ai_transcription' | 'ai_evaluation', essayId: string, action: () => Promise<T>, message: string): Promise<T> {
+  private async runStage<T>(stage: 'validation' | 'storage' | 'storage_access' | 'ai_transcription' | 'ai_verification' | 'ai_evaluation', essayId: string, action: () => Promise<T>, message: string): Promise<T> {
     try {
       return await action();
     } catch (error) {
@@ -333,14 +355,14 @@ export class EssayService {
     }
   }
 
-  private raiseStageFailure(stage: 'validation' | 'storage' | 'storage_access' | 'ai_transcription' | 'ai_evaluation' | 'persistence', essayId: string, error: unknown, message: string): never {
+  private raiseStageFailure(stage: 'validation' | 'storage' | 'storage_access' | 'ai_transcription' | 'ai_verification' | 'ai_evaluation' | 'persistence', essayId: string, error: unknown, message: string): never {
     const errorType = error instanceof Error ? error.constructor.name : typeof error;
     this.logger.warn(`essay_workflow_failure stage=${stage} essayId=${essayId} error=${errorType}`);
     if (error instanceof HttpException) throw error;
     throw new ServiceUnavailableException(message);
   }
 
-  private async owned(id: string, userId: string): Promise<{ id: string; userId: string; topic: string; transcription?: string | null; confirmedText?: string | null; status: string; createdAt: Date; evaluatedAt?: Date | null; images: StoredEssayImage[]; evaluation?: { payload: unknown } | null; memory?: MemoryEssay }> {
+  private async owned(id: string, userId: string): Promise<{ id: string; userId: string; topic: string; transcription?: string | null; transcriptionResult?: unknown; confirmedText?: string | null; status: string; createdAt: Date; evaluatedAt?: Date | null; images: StoredEssayImage[]; evaluation?: { payload: unknown } | null; memory?: MemoryEssay }> {
     if (!this.databaseEnabled || !this.prisma) {
       const essay = this.essays.get(id);
       if (!essay || essay.userId !== userId) throw new NotFoundException('Redação não encontrada.');
@@ -352,7 +374,29 @@ export class EssayService {
   }
 
   private memoryPayload(essay: MemoryEssay) {
-    return { id: essay.id, topic: essay.topic, transcription: essay.transcription, confirmedText: essay.confirmedText, status: essay.status, createdAt: essay.createdAt, evaluatedAt: essay.evaluatedAt, images: essay.images.map(({ id, mimeType, size, page }) => ({ id, mimeType, size, page })), evaluation: this.presentEvaluation(essay.evaluation?.payload) };
+    return { id: essay.id, topic: essay.topic, transcription: essay.transcription, transcriptionResult: this.presentTranscription(essay.transcriptionResult, essay.transcription), confirmedText: essay.confirmedText, status: essay.status, createdAt: essay.createdAt, evaluatedAt: essay.evaluatedAt, images: essay.images.map(({ id, mimeType, size, page }) => ({ id, mimeType, size, page })), evaluation: this.presentEvaluation(essay.evaluation?.payload) };
+  }
+
+  private presentTranscription(payload: unknown, legacyText?: string | null) {
+    const parsed = transcriptionSchema.safeParse(payload);
+    if (parsed.success) return parsed.data;
+    if (!legacyText) return null;
+    const paragraphs = confirmedTextToParagraphs(legacyText).map((paragraph, index) => ({
+      index: paragraph.index,
+      rawText: paragraph.normalizedText,
+      normalizedText: paragraph.normalizedText,
+      confidence: 0.5,
+      lineRange: { start: index + 1, end: index + 1 },
+    }));
+    return transcriptionSchema.parse({
+      rawText: legacyText,
+      normalizedText: legacyText,
+      paragraphs,
+      corrections: [],
+      uncertainTerms: [],
+      overallConfidence: 0.5,
+      requiresReview: true,
+    });
   }
 
   private presentEvaluation(payload: unknown) {
@@ -364,6 +408,14 @@ export class EssayService {
 
 function cleanText(value: string, maximum: number) {
   return value.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').trim().slice(0, maximum);
+}
+
+function confirmedTextToParagraphs(text: string) {
+  return text
+    .split(/\r?\n\s*\r?\n/)
+    .map((paragraph) => paragraph.replace(/\s*\r?\n\s*/g, ' ').trim())
+    .filter(Boolean)
+    .map((normalizedText, index) => ({ index: index + 1, normalizedText }));
 }
 
 function presentQuestionAsset(asset: { id: string; url: string; placement: string; optionLabel: string | null; displayOrder: number; mimeType: string; altText: string }): QuestionAsset {

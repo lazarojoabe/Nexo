@@ -24,4 +24,12 @@ describe('provedor Gemini', () => {
     await expect(new GeminiProvider().evaluate('Tema técnico', 'Texto confirmado com extensão suficiente para a avaliação.'))
       .rejects.toThrow('avaliação incompleta');
   });
+
+  it('rejeita resposta de transcrição incompleta do provedor', async () => {
+    process.env.GEMINI_API_KEY = 'test-key';
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: '{"rawText":"leitura sem estrutura"}' }] } }] }), { status: 200 })));
+
+    await expect(new GeminiProvider().transcribe([{ mimeType: 'image/jpeg', data: 'base64' }]))
+      .rejects.toThrow();
+  });
 });
