@@ -41,6 +41,7 @@ model Question {
   isCancelled     Boolean           @default(false)
   correctOptionId String
   options         QuestionOption[]
+  assets          QuestionAsset[]
   attempts        QuestionAttempt[]
 
   @@index([examId, area])
@@ -55,6 +56,26 @@ model QuestionOption {
   content    String
 
   @@unique([questionId, label])
+}
+
+model QuestionAsset {
+  id           String   @id @default(cuid())
+  questionId   String
+  question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  url          String
+  storagePath  String?
+  placement    String
+  optionLabel  String?
+  displayOrder Int      @default(0)
+  mimeType     String
+  altText      String
+  sourcePage   Int?
+  sourceCrop   Json?
+  sourceHash   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([questionId, placement, optionLabel, displayOrder])
 }
 
 model QuizSession {
@@ -88,9 +109,13 @@ model Essay {
   user          UserProfile      @relation(fields: [userId], references: [id])
   topic         String
   transcription String?
+  transcriptionResult Json?
   confirmedText String?
+  consentAt     DateTime?
   status        String           @default("draft")
   createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  evaluatedAt   DateTime?
   images        EssayImage[]
   evaluation    EssayEvaluation?
 
@@ -102,8 +127,10 @@ model EssayImage {
   essayId     String
   essay       Essay    @relation(fields: [essayId], references: [id], onDelete: Cascade)
   storagePath String
+  originalStoragePath String?
   mimeType    String
   size        Int
+  page        Int      @default(1)
   createdAt   DateTime @default(now())
 }
 

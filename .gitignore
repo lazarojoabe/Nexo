@@ -1,5 +1,6 @@
 node_modules
 .next
+.next-dev
 dist
 coverage
 .env
@@ -7,6 +8,8 @@ coverage
 *.log
 *.tsbuildinfo
 apps/api/uploads
+tmp/
+**/__pycache__/
 *** Add File: C:\Users\lazar\OneDrive\Documentos\PROJETOS\Nexo AI\Nexo\.env.example
 # Web (apps/web/.env.local)
 NEXT_PUBLIC_API_URL=http://localhost:3001

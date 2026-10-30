@@ -20,6 +20,18 @@ export type NormalizedExamImport = {
     statement: string;
     explanation?: string;
     imageUrl?: string;
+    assets: Array<{
+      url: string;
+      storagePath?: string;
+      placement: 'before_statement' | 'after_statement' | 'option';
+      optionLabel?: 'A' | 'B' | 'C' | 'D' | 'E';
+      displayOrder: number;
+      mimeType: 'image/png' | 'image/jpeg' | 'image/webp';
+      altText: string;
+      sourcePage: number;
+      sourceCrop?: { x: number; y: number; width: number; height: number };
+      sourceHash?: string;
+    }>;
     isCancelled: boolean;
     correctOptionLabel?: string;
     correctOptionId: string;
@@ -46,17 +58,24 @@ export function normalizeExamImport(input: unknown): NormalizedExamImport {
 }
 
 export async function persistExamImport(prisma: PrismaClient, payload: NormalizedExamImport) {
-  await prisma.$transaction(async (transaction) => {
-    const { id: _examId, ...examData } = payload.exam;
-    await transaction.exam.upsert({ where: { id: payload.exam.id }, update: examData, create: payload.exam });
-    for (const question of payload.questions) {
-      const { options, id, examId, correctOptionLabel: _correctOptionLabel, ...questionData } = question;
-      await transaction.question.upsert({
-        where: { examId_number: { examId, number: question.number } },
-        update: { id, ...questionData, options: { deleteMany: {}, create: options } },
-        create: { id, examId, ...questionData, options: { create: options } },
-      });
-    }
-  });
+  // Do not keep the whole import inside one interactive transaction. An exam
+  // can contain 90 questions and each question also writes its five options;
+  // with Supabase's pooler this can exceed Prisma's interactive transaction
+  // timeout and leave the transaction closed midway through the import.
+  // Each upsert is idempotent, so retrying after a network interruption is
+  // safe and allows the pooler to use a fresh short-lived transaction per
+  // question.
+  const { id: _examId, ...examData } = payload.exam;
+  await prisma.exam.upsert({ where: { id: payload.exam.id }, update: examData, create: payload.exam });
+
+  for (const question of payload.questions) {
+    const { options, assets, id, examId, correctOptionLabel: _correctOptionLabel, ...questionData } = question;
+    await prisma.question.upsert({
+      where: { examId_number: { examId, number: question.number } },
+      update: { id, ...questionData, options: { deleteMany: {}, create: options }, assets: { deleteMany: {}, create: assets } },
+      create: { id, examId, ...questionData, options: { create: options }, assets: { create: assets } },
+    });
+  }
+
   return { examId: payload.exam.id, questions: payload.questions.length };
 }

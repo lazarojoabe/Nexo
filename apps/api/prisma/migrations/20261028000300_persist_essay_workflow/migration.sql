@@ -1,0 +1,9 @@
+ALTER TABLE "Essay"
+  ADD COLUMN "transcriptionResult" JSONB,
+  ADD COLUMN "consentAt" TIMESTAMP(3),
+  ADD COLUMN "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ADD COLUMN "evaluatedAt" TIMESTAMP(3);
+
+ALTER TABLE "EssayImage"
+  ADD COLUMN "originalStoragePath" TEXT,
+  ADD COLUMN "page" INTEGER NOT NULL DEFAULT 1;

@@ -1,117 +1,217 @@
 'use client';
-import { ChangeEvent, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { api, type Dashboard, type EssayDetail, type EssayEvaluation, type EssayHistory, type Exam, type Question, type QuizAnswer, type QuizSession, type QuizSummary, type Transcription } from '../lib/api';
+import { ErrorState } from '../components/error-state';
+import { LoadingState } from '../components/loading-state';
+import { ExamSelector } from '../components/exam-selector';
+import { QuizSession as QuizSessionView } from '../components/quiz-session';
+import { EssayUpload } from '../components/essay-upload';
+import { TranscriptionEditor } from '../components/transcription-editor';
+import { EvaluationResult } from '../components/evaluation-result';
+import { EssayHistoryPanel } from '../components/essay-history';
+import { Icon } from '../components/ui/icon';
 
-const api = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-type Question = { id: string; area: string; statement: string; explanation: string; source: string; options: { id: string; label: string; content: string }[] };
-type Exam = { id: string; year: number; day: number; color: string; source?: string; questionCount: number };
-type Step = 'home' | 'quiz' | 'essay' | 'progress';
-type QuizResult = { correct: boolean; correctOptionId: string; explanation: string };
-type QuizSummary = { answered: number; correct: number };
-
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${api}${path}`, { ...init, headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) } });
-  const body = await response.json();
-  if (!response.ok) throw new Error(body.message ?? 'Não foi possível concluir esta ação.');
-  return body as T;
-}
-
-function Icon({ name, size = 20 }: { name: 'home' | 'bolt' | 'pen' | 'chart' | 'arrow' | 'check' | 'lock' | 'spark'; size?: number }) {
-  const paths = {
-    home: <><path d="m3 10 9-7 9 7" /><path d="M5 9v11h14V9" /><path d="M9 20v-6h6v6" /></>,
-    bolt: <path d="m13 2-9 12h7l-1 8 9-12h-7z" />,
-    pen: <><path d="m4 20 4.3-1 9.8-9.8a2.1 2.1 0 0 0-3-3L5.3 16z" /><path d="m13.5 7.5 3 3" /></>,
-    chart: <><path d="M4 19V5" /><path d="M4 19h17" /><path d="m7 15 3-4 3 2 5-7" /></>,
-    arrow: <><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></>,
-    check: <path d="m5 12 4 4L19 6" />,
-    lock: <><rect x="5" y="10" width="14" height="11" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></>,
-    spark: <><path d="m12 3-1.4 5.6L5 10l5.6 1.4L12 17l1.4-5.6L19 10l-5.6-1.4z" /><path d="m19 16-.6 2.4L16 19l2.4.6L19 22l.6-2.4L22 19l-2.4-.6z" /></>,
-  };
-  return <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
-}
+type View = 'home' | 'exams' | 'quiz' | 'essay';
+type EssayPhase = 'topic' | 'images' | 'review' | 'confirmed' | 'evaluation';
 
 export default function Home() {
-  const [step, setStep] = useState<Step>('home');
-  const [question, setQuestion] = useState<Question>();
-  const [activeExam, setActiveExam] = useState<Exam>();
-  const [quizQuestions, setQuizQuestions] = useState<Question[]>([]);
+  const [view, setView] = useState<View>('home');
+  const [dashboard, setDashboard] = useState<Dashboard>();
+  const [dashboardError, setDashboardError] = useState('');
+  const [exams, setExams] = useState<Exam[]>([]);
+  const [loadingExams, setLoadingExams] = useState(false);
+  const [startingExamId, setStartingExamId] = useState('');
+  const [exam, setExam] = useState<Exam>();
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [session, setSession] = useState<QuizSession>();
   const [questionIndex, setQuestionIndex] = useState(0);
-  const [session, setSession] = useState<string>();
-  const [result, setResult] = useState<QuizResult>();
-  const [quizSummary, setQuizSummary] = useState<QuizSummary>();
   const [selected, setSelected] = useState<string>();
-  const [error, setError] = useState('');
+  const [answer, setAnswer] = useState<QuizAnswer>();
+  const [sendingAnswer, setSendingAnswer] = useState(false);
+  const [summary, setSummary] = useState<QuizSummary>();
+  const [answeredQuestionIds, setAnsweredQuestionIds] = useState<string[]>([]);
+  const [flowError, setFlowError] = useState('');
+
   const [topic, setTopic] = useState('');
   const [essayId, setEssayId] = useState('');
-  const [text, setText] = useState('');
-  const [essayMessage, setEssayMessage] = useState('');
-  const [image, setImage] = useState<File>();
+  const [essayPhase, setEssayPhase] = useState<EssayPhase>('topic');
+  const [essayFiles, setEssayFiles] = useState<File[]>([]);
+  const [uploadedCount, setUploadedCount] = useState(0);
+  const [uploading, setUploading] = useState(false);
   const [consent, setConsent] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
-  const [streak, setStreak] = useState(3);
+  const [transcription, setTranscription] = useState<Transcription>();
+  const [transcribedText, setTranscribedText] = useState('');
+  const [savingText, setSavingText] = useState(false);
+  const [evaluation, setEvaluation] = useState<EssayEvaluation>();
+  const [evaluating, setEvaluating] = useState(false);
+  const [essayError, setEssayError] = useState('');
+  const [essayHistory, setEssayHistory] = useState<EssayHistory>();
+  const [loadingEssayHistory, setLoadingEssayHistory] = useState(false);
 
-  useEffect(() => { if (step === 'quiz') void startQuiz(); }, [step]);
-  const answered = result ? questionIndex + 1 : questionIndex;
-  const progressText = quizSummary ? `${quizSummary.correct} de ${quizSummary.answered} acertos` : `${answered} de ${quizQuestions.length || 10} concluídas`;
   const greeting = useMemo(() => new Date().getHours() < 12 ? 'Bom dia' : new Date().getHours() < 18 ? 'Boa tarde' : 'Boa noite', []);
+  useEffect(() => { void loadDashboard(); }, []);
 
-  async function startQuiz() {
-    setError(''); setResult(undefined); setQuizSummary(undefined); setSelected(undefined); setQuestionIndex(0);
-    try { const exams = await request<Exam[]>('/exams'); const selectedExam = exams[0]; if (!selectedExam) throw new Error('Ainda não há provas disponíveis.'); const list = await request<Question[]>(`/questions?examId=${encodeURIComponent(selectedExam.id)}`); if (!list.length) throw new Error('Essa prova ainda não possui questões ativas.'); const created = await request<{ id: string; questionIds: string[] }>(`/quiz-sessions`, { method: 'POST', body: JSON.stringify({ examId: selectedExam.id }) }); const selectedQuestions = created.questionIds.map((id) => list.find((item) => item.id === id)).filter((item): item is Question => Boolean(item)); if (!selectedQuestions.length) throw new Error('Não foi possível montar esta sessão.'); setActiveExam(selectedExam); setQuizQuestions(selectedQuestions); setQuestion(selectedQuestions[0]); setSession(created.id); }
-    catch (e) { setError(e instanceof Error ? e.message : 'Erro inesperado.'); }
+  async function loadDashboard() {
+    setDashboardError('');
+    try { setDashboard(await api.dashboard()); } catch (error) { setDashboardError(message(error)); }
   }
 
-  async function legacyStartQuizByExam() {
-    setError(''); setResult(undefined); setSelected(undefined);
-    try { const exams = await request<Exam[]>('/exams'); const selectedExam = exams[0]; if (!selectedExam) throw new Error('Ainda não há provas disponíveis.'); const list = await request<Question[]>(`/questions?examId=${encodeURIComponent(selectedExam.id)}`); const first = list[0]; if (!first) throw new Error('Essa prova ainda não possui questões ativas.'); const created = await request<{ id: string }>(`/quiz-sessions`, { method: 'POST', body: JSON.stringify({ examId: selectedExam.id, questionIds: [first.id] }) }); setActiveExam(selectedExam); setQuestion(first); setSession(created.id); }
-    catch (e) { setError(e instanceof Error ? e.message : 'Erro inesperado.'); }
+  async function openExams() {
+    setView('exams'); setFlowError('');
+    if (exams.length) return;
+    setLoadingExams(true);
+    try { setExams(await api.exams()); } catch (error) { setFlowError(message(error)); } finally { setLoadingExams(false); }
   }
 
-  async function legacyStartQuiz() {
-    setError(''); setResult(undefined); setSelected(undefined);
-    try { const list = await request<Question[]>('/questions'); const first = list[0]; if (!first) throw new Error('Ainda não há questões disponíveis.'); const created = await request<{ id: string }>('/quiz-sessions', { method: 'POST', body: JSON.stringify({ questionIds: [first.id] }) }); setQuestion(first); setSession(created.id); }
-    catch (e) { setError(e instanceof Error ? e.message : 'Erro inesperado.'); }
-  }
-  async function answer(optionId: string) {
-    if (!question || !session || result) return;
-    setSelected(optionId);
-    try { const answerResult = await request<QuizResult>(`/quiz-sessions/${session}/answers?questionId=${question.id}`, { method: 'POST', body: JSON.stringify({ optionId }) }); setResult(answerResult); if (answerResult.correct) setStreak((value) => value + 1); }
-    catch (e) { setError(e instanceof Error ? e.message : 'Erro inesperado.'); }
-  }
-  async function nextQuizStep() { if (!session) return; if (questionIndex + 1 < quizQuestions.length) { const next = quizQuestions[questionIndex + 1]; setQuestionIndex((value) => value + 1); setQuestion(next); setResult(undefined); setSelected(undefined); return; } try { const summary = await request<QuizSummary>(`/quiz-sessions/${session}/results`); setQuizSummary(summary); } catch (e) { setError(e instanceof Error ? e.message : 'Erro inesperado.'); } }
-  async function startEssay() { try { const essay = await request<{ id: string }>('/essays', { method: 'POST', body: JSON.stringify({ topic }) }); setEssayId(essay.id); setEssayMessage('Rascunho criado. Agora revise tudo com calma.'); } catch (e) { setEssayMessage(e instanceof Error ? e.message : 'Erro inesperado.'); } }
-  async function saveText() { try { await request(`/essays/${essayId}/transcription`, { method: 'PATCH', body: JSON.stringify({ text }) }); setEssayMessage('Transcrição salva. Você pode pedir uma avaliação quando quiser.'); } catch (e) { setEssayMessage(e instanceof Error ? e.message : 'Erro inesperado.'); } }
-  async function evaluate() { try { const evaluation = await request<{ totalScore: number }>(`/essays/${essayId}/evaluate`, { method: 'POST', body: JSON.stringify({ consent }) }); setEssayMessage(`Estimativa: ${evaluation.totalScore}/1000. Continue evoluindo!`); } catch (e) { setEssayMessage(e instanceof Error ? e.message : 'Erro inesperado.'); } }
-  async function upload(e: ChangeEvent<HTMLInputElement>) { const file = e.target.files?.[0]; if (!file || !essayId) return; setImage(file); const form = new FormData(); form.append('image', file); const response = await fetch(`${api}/essays/${essayId}/images`, { method: 'POST', headers: { 'x-user-id': 'demo-user' }, body: form }); const payload = await response.json(); setEssayMessage(response.ok ? 'Imagem recebida. A transcrição ficará disponível com a IA configurada.' : payload.message); }
-  async function transcribe() { if (!essayId || !image || !consent) return; setTranscribing(true); try { const transcription = await request<{ text: string; lowConfidenceSegments: { text: string; reason?: string }[] }>(`/essays/${essayId}/transcribe`, { method: 'POST', body: JSON.stringify({ consent }) }); setText(transcription.text); setEssayMessage(transcription.lowConfidenceSegments.length ? `Transcrição pronta. Revise ${transcription.lowConfidenceSegments.length} trecho(s) incerto(s).` : 'Transcrição pronta. Revise o texto antes de salvar.'); } catch (e) { setEssayMessage(e instanceof Error ? e.message : 'Erro inesperado.'); } finally { setTranscribing(false); } }
-
-  function HomeView() {
-    return <>
-      <section className="welcome-row"><div><p className="kicker">{greeting}, estudante</p><h2>Vamos fazer acontecer.</h2></div><button className="avatar" aria-label="Abrir perfil">L</button></section>
-      <section className="hero-card"><div className="hero-copy"><span className="hero-label"><Icon name="spark" size={14} /> FOCO NO ENEM 2026</span><h3>Seu próximo<br /><em>acerto</em> começa aqui.</h3><p>Um pouco por dia. Um passo de cada vez.</p><button className="hero-button" onClick={() => setStep('quiz')}>Começar agora <Icon name="arrow" size={17} /></button></div><div className="hero-orb"><span>92%</span><small>ritmo</small></div></section>
-      <section className="section-heading"><div><p className="eyebrow">SEU MOMENTO</p><h3>Continue de onde parou</h3></div><button className="text-link" onClick={() => setStep('progress')}>Ver tudo <Icon name="arrow" size={15} /></button></section>
-      <div className="stats-grid"><div className="stat-card peach"><span className="stat-icon"><Icon name="bolt" size={18} /></span><strong>{streak} dias</strong><small>de sequência</small></div><div className="stat-card mint"><span className="stat-icon"><Icon name="chart" size={18} /></span><strong>68%</strong><small>aproveitamento</small></div></div>
-      <section className="quick-grid"><button className="quick-card lavender" onClick={() => setStep('quiz')}><span className="quick-icon"><Icon name="bolt" /></span><b>Quiz relâmpago</b><small>5 min · Matemática</small><span className="card-arrow"><Icon name="arrow" size={16} /></span></button><button className="quick-card yellow" onClick={() => setStep('essay')}><span className="quick-icon"><Icon name="pen" /></span><b>Treinar redação</b><small>Escreva sem pressão</small><span className="card-arrow"><Icon name="arrow" size={16} /></span></button></section>
-      <section className="tip-card"><span><Icon name="spark" size={18} /></span><div><b>Dica de hoje</b><p>Errar também é estudar. Revise a explicação e tente de novo.</p></div></section>
-      <p className="demo-note">Modo demonstrativo · conteúdos exibidos não são oficiais do Inep.</p>
-    </>;
+  async function startExam(selectedExam: Exam, area?: string) {
+    setStartingExamId(selectedExam.id); setFlowError('');
+    try {
+      const list = await api.questions(selectedExam.id, area);
+      if (!list.length) throw new Error('Este conteúdo ainda não possui questões ativas.');
+      const created = await api.createSession(selectedExam.id, area);
+      const byId = new Map(list.map((question) => [question.id, question]));
+      const orderedQuestions = created.questionIds.map((id) => byId.get(id)).filter((question): question is Question => Boolean(question));
+      if (!orderedQuestions.length) throw new Error('Não foi possível carregar as questões desta sessão.');
+      setExam(selectedExam); setQuestions(orderedQuestions); setSession(created); setQuestionIndex(0); setSelected(undefined); setAnswer(undefined); setSummary(undefined); setAnsweredQuestionIds([]); setView('quiz');
+    } catch (error) { setFlowError(message(error)); } finally { setStartingExamId(''); }
   }
 
-  function QuizView() {
-    return <section className="screen quiz-screen"><div className="screen-top"><button className="icon-button" onClick={() => setStep('home')} aria-label="Voltar"><Icon name="arrow" size={20} /></button><span className="screen-title">QUIZ RELÂMPAGO</span><span className="question-count">{progressText}</span></div><div className="progress-track"><span style={{ width: `${quizSummary ? 100 : Math.round((answered / Math.max(quizQuestions.length, 1)) * 100)}%` }} /></div>{error ? <p className="error">{error}</p> : quizSummary ? <div className="quiz-summary"><p className="eyebrow">SESSÃO CONCLUÍDA</p><h2>{quizSummary.correct} de {quizSummary.answered}<br /><em>respostas certas.</em></h2><p>Revise as explicações e tente novamente para fortalecer seu ritmo.</p><button className="primary-button" onClick={() => void startQuiz()}>Fazer outro quiz <Icon name="arrow" size={18} /></button></div> : question ? <><div className="subject-line"><span className="subject-dot" />{question.area}<span className="source-pill">{activeExam ? `${activeExam.year} · ${activeExam.color}` : 'Demonstração'}</span></div><h2 className="question-title">{question.statement}</h2><p className="question-hint">Escolha uma alternativa para continuar</p><div className="answer-list">{question.options.map((option) => { const correct = result && option.id === result.correctOptionId; const wrong = result && selected === option.id && !result.correct; return <button key={option.id} className={`answer ${correct ? 'is-correct' : ''} ${wrong ? 'is-wrong' : ''}`} disabled={!!result} onClick={() => void answer(option.id)}><span className="answer-letter">{option.label}</span><span>{option.content}</span>{correct && <Icon name="check" size={19} />}</button>; })}</div>{result && <div className={`answer-feedback ${result.correct ? 'positive' : ''}`}><span className="feedback-mark"><Icon name={result.correct ? 'check' : 'spark'} size={18} /></span><div><b>{result.correct ? 'Mandou bem!' : 'Quase lá — bora revisar?'}</b><p>{result.explanation}</p></div><button onClick={() => void nextQuizStep()} aria-label={questionIndex + 1 < quizQuestions.length ? 'Próxima questão' : 'Ver resultado'}><Icon name="arrow" size={18} /></button></div>}</> : <p className="question-hint">Carregando uma sessão…</p>}</section>;
+  async function resumeQuiz(id: string) {
+    setFlowError('');
+    try {
+      const [savedSession, currentExams] = await Promise.all([api.session(id), exams.length ? Promise.resolve(exams) : api.exams()]);
+      const selectedExam = currentExams.find((item) => item.id === savedSession.examId);
+      if (!selectedExam) throw new Error('A prova desta sessão não está mais disponível.');
+      const list = await api.questions(selectedExam.id);
+      const byId = new Map(list.map((question) => [question.id, question]));
+      const orderedQuestions = savedSession.questionIds.map((questionId) => byId.get(questionId)).filter((question): question is Question => Boolean(question));
+      if (!orderedQuestions.length) throw new Error('As questões desta sessão não estão disponíveis.');
+      setExams(currentExams); setExam(selectedExam); setQuestions(orderedQuestions); setSession(savedSession); setQuestionIndex(Math.min(savedSession.attempts?.length ?? 0, orderedQuestions.length - 1)); setSelected(undefined); setAnswer(undefined); setSummary(undefined); setAnsweredQuestionIds(savedSession.attempts?.map((attempt) => attempt.questionId) ?? []); setView('quiz');
+    } catch (error) { setFlowError(message(error)); }
   }
 
-  function LegacyQuizView() {
-    return <section className="screen quiz-screen"><div className="screen-top"><button className="icon-button" onClick={() => setStep('home')} aria-label="Voltar"><Icon name="arrow" size={20} /></button><span className="screen-title">QUIZ RELÂMPAGO</span><span className="question-count">{progressText}</span></div><div className="progress-track"><span style={{ width: `${answered ? 100 : 12}%` }} /></div>{error ? <p className="error">{error}</p> : question && <><div className="subject-line"><span className="subject-dot" />{question.area}<span className="source-pill">Demonstração</span></div><h2 className="question-title">{question.statement}</h2><p className="question-hint">Escolha uma alternativa para continuar</p><div className="answer-list">{question.options.map((option) => { const correct = result && option.id === result.correctOptionId; const wrong = result && selected === option.id && !result.correct; return <button key={option.id} className={`answer ${correct ? 'is-correct' : ''} ${wrong ? 'is-wrong' : ''}`} disabled={!!result} onClick={() => void answer(option.id)}><span className="answer-letter">{option.label}</span><span>{option.content}</span>{correct && <Icon name="check" size={19} />}</button>; })}</div>{result && <div className={`answer-feedback ${result.correct ? 'positive' : ''}`}><span className="feedback-mark"><Icon name={result.correct ? 'check' : 'spark'} size={18} /></span><div><b>{result.correct ? 'Mandou bem!' : 'Quase lá — bora revisar?'}</b><p>{result.explanation}</p></div><button onClick={() => void startQuiz()} aria-label="Nova questão"><Icon name="arrow" size={18} /></button></div>}</>}</section>;
+  async function submitAnswer(optionId: string) {
+    const question = questions[questionIndex];
+    if (!session || !question || answer) return;
+    setSelected(optionId); setSendingAnswer(true); setFlowError('');
+    try { setAnswer(await api.answer(session.id, question.id, optionId)); setAnsweredQuestionIds((ids) => ids.includes(question.id) ? ids : [...ids, question.id]); } catch (error) { setSelected(undefined); setFlowError(message(error)); } finally { setSendingAnswer(false); }
   }
 
-  function EssayView() {
-    if (!essayId) return <section className="screen essay-screen"><div className="screen-top"><button className="icon-button" onClick={() => setStep('home')} aria-label="Voltar"><Icon name="arrow" size={20} /></button><span className="screen-title">MINHA REDAÇÃO</span><span className="round-label">Rascunho</span></div><div className="essay-intro"><span className="essay-sticker"><Icon name="pen" size={24} /></span><p className="eyebrow">MODO AUTOR</p><h2>Suas ideias<br /><em>merecem espaço.</em></h2><p>Escolha um tema e coloque suas palavras no mundo.</p></div><label className="field-label">Qual é o tema?<input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="Ex.: Desafios para a saúde mental..." /></label><button className="primary-button" disabled={topic.trim().length < 3} onClick={() => void startEssay()}>Criar meu rascunho <Icon name="arrow" size={18} /></button><div className="safe-note"><Icon name="lock" size={16} /> Seu texto fica privado e sob seu controle.</div>{essayMessage && <p className="inline-message">{essayMessage}</p>}</section>;
-    return <section className="screen essay-screen"><div className="screen-top"><button className="icon-button" onClick={() => setStep('home')} aria-label="Voltar"><Icon name="arrow" size={20} /></button><span className="screen-title">MINHA REDAÇÃO</span><span className="round-label">Rascunho</span></div><div className="essay-progress"><span className="essay-step active">1 <small>Escrever</small></span><i /><span className="essay-step">2 <small>Revisar</small></span><i /><span className="essay-step">3 <small>Evoluir</small></span></div><p className="topic-chip">{topic}</p><label className="field-label">Seu texto<textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Digite ou cole sua redação aqui..." rows={11} /></label><div className="word-count">{text.length} / 8.000 caracteres</div><label className="upload-box"><Icon name="pen" size={20} /><span><b>Tem uma foto?</b><small>Envie até 5 imagens da redação</small></span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={upload} /></label>{image && <p className="file-name">✓ {image.name}</p>}<label className="consent-row"><input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} /> <span>Concordo em enviar imagem e texto ao Gemini para receber apoio educacional.</span></label>{image && <button className="secondary-button" disabled={!consent || transcribing} onClick={() => void transcribe()}><Icon name="spark" size={18} /> {transcribing ? 'Lendo sua redação…' : 'Transcrever imagem'}</button>}<button className="primary-button" disabled={text.trim().length < 20} onClick={() => void saveText()}>Salvar texto <Icon name="check" size={18} /></button><button className="secondary-button" disabled={text.trim().length < 20 || !consent} onClick={() => void evaluate()}><Icon name="spark" size={18} /> Pedir avaliação</button><p className="disclaimer">A avaliação é educacional, não oficial e não garante desempenho.</p>{essayMessage && <p className="inline-message">{essayMessage}</p>}</section>;
+  function selectAnswer(optionId: string) {
+    if (!answer) setSelected(optionId);
   }
 
-  function LegacyEssayView() {
-    return <section className="screen essay-screen"><div className="screen-top"><button className="icon-button" onClick={() => setStep('home')} aria-label="Voltar"><Icon name="arrow" size={20} /></button><span className="screen-title">MINHA REDAÇÃO</span><span className="round-label">Rascunho</span></div>{!essayId ? <><div className="essay-intro"><span className="essay-sticker"><Icon name="pen" size={24} /></span><p className="eyebrow">MODO AUTOR</p><h2>Suas ideias<br /><em>merecem espaço.</em></h2><p>Escolha um tema e coloque suas palavras no mundo.</p></div><label className="field-label">Qual é o tema?<input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="Ex.: Desafios para a saúde mental..." /></label><button className="primary-button" disabled={topic.trim().length < 3} onClick={() => void startEssay()}>Criar meu rascunho <Icon name="arrow" size={18} /></button><div className="safe-note"><Icon name="lock" size={16} /> Seu texto fica privado e sob seu controle.</div></> : <><div className="essay-progress"><span className="essay-step active">1 <small>Escrever</small></span><i /><span className="essay-step">2 <small>Revisar</small></span><i /><span className="essay-step">3 <small>Evoluir</small></span></div><p className="topic-chip">{topic}</p><label className="field-label">Seu texto<textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Digite ou cole sua redação aqui..." rows={11} /></label><div className="word-count">{text.length} / 8.000 caracteres</div><label className="upload-box"><Icon name="pen" size={20} /><span><b>Tem uma foto?</b><small>Envie até 5 imagens da redação</small></span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={upload} /></label>{image && <p className="file-name">✓ {image.name}</p>}<button className="primary-button" disabled={text.trim().length < 20} onClick={() => void saveText()}>Salvar texto <Icon name="check" size={18} /></button><label className="consent-row"><input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} /> <span>Concordo em enviar meu texto ao Gemini para receber uma estimativa.</span></label><button className="secondary-button" disabled={text.trim().length < 20 || !consent} onClick={() => void evaluate()}><Icon name="spark" size={18} /> Pedir avaliação</button><p className="disclaimer">A avaliação é educacional, não oficial e não garante desempenho.</p></>}{essayMessage && <p className="inline-message">{essayMessage}</p>}</section>;
+  async function nextQuestion() {
+    if (!session) return;
+    if (questionIndex + 1 < questions.length) { setQuestionIndex((index) => index + 1); setSelected(undefined); setAnswer(undefined); return; }
+    try { setSummary(await api.results(session.id)); void loadDashboard(); } catch (error) { setFlowError(message(error)); }
   }
 
-  return <div className="app-shell"><header className="app-header"><div className="brand-lockup"><img className="brand-logo" src="/icon.svg" alt="" /><span className="brand-name">nexo</span></div><button className="header-streak"><Icon name="bolt" size={16} /> {streak}</button></header><main>{step === 'home' && <HomeView />}{step === 'quiz' && <QuizView />}{step === 'essay' && <EssayView />}{step === 'progress' && <section className="screen"><button className="back-link" onClick={() => setStep('home')}>← Voltar</button><p className="eyebrow">SEU MOMENTO</p><h2>Você está construindo<br /><em>consistência.</em></h2><div className="big-progress"><strong>68%</strong><span>aproveitamento geral</span><div><i /></div></div><p className="demo-note">O histórico detalhado será ampliado conforme mais questões oficiais forem importadas.</p></section>}</main><nav className="bottom-nav"><button className={step === 'home' || step === 'progress' ? 'active' : ''} onClick={() => setStep('home')}><Icon name="home" size={20} /><small>Início</small></button><button className={step === 'quiz' ? 'active' : ''} onClick={() => setStep('quiz')}><Icon name="bolt" size={20} /><small>Praticar</small></button><button className={step === 'essay' ? 'active' : ''} onClick={() => setStep('essay')}><Icon name="pen" size={20} /><small>Redação</small></button><button className={step === 'progress' ? 'active' : ''} onClick={() => setStep('progress')}><Icon name="chart" size={20} /><small>Progresso</small></button></nav></div>;
+  async function finishQuiz() {
+    if (!session) return;
+    setFlowError('');
+    try { setSummary(await api.results(session.id)); void loadDashboard(); } catch (error) { setFlowError(message(error)); }
+  }
+
+  function goToQuestion(nextIndex: number) {
+    setQuestionIndex(nextIndex); setSelected(undefined); setAnswer(undefined);
+  }
+
+  function retryExam() { if (exam) void startExam(exam, questions[0]?.area); }
+
+  async function createEssay() {
+    setEssayError('');
+    try { const essay = await api.createEssay(topic); setEssayId(essay.id); setTopic(essay.topic); setEssayPhase('images'); } catch (error) { setEssayError(message(error)); }
+  }
+
+  async function uploadPages() {
+    if (!essayId) return;
+    setUploading(true); setEssayError('');
+    try {
+      for (let index = uploadedCount; index < essayFiles.length; index += 1) { await api.uploadEssayImage(essayId, essayFiles[index]); setUploadedCount(index + 1); }
+    } catch (error) { setEssayError(message(error)); } finally { setUploading(false); }
+  }
+
+  async function transcribeEssay() {
+    if (!essayId || !consent || uploadedCount < 1) return;
+    setTranscribing(true); setEssayError('');
+    try { const result = await api.transcribe(essayId, consent); setTranscription(result); setTranscribedText(result.text); setEssayPhase('review'); } catch (error) { setEssayError(message(error)); } finally { setTranscribing(false); }
+  }
+
+  async function confirmText() {
+    if (!essayId) return;
+    setSavingText(true); setEssayError('');
+    try { await api.saveTranscription(essayId, transcribedText); setEssayPhase('confirmed'); } catch (error) { setEssayError(message(error)); } finally { setSavingText(false); }
+  }
+
+  async function evaluateEssay() {
+    if (!essayId || !consent) return;
+    setEvaluating(true); setEssayError('');
+    try { setEvaluation(await api.evaluateEssay(essayId, consent)); setEssayPhase('evaluation'); void loadEssayHistory(); } catch (error) { setEssayError(message(error)); } finally { setEvaluating(false); }
+  }
+
+  async function loadEssayHistory() {
+    setLoadingEssayHistory(true);
+    try { setEssayHistory(await api.essays()); } catch (error) { setEssayError(message(error)); } finally { setLoadingEssayHistory(false); }
+  }
+
+  function resetEssay() {
+    setTopic(''); setEssayId(''); setEssayPhase('topic'); setEssayFiles([]); setUploadedCount(0); setUploading(false); setConsent(false); setTranscription(undefined); setTranscribedText(''); setEvaluation(undefined); setEssayError('');
+  }
+
+  async function openHistoryEssay(id: string) {
+    setEssayError('');
+    try {
+      const essay = await api.essay(id);
+      restoreEssay(essay);
+    } catch (error) { setEssayError(message(error)); }
+  }
+
+  function restoreEssay(essay: EssayDetail) {
+    const restoredText = essay.confirmedText ?? essay.transcription ?? '';
+    setEssayId(essay.id); setTopic(essay.topic); setEssayFiles([]); setUploadedCount(essay.images.length); setTranscribedText(restoredText); setConsent(Boolean(restoredText)); setEvaluation(essay.evaluation ?? undefined);
+    setTranscription(essay.transcription ? { text: essay.transcription, lowConfidenceSegments: [] } : undefined);
+    setEssayPhase(essay.evaluation ? 'evaluation' : essay.confirmedText ? 'confirmed' : essay.transcription ? 'review' : 'images');
+  }
+
+  function chooseEssay() { setView('essay'); setEssayError(''); void loadEssayHistory(); }
+  function backHome() { setView('home'); setFlowError(''); }
+
+  return <div className="app-shell"><header className="app-header"><div className="brand-lockup"><img className="brand-logo" src="/icon.svg" alt="" /><span>nexo</span></div>{dashboard?.progress && <span className="progress-chip">{dashboard.progress.percentage}% nas respostas</span>}</header><main>
+    {view === 'home' && <HomeView greeting={greeting} dashboard={dashboard} error={dashboardError} onRetry={() => void loadDashboard()} onExams={() => void openExams()} onEssay={chooseEssay} onResume={(id) => void resumeQuiz(id)} />}
+    {view === 'exams' && <ScreenHeader title="Provas" onBack={backHome}>{loadingExams ? <LoadingState label="Carregando provas…" /> : flowError ? <ErrorState message={flowError} retry={() => void openExams()} /> : <ExamSelector exams={exams} startingExamId={startingExamId} onStart={(item, area) => void startExam(item, area)} />}</ScreenHeader>}
+    {view === 'quiz' && <ScreenHeader title="Resolver prova" onBack={() => setView('exams')}>{flowError && <ErrorState message={flowError} />}{exam && <QuizSessionView exam={exam} questions={questions} index={questionIndex} selected={selected} feedback={answer} sending={sendingAnswer} summary={summary} answeredQuestionIds={answeredQuestionIds} onSelect={selectAnswer} onConfirm={() => { if (selected) void submitAnswer(selected); }} onSkip={() => void nextQuestion()} onFinish={() => void finishQuiz()} onGoToQuestion={goToQuestion} onNext={() => void nextQuestion()} onRetry={retryExam} onChooseExam={() => void openExams()} />}</ScreenHeader>}
+    {view === 'essay' && <ScreenHeader title="Minha redação" onBack={backHome}><EssayView phase={essayPhase} topic={topic} essayFiles={essayFiles} uploadedCount={uploadedCount} uploading={uploading} consent={consent} transcribing={transcribing} transcription={transcription} text={transcribedText} savingText={savingText} evaluation={evaluation} evaluating={evaluating} error={essayError} history={essayHistory} historyLoading={loadingEssayHistory} onTopic={setTopic} onCreate={() => void createEssay()} onFiles={setEssayFiles} onFileValidationError={setEssayError} onUpload={() => void uploadPages()} onConsent={setConsent} onTranscribe={() => void transcribeEssay()} onText={setTranscribedText} onConfirm={() => void confirmText()} onEvaluate={() => void evaluateEssay()} onOpenHistory={(id) => void openHistoryEssay(id)} onNew={resetEssay} /></ScreenHeader>}
+  </main><nav className="bottom-nav" aria-label="Navegação principal"><button className={view === 'home' ? 'active' : ''} onClick={backHome}><Icon name="home" size={20} /><span>Início</span></button><button className={view === 'exams' || view === 'quiz' ? 'active' : ''} onClick={() => void openExams()}><Icon name="book" size={20} /><span>Provas</span></button><button className={view === 'essay' ? 'active' : ''} onClick={chooseEssay}><Icon name="pen" size={20} /><span>Redação</span></button></nav></div>;
 }
+
+function HomeView({ greeting, dashboard, error, onRetry, onExams, onEssay, onResume }: { greeting: string; dashboard?: Dashboard; error: string; onRetry: () => void; onExams: () => void; onEssay: () => void; onResume: (id: string) => void }) {
+  return <section className="home-view"><p className="eyebrow">{greeting.toUpperCase()}, ESTUDANTE</p><h1>Seu estudo, em<br /><em>movimento real.</em></h1><p className="home-intro">Resolva provas importadas do ENEM ou transforme uma redação manuscrita em um plano de evolução.</p><div className="primary-actions"><button className="hero-action dark" onClick={onExams}><Icon name="book" size={22} /><span><b>Resolver uma prova</b><small>Escolha o ano, dia e caderno</small></span><Icon name="arrow" size={19} /></button><button className="hero-action light" onClick={onEssay}><Icon name="pen" size={22} /><span><b>Corrigir minha redação</b><small>Foto, transcrição e devolutiva</small></span><Icon name="arrow" size={19} /></button></div>
+    {error ? <ErrorState message={error} retry={onRetry} /> : !dashboard ? <LoadingState label="Carregando seu resumo…" /> : <><section className="real-summary"><article><strong>{dashboard.examCount}</strong><span>{dashboard.examCount === 1 ? 'prova disponível' : 'provas disponíveis'}</span></article>{dashboard.progress && <article><strong>{dashboard.progress.percentage}%</strong><span>aproveitamento em {dashboard.progress.answered} resposta{dashboard.progress.answered === 1 ? '' : 's'}</span></article>}</section>{dashboard.resumeSession && <section className="resume-card"><p className="eyebrow">CONTINUAR SESSÃO</p><h2>{dashboard.resumeSession.answered} de {dashboard.resumeSession.total} questões respondidas</h2><p>{dashboard.resumeSession.correct} acerto{dashboard.resumeSession.correct === 1 ? '' : 's'} até agora.</p><button className="secondary-button" onClick={() => onResume(dashboard.resumeSession!.id)}>Continuar de onde parei <Icon name="arrow" size={17} /></button></section>}</>}
+    <p className="disclaimer home-disclaimer">A correção de redação é educacional e não representa uma nota oficial do ENEM.</p>
+  </section>;
+}
+
+function ScreenHeader({ title, onBack, children }: { title: string; onBack: () => void; children: ReactNode }) {
+  return <section className="screen"><div className="screen-top"><button className="back-button" onClick={onBack} aria-label="Voltar">←</button><span>{title}</span></div>{children}</section>;
+}
+
+function EssayView({ phase, topic, essayFiles, uploadedCount, uploading, consent, transcribing, transcription, text, savingText, evaluation, evaluating, error, history, historyLoading, onTopic, onCreate, onFiles, onFileValidationError, onUpload, onConsent, onTranscribe, onText, onConfirm, onEvaluate, onOpenHistory, onNew }: { phase: EssayPhase; topic: string; essayFiles: File[]; uploadedCount: number; uploading: boolean; consent: boolean; transcribing: boolean; transcription?: Transcription; text: string; savingText: boolean; evaluation?: EssayEvaluation; evaluating: boolean; error: string; history?: EssayHistory; historyLoading: boolean; onTopic: (value: string) => void; onCreate: () => void; onFiles: (files: File[]) => void; onFileValidationError: (message: string) => void; onUpload: () => void; onConsent: (value: boolean) => void; onTranscribe: () => void; onText: (value: string) => void; onConfirm: () => void; onEvaluate: () => void; onOpenHistory: (id: string) => void; onNew: () => void }) {
+  if (phase === 'topic') return <section className="essay-intro">
+    <p className="eyebrow">FLUXO DE REDAÇÃO</p><h1>Comece pelo tema.</h1>
+    <p className="muted-copy">Você poderá escrever, fotografar ou fazer os dois. A revisão da transcrição é sempre sua.</p>
+    <label className="field-label">Tema da redação<input value={topic} onChange={(event) => onTopic(event.target.value)} placeholder="Ex.: Desafios para a saúde mental no Brasil" maxLength={300} /></label>
+    <button className="primary-button" disabled={topic.trim().length < 3} onClick={onCreate}>Criar redação <Icon name="arrow" size={17} /></button>
+    <EssayHistoryPanel history={history} loading={historyLoading} onOpen={onOpenHistory} />
+    {error && <ErrorState message={error} />}
+  </section>;
+  return <section className="essay-flow"><div className="essay-steps"><span className={phase === 'images' ? 'active' : ''}>1. Fotos</span><span className={phase === 'review' ? 'active' : ''}>2. Revisar</span><span className={phase === 'confirmed' || phase === 'evaluation' ? 'active' : ''}>3. Avaliar</span></div><p className="topic-chip">{topic}</p>
+    {phase === 'images' && <><EssayUpload files={essayFiles} uploadedCount={uploadedCount} uploading={uploading} onChange={onFiles} onUpload={onUpload} onValidationError={onFileValidationError} /><label className="consent-row"><input type="checkbox" checked={consent} onChange={(event) => onConsent(event.target.checked)} /><span>Concordo em enviar as imagens da minha redação para um provedor de IA com a finalidade de transcrever e avaliar meu texto.</span></label>{transcribing && <div className="transcription-progress" role="status"><span className="spinner" />Preparando imagens…<small>Lendo as páginas, reconhecendo o texto e identificando trechos incertos.</small></div>}<button className="primary-button" disabled={!consent || uploadedCount < 1 || uploading || transcribing} onClick={onTranscribe}>{transcribing ? 'Transcrevendo…' : 'Transcrever redação'}</button></>}
+    {phase === 'review' && <TranscriptionEditor text={text} transcription={transcription} files={essayFiles} saving={savingText} onChange={onText} onConfirm={onConfirm} />}
+    {phase === 'confirmed' && <section className="ready-evaluation"><p className="eyebrow">TEXTO CONFIRMADO</p><h2>Pronto para a devolutiva.</h2><p className="muted-copy">A análise usa as cinco competências do ENEM e destaca evidências do seu próprio texto.</p><label className="consent-row"><input type="checkbox" checked={consent} onChange={(event) => onConsent(event.target.checked)} /><span>Confirmo o envio do texto para uma avaliação educacional por IA.</span></label><button className="primary-button" disabled={!consent || evaluating} onClick={onEvaluate}>{evaluating ? 'Avaliando…' : 'Avaliar pelas 5 competências'} <Icon name="spark" size={17} /></button></section>}
+    {phase === 'evaluation' && evaluation && <><EvaluationResult evaluation={evaluation} /><button className="secondary-button" onClick={onNew}>Começar nova redação</button></>}{error && <ErrorState message={error} retry={phase === 'images' ? uploadedCount < essayFiles.length ? onUpload : uploadedCount ? onTranscribe : undefined : phase === 'confirmed' ? onEvaluate : undefined} />}
+  </section>;
+}
+
+function message(error: unknown) { return error instanceof Error ? error.message : 'Ocorreu um erro inesperado. Tente novamente.'; }

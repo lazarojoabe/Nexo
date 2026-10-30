@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "nest start --watch",
+    "dev:fixed-port": "nest start --watch",
     "build": "nest build",
     "start": "node dist/main.js",
     "lint": "tsc --noEmit",
@@ -13,7 +14,9 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
     "import:exams": "tsx ../../scripts/import-exams/index.ts",
-    "exams:fetch": "tsx ../../scripts/import-exams/fetch.ts"
+    "exams:fetch": "tsx ../../scripts/import-exams/fetch.ts",
+    "exams:download": "tsx ../../scripts/import-exams/download-official.ts",
+    "exams:assets": "python ../../scripts/import-exams/extract_question_assets.py"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.11",
@@ -25,6 +28,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "dotenv": "^16.4.7",
+    "express": "^5.2.1",
     "multer": "^1.4.5-lts.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",

@@ -5,7 +5,7 @@ import { ArrayMaxSize, IsArray, IsBoolean, IsOptional, IsString, MaxLength, MinL
 import { EssayService, QuizService } from './services';
 import { PrismaService } from './prisma.service';
 
-class StartQuizDto { @IsOptional() @IsString() examId?: string; @IsOptional() @IsArray() @ArrayMaxSize(50) @IsString({ each: true }) questionIds?: string[]; }
+class StartQuizDto { @IsOptional() @IsString() examId?: string; @IsOptional() @IsString() area?: string; @IsOptional() @IsArray() @ArrayMaxSize(90) @IsString({ each: true }) questionIds?: string[]; }
 class AnswerDto { @IsString() @MinLength(1) optionId!: string; }
 class CreateEssayDto { @IsString() @MinLength(3) @MaxLength(300) topic!: string; }
 class TextDto { @IsString() @MinLength(20) @MaxLength(8000) text!: string; }
@@ -26,7 +26,9 @@ export class QuizController {
   @Get('exams') exams() { return this.quiz.listExams(); }
   @Get('questions') questions(@Query('area') area?: string, @Query('examId') examId?: string) { return this.quiz.listQuestions(area, examId); }
   @Get('questions/:id') async question(@Param('id') id: string) { const { correctOptionId, ...question } = await this.quiz.question(id); return question; }
-  @Post('quiz-sessions') start(@Headers('x-user-id') userId: string | undefined, @Body() dto: StartQuizDto) { return this.quiz.createSession(dto.questionIds, dto.examId, demoUser(userId)); }
+  @Get('dashboard') dashboard(@Headers('x-user-id') userId: string | undefined) { return this.quiz.dashboard(demoUser(userId)); }
+  @Post('quiz-sessions') start(@Headers('x-user-id') userId: string | undefined, @Body() dto: StartQuizDto) { return this.quiz.createSession(dto.questionIds, dto.examId, demoUser(userId), dto.area); }
+  @Get('quiz-sessions/:id') session(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined) { return this.quiz.session(id, demoUser(userId)); }
   @Post('quiz-sessions/:id/answers') answer(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined, @Body() dto: AnswerDto, @Query('questionId') questionId: string) { return this.quiz.answer(id, questionId, dto.optionId, demoUser(userId)); }
   @Get('quiz-sessions/:id/results') results(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined) { return this.quiz.results(id, demoUser(userId)); }
 }
@@ -36,10 +38,11 @@ export class QuizController {
 export class EssayController {
   constructor(private readonly essays: EssayService) {}
   @Post() create(@Headers('x-user-id') userId: string | undefined, @Body() dto: CreateEssayDto) { return this.essays.create(demoUser(userId), dto.topic); }
+  @Get() history(@Headers('x-user-id') userId: string | undefined) { return this.essays.history(demoUser(userId)); }
   @Post(':id/images') @ApiConsumes('multipart/form-data') @UseInterceptors(FileInterceptor('image', { limits: { fileSize: 8 * 1024 * 1024 } })) image(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined, @UploadedFile() file?: Express.Multer.File) { return this.essays.addImage(id, demoUser(userId), file); }
   @Post(':id/transcribe') @HttpCode(200) transcribe(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined, @Body() dto: EvaluateDto) { return this.essays.transcribe(id, demoUser(userId), dto.consent); }
   @Patch(':id/transcription') text(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined, @Body() dto: TextDto) { return this.essays.setText(id, demoUser(userId), dto.text); }
   @Post(':id/evaluate') @HttpCode(200) evaluate(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined, @Body() dto: EvaluateDto) { return this.essays.evaluate(id, demoUser(userId), dto.consent); }
   @Get(':id') get(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined) { return this.essays.get(id, demoUser(userId)); }
-  @Get(':id/evaluation') evaluation(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined) { const essay = this.essays.get(id, demoUser(userId)); return essay.evaluation ?? { status: 'pending' }; }
+  @Get(':id/evaluation') evaluation(@Param('id') id: string, @Headers('x-user-id') userId: string | undefined) { return this.essays.evaluation(id, demoUser(userId)); }
 }

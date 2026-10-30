@@ -12,7 +12,9 @@
     "db:migrate": "pnpm --filter @nexo/api prisma:migrate",
     "db:deploy": "pnpm --filter @nexo/api prisma:deploy",
     "import:exams": "pnpm --filter @nexo/api import:exams",
-    "exams:fetch": "pnpm --filter @nexo/api exams:fetch"
+    "exams:fetch": "pnpm --filter @nexo/api exams:fetch",
+    "exams:download": "pnpm --filter @nexo/api exams:download",
+    "exams:assets": "pnpm --filter @nexo/api exams:assets"
   },
   "devDependencies": {
     "typescript": "^5.7.3"
