@@ -4,6 +4,8 @@ import sharp from 'sharp';
 export type EssayImageMimeType = 'image/jpeg' | 'image/png' | 'image/webp';
 export type ProcessedImage = {
   originalMimeType: EssayImageMimeType;
+  /** Sanitized re-encoding; no EXIF or original camera metadata is retained. */
+  originalData: string;
   mimeType: EssayImageMimeType;
   data: string;
   width?: number;
@@ -16,6 +18,8 @@ const mimeByFormat: Record<string, EssayImageMimeType | undefined> = {
   png: 'image/png',
   webp: 'image/webp',
 };
+const maxDimension = 10_000;
+const maxPixels = 25_000_000;
 
 /**
  * Reaproveita o que funcionou no trabalho de PDI (normalização, escala de cinza,
@@ -26,29 +30,31 @@ const mimeByFormat: Record<string, EssayImageMimeType | undefined> = {
 @Injectable()
 export class HandwritingPreprocessor {
   async enhance(input: Buffer): Promise<ProcessedImage> {
-    let width: number | undefined;
-    let height: number | undefined;
-    const originalMimeType = mimeFromSignature(input);
-
-    // The browser preview is often able to render mobile photos that libvips
-    // cannot fully decode. Validate the real file signature first, then keep
-    // the original if local enhancement is unavailable.
-    if (!originalMimeType) {
+    const signedMimeType = mimeFromSignature(input);
+    if (!signedMimeType) {
       throw new BadRequestException('Não foi possível ler este arquivo como imagem. Use uma foto em JPEG, PNG ou WebP.');
     }
-
+    let metadata: { format?: string; width?: number; height?: number };
     try {
-      const metadata = await sharp(input, { failOn: 'none' }).metadata();
-      if (mimeByFormat[metadata.format ?? '']) {
-        width = metadata.width;
-        height = metadata.height;
-      }
+      metadata = await sharp(input, { limitInputPixels: maxPixels, failOn: 'error' }).metadata();
     } catch {
-      return { originalMimeType, mimeType: originalMimeType, data: input.toString('base64'), enhanced: false };
+      throw new BadRequestException('Não foi possível ler este arquivo como imagem. Use uma foto em JPEG, PNG ou WebP.');
+    }
+    const decodedMimeType = mimeByFormat[metadata.format ?? ''];
+    const width = metadata.width;
+    const height = metadata.height;
+    if (!decodedMimeType || decodedMimeType !== signedMimeType || !width || !height || width > maxDimension || height > maxDimension || width * height > maxPixels) {
+      throw new BadRequestException('A imagem precisa ser JPEG, PNG ou WebP e ter dimensões de até 10.000 px por lado.');
     }
 
     try {
-      const enhanced = await sharp(input, { failOn: 'none' })
+      // Re-encoding strips EXIF (including camera location) before either
+      // private copy is stored. The source bytes are never persisted.
+      const original = await sharp(input, { limitInputPixels: maxPixels, failOn: 'error' })
+        .rotate()
+        .jpeg({ quality: 94, chromaSubsampling: '4:4:4' })
+        .toBuffer();
+      const enhanced = await sharp(original, { limitInputPixels: maxPixels, failOn: 'error' })
         .rotate()
         .resize({ width: 2400, height: 3200, fit: 'inside', withoutEnlargement: true })
         .grayscale()
@@ -56,11 +62,9 @@ export class HandwritingPreprocessor {
         .sharpen({ sigma: 1.1, m1: 0.7, m2: 2.2 })
         .jpeg({ quality: 90, chromaSubsampling: '4:4:4' })
         .toBuffer();
-      return { originalMimeType, mimeType: 'image/jpeg', data: enhanced.toString('base64'), width, height, enhanced: true };
+      return { originalMimeType: 'image/jpeg', originalData: original.toString('base64'), mimeType: 'image/jpeg', data: enhanced.toString('base64'), width, height, enhanced: true };
     } catch {
-      // Do not discard a readable original only because a cosmetic treatment
-      // failed. Gemini accepts all three formats, so transcription can proceed.
-      return { originalMimeType, mimeType: originalMimeType, data: input.toString('base64'), width, height, enhanced: false };
+      throw new BadRequestException('Não foi possível processar esta imagem com segurança. Envie outra foto em JPEG, PNG ou WebP.');
     }
   }
 }

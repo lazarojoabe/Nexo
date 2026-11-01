@@ -10,11 +10,18 @@ import { TranscriptionEditor } from '../components/transcription-editor';
 import { EvaluationResult } from '../components/evaluation-result';
 import { EssayHistoryPanel } from '../components/essay-history';
 import { Icon } from '../components/ui/icon';
+import { RequireAuth } from '../components/require-auth';
+import { accountName, useAuth } from '../components/auth-provider';
 
 type View = 'home' | 'exams' | 'quiz' | 'essay';
 type EssayPhase = 'topic' | 'images' | 'review' | 'confirmed' | 'evaluation';
 
 export default function Home() {
+  return <RequireAuth><AuthenticatedHome /></RequireAuth>;
+}
+
+function AuthenticatedHome() {
+  const { user, signOut } = useAuth();
   const [view, setView] = useState<View>('home');
   const [dashboard, setDashboard] = useState<Dashboard>();
   const [dashboardError, setDashboardError] = useState('');
@@ -177,8 +184,11 @@ export default function Home() {
 
   function chooseEssay() { setView('essay'); setEssayError(''); void loadEssayHistory(); }
   function backHome() { setView('home'); setFlowError(''); }
+  async function leaveAccount() {
+    try { await signOut(); } catch (error) { setDashboardError(message(error)); }
+  }
 
-  return <div className="app-shell"><header className="app-header"><div className="brand-lockup"><img className="brand-logo" src="/icon.svg" alt="" /><span>nexo</span></div>{dashboard?.progress && <span className="progress-chip">{dashboard.progress.percentage}% nas respostas</span>}</header><main>
+  return <div className="app-shell"><header className="app-header"><div className="brand-lockup"><img className="brand-logo" src="/icon.svg" alt="" /><span>nexo</span></div><div className="account-panel"><span className="account-copy"><b>{user ? accountName(user) : 'Estudante'}</b><small>{user?.email}</small></span><button type="button" onClick={() => void leaveAccount()} aria-label="Sair da conta">Sair</button></div></header><main>
     {view === 'home' && <HomeView greeting={greeting} dashboard={dashboard} error={dashboardError} onRetry={() => void loadDashboard()} onExams={() => void openExams()} onEssay={chooseEssay} onResume={(id) => void resumeQuiz(id)} />}
     {view === 'exams' && <ScreenHeader title="Provas" onBack={backHome}>{loadingExams ? <LoadingState label="Carregando provas…" /> : flowError ? <ErrorState message={flowError} retry={() => void openExams()} /> : <ExamSelector exams={exams} startingExamId={startingExamId} onStart={(item, area) => void startExam(item, area)} />}</ScreenHeader>}
     {view === 'quiz' && <ScreenHeader title="Resolver prova" onBack={() => setView('exams')}>{flowError && <ErrorState message={flowError} />}{exam && <QuizSessionView exam={exam} questions={questions} index={questionIndex} selected={selected} feedback={answer} sending={sendingAnswer} summary={summary} answeredQuestionIds={answeredQuestionIds} onSelect={selectAnswer} onConfirm={() => { if (selected) void submitAnswer(selected); }} onSkip={() => void nextQuestion()} onFinish={() => void finishQuiz()} onGoToQuestion={goToQuestion} onNext={() => void nextQuestion()} onRetry={retryExam} onChooseExam={() => void openExams()} />}</ScreenHeader>}

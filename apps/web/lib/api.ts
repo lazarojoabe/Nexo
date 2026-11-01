@@ -1,3 +1,5 @@
+import { getSupabaseBrowserClient } from './supabase';
+
 const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const requestTimeout = 15_000;
 
@@ -32,16 +34,49 @@ export type EssayEvaluation = { totalScore: number; competencies: Array<{ id: 1 
 export type EssayDetail = { id: string; topic: string; transcription?: string | null; transcriptionResult?: Transcription | null; confirmedText?: string | null; status: string; createdAt: string; evaluatedAt?: string | null; images: Array<{ id: string; mimeType: string; size: number; page: number }>; evaluation: EssayEvaluation | null };
 export type EssayHistory = { summary: { total: number; evaluated: number; latestScore: number | null; bestScore: number | null; delta: number | null; competencyTrend: Array<{ id: number; latestScore: number | null; previousScore: number | null; delta: number | null }> }; essays: Array<{ id: string; topic: string; status: string; createdAt: string; evaluatedAt?: string | null; totalScore: number | null; competencies: Array<{ id: number; score: number }> }> };
 
-type RequestOptions = RequestInit & { timeout?: number };
+type RequestOptions = RequestInit & { timeout?: number; requiresAuth?: boolean };
+type AuthAdapter = {
+  accessToken: () => Promise<string | null>;
+  refreshAccessToken: () => Promise<string | null>;
+  clearSession: () => Promise<void>;
+};
+
+let testAuthAdapter: AuthAdapter | undefined;
+
+function authAdapter(): AuthAdapter {
+  return testAuthAdapter ?? {
+    async accessToken() {
+      const { data } = await getSupabaseBrowserClient().auth.getSession();
+      return data.session?.access_token ?? null;
+    },
+    async refreshAccessToken() {
+      const { data } = await getSupabaseBrowserClient().auth.refreshSession();
+      return data.session?.access_token ?? null;
+    },
+    async clearSession() {
+      await getSupabaseBrowserClient().auth.signOut({ scope: 'local' });
+    },
+  };
+}
+
+/** Test seam only; production always uses Supabase's supported session client. */
+export function setApiAuthAdapterForTests(adapter?: AuthAdapter) { testAuthAdapter = adapter; }
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), options.timeout ?? requestTimeout);
-  const headers = new Headers(options.headers);
-  headers.set('x-user-id', 'demo-user'); // Temporary fallback until Supabase Auth/JWT is connected.
-  if (options.body && !(options.body instanceof FormData) && !headers.has('content-type')) headers.set('content-type', 'application/json');
   try {
-    const response = await fetch(`${baseUrl}${path}`, { ...options, headers, signal: options.signal ?? controller.signal });
+    const adapter = options.requiresAuth ? authAdapter() : undefined;
+    let accessToken = adapter ? await adapter.accessToken() : null;
+    let response = await send(path, options, accessToken, options.signal ?? controller.signal);
+    if (response.status === 401 && adapter) {
+      accessToken = await adapter.refreshAccessToken();
+      if (accessToken) response = await send(path, options, accessToken, options.signal ?? controller.signal);
+      if (response.status === 401) {
+        await adapter.clearSession().catch(() => undefined);
+        redirectToSignIn();
+      }
+    }
     const isJson = response.headers.get('content-type')?.includes('application/json');
     const payload: unknown = isJson ? await response.json() : null;
     if (!response.ok) {
@@ -58,19 +93,32 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   }
 }
 
+async function send(path: string, options: RequestOptions, accessToken: string | null, signal: AbortSignal) {
+  const headers = new Headers(options.headers);
+  if (accessToken) headers.set('authorization', `Bearer ${accessToken}`);
+  if (options.body && !(options.body instanceof FormData) && !headers.has('content-type')) headers.set('content-type', 'application/json');
+  return fetch(`${baseUrl}${path}`, { ...options, headers, signal });
+}
+
+function redirectToSignIn() {
+  if (typeof window !== 'undefined' && window.location.pathname !== '/entrar') window.location.assign('/entrar?motivo=sessao');
+}
+
 export const api = {
   exams: () => request<Exam[]>('/exams'),
   questions: (examId: string, area?: string) => request<Question[]>(`/questions?examId=${encodeURIComponent(examId)}${area ? `&area=${encodeURIComponent(area)}` : ''}`),
-  dashboard: () => request<Dashboard>('/dashboard'),
-  createSession: (examId: string, area?: string) => request<QuizSession>('/quiz-sessions', { method: 'POST', body: JSON.stringify({ examId, ...(area ? { area } : {}) }) }),
-  session: (id: string) => request<QuizSession>(`/quiz-sessions/${id}`),
-  answer: (sessionId: string, questionId: string, optionId: string) => request<QuizAnswer>(`/quiz-sessions/${sessionId}/answers?questionId=${encodeURIComponent(questionId)}`, { method: 'POST', body: JSON.stringify({ optionId }) }),
-  results: (id: string) => request<QuizSummary>(`/quiz-sessions/${id}/results`),
-  createEssay: (topic: string) => request<{ id: string; topic: string; status: string }>('/essays', { method: 'POST', body: JSON.stringify({ topic }) }),
-  uploadEssayImage: (essayId: string, image: File) => { const body = new FormData(); body.append('image', image); return request<{ accepted: boolean; images: number; page: number }>(`/essays/${essayId}/images`, { method: 'POST', body, timeout: 45_000 }); },
-  transcribe: (essayId: string, consent: boolean) => request<Transcription>(`/essays/${essayId}/transcribe`, { method: 'POST', body: JSON.stringify({ consent }), timeout: 75_000 }),
-  saveTranscription: (essayId: string, text: string) => request<{ status: string }>(`/essays/${essayId}/transcription`, { method: 'PATCH', body: JSON.stringify({ text }) }),
-  evaluateEssay: (essayId: string, consent: boolean) => request<EssayEvaluation>(`/essays/${essayId}/evaluate`, { method: 'POST', body: JSON.stringify({ consent }), timeout: 75_000 }),
-  essays: () => request<EssayHistory>('/essays'),
-  essay: (id: string) => request<EssayDetail>(`/essays/${id}`),
+  signUp: (email: string, password: string) => request<{ confirmationRequired: true }>('/auth/sign-up', { method: 'POST', body: JSON.stringify({ email, password }) }),
+  dashboard: () => request<Dashboard>('/dashboard', { requiresAuth: true }),
+  createSession: (examId: string, area?: string) => request<QuizSession>('/quiz-sessions', { method: 'POST', body: JSON.stringify({ examId, ...(area ? { area } : {}) }), requiresAuth: true }),
+  session: (id: string) => request<QuizSession>(`/quiz-sessions/${id}`, { requiresAuth: true }),
+  answer: (sessionId: string, questionId: string, optionId: string) => request<QuizAnswer>(`/quiz-sessions/${sessionId}/answers?questionId=${encodeURIComponent(questionId)}`, { method: 'POST', body: JSON.stringify({ optionId }), requiresAuth: true }),
+  results: (id: string) => request<QuizSummary>(`/quiz-sessions/${id}/results`, { requiresAuth: true }),
+  createEssay: (topic: string) => request<{ id: string; topic: string; status: string }>('/essays', { method: 'POST', body: JSON.stringify({ topic }), requiresAuth: true }),
+  discardEssay: (essayId: string) => request<{ discarded: boolean }>(`/essays/${essayId}`, { method: 'DELETE', requiresAuth: true }),
+  uploadEssayImage: (essayId: string, image: File) => { const body = new FormData(); body.append('image', image); return request<{ accepted: boolean; images: number; page: number }>(`/essays/${essayId}/images`, { method: 'POST', body, timeout: 45_000, requiresAuth: true }); },
+  transcribe: (essayId: string, consent: boolean) => request<Transcription>(`/essays/${essayId}/transcribe`, { method: 'POST', body: JSON.stringify({ consent }), timeout: 75_000, requiresAuth: true }),
+  saveTranscription: (essayId: string, text: string) => request<{ status: string }>(`/essays/${essayId}/transcription`, { method: 'PATCH', body: JSON.stringify({ text }), requiresAuth: true }),
+  evaluateEssay: (essayId: string, consent: boolean) => request<EssayEvaluation>(`/essays/${essayId}/evaluate`, { method: 'POST', body: JSON.stringify({ consent }), timeout: 75_000, requiresAuth: true }),
+  essays: () => request<EssayHistory>('/essays', { requiresAuth: true }),
+  essay: (id: string) => request<EssayDetail>(`/essays/${id}`, { requiresAuth: true }),
 };

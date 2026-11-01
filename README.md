@@ -5,8 +5,10 @@ MVP mobile-first para treino de quiz e redação do ENEM. O quiz aceita provas i
 ## Rodar localmente
 
 ```bash
-cp .env.example apps/api/.env
 pnpm install
+cp .env.example apps/api/.env
+# Crie também apps/web/.env.local com NEXT_PUBLIC_API_URL,
+# NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY.
 pnpm dev
 ```
 
@@ -20,7 +22,9 @@ Depois de configurar uma `DATABASE_URL` válida do Supabase, gere o cliente com 
 
 ## Configuração
 
-Consulte [.env.example](.env.example), [arquitetura](docs/ARCHITECTURE.md), [motor de redação](docs/AI_ESSAY_RECOGNITION.md) e [deploy](docs/DEPLOYMENT.md). Nunca use chaves com prefixo `NEXT_PUBLIC_`. Para produção, configure Supabase Auth/Storage privado, PostgreSQL e Gemini em seus planos gratuitos elegíveis.
+Consulte [.env.example](.env.example), [arquitetura](docs/ARCHITECTURE.md), [motor de redação](docs/AI_ESSAY_RECOGNITION.md) e [deploy](docs/DEPLOYMENT.md). Somente `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` podem ficar no cliente. `SUPABASE_JWT_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL` e `GEMINI_API_KEY` pertencem exclusivamente à API. Para produção, configure Supabase Auth/Storage privado, PostgreSQL e Gemini em seus planos gratuitos elegíveis.
+
+O cadastro da beta é feito pelo Supabase Auth com e-mail e senha, confirmação de e-mail e recuperação de senha. A API aceita novos cadastros exclusivamente para os endereços separados por vírgula em `ALLOWED_SIGNUP_EMAILS`; se ela estiver vazia, o cadastro fica bloqueado em produção. Para adicionar ou remover uma pessoa da beta, atualize essa variável no ambiente da API e faça o redeploy. Não há senhas no Prisma.
 
 Para o motor de redação, configure `GEMINI_API_KEY`, `GEMINI_MODEL`, `GEMINI_TEMPERATURE`, `AI_PROVIDER_TIMEOUT_MS`, `AI_EVALUATIONS_PER_DAY` e `ESSAY_RUBRIC_VERSION`. A temperatura é limitada a 0,3 para reduzir variação. Referências pedagógicas só podem ser validadas quando houver origem/licença/autorização registradas:
 
@@ -32,6 +36,6 @@ pnpm --filter @nexo/api references:validate docs/ESSAY_REFERENCE_IMPORT_TEMPLATE
 
 - As provas importadas são armazenadas no banco e devem ser tratadas como material de treino; confira sempre a fonte e o edital oficial antes de publicar conteúdo.
 - Transcrição e avaliação exigem Gemini configurado, consentimento informado e a disponibilidade de cota gratuita. O app não inventa resultados quando o serviço está indisponível.
-- Em produção, a API exige `Authorization: Bearer <JWT>` HS256 validado com `SUPABASE_JWT_SECRET`; `x-user-id` funciona apenas no modo demonstrativo.
+- Em produção, a API exige `Authorization: Bearer <JWT>` HS256 validado com `SUPABASE_JWT_SECRET`; `x-user-id` não é aceito. O modo demonstrativo requer `DEMO_AUTH_ENABLED=true` e só é permitido em desenvolvimento/teste.
 - A devolutiva é uma estimativa educacional por IA, não uma nota oficial do Inep. Ela pode sinalizar baixa confiança e necessidade de revisão humana.
 - Não há calibração declarada: a próxima etapa é comparar avaliações com redações anonimizadas, consentidas e corrigidas por professores em várias faixas.

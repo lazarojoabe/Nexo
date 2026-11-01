@@ -12,7 +12,12 @@ self.addEventListener('activate', (event) => event.waitUntil(
 ));
 
 self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET' || new URL(event.request.url).origin !== location.origin) return;
+  const url = new URL(event.request.url);
+  if (event.request.method !== 'GET' || url.origin !== location.origin) return;
+
+  // Authenticated and private study data must never enter Cache Storage. This
+  // also protects deployments where the API shares the web origin via a proxy.
+  if (event.request.headers.has('authorization') || /\/(?:dashboard|quiz-sessions|essays|admin\/exam-imports)(?:\/|$)/.test(url.pathname)) return;
 
   // Documents must always come from the server so a newly deployed screen is
   // never hidden behind an old cached application shell.
@@ -22,8 +27,11 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(caches.match(event.request).then((hit) => hit || fetch(event.request).then((response) => {
-    const copy = response.clone();
-    caches.open(CACHE).then((cache) => cache.put(event.request, copy));
+    const cacheControl = response.headers.get('cache-control') ?? '';
+    if (response.ok && !/\bno-store\b/i.test(cacheControl)) {
+      const copy = response.clone();
+      void caches.open(CACHE).then((cache) => cache.put(event.request, copy));
+    }
     return response;
   })));
 });

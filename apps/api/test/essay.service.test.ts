@@ -34,6 +34,7 @@ describe('fluxo de redação', () => {
     expect(history.summary).toMatchObject({ total: 1, evaluated: 1, latestScore: 600, bestScore: 600 });
     expect(history.essays[0].competencies).toHaveLength(5);
     await expect(essays.addImage(essay.id, 'another-student', file)).rejects.toThrow('não encontrada');
+    await expect(essays.get(essay.id, 'another-student')).rejects.toThrow('não encontrada');
   });
 
   it('aplica limite diário sem apagar o texto confirmado', async () => {

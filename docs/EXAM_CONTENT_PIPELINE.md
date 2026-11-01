@@ -51,6 +51,6 @@ O `--persist` exige `DATABASE_URL` e grava no Supabase. A extração de PDFs con
 - `POST /quiz-sessions/:id/answers?questionId=...` verifica que a questão pertence à sessão e compara a alternativa enviada com `Question.correctOptionId` persistida;
 - `GET /quiz-sessions/:id/results` consolida acertos e tentativas.
 
-As sessões são associadas ao sujeito do JWT Supabase validado em produção. Em desenvolvimento, `x-user-id` (ou `demo-user`) continua disponível exclusivamente como identidade demonstrativa. A API impede que outro usuário responda ou consulte o resultado de uma sessão.
+As sessões são associadas ao sujeito do JWT Supabase validado. A identidade demonstrativa `demo-user` só é habilitada de forma explícita com `DEMO_AUTH_ENABLED=true` em desenvolvimento/teste; `x-user-id` não é aceito. A API impede que outro usuário responda ou consulte o resultado de uma sessão.
 
 Questões anuladas ficam fora das consultas do quiz. A explicação exibida após a resposta vem do registro importado, nunca de uma resposta gerada pelo modelo de IA.

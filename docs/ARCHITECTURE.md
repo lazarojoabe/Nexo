@@ -26,6 +26,6 @@ Sem banco, a API permanece em modo demonstrativo em memória. Esse modo é expli
 
 ## Segurança e privacidade
 
-Em produção, a API valida JWT Supabase HS256 (`Authorization: Bearer`) com expiração, audiência e assinatura em tempo constante; o cabeçalho `x-user-id` só funciona fora de produção. Imagens devem ficar em bucket privado e dados só devem ser enviados ao provedor após consentimento específico. O serviço limita imagens, tamanho, chamadas simultâneas por redação, chamadas diárias por usuário e tempo de resposta do provedor.
+Em produção, a API valida JWT Supabase HS256 (`Authorization: Bearer`) com expiração, audiência, role, issuer quando configurado e assinatura em tempo constante. A identidade vem exclusivamente do `sub`; `x-user-id` não participa da autenticação. O modo demonstrativo só existe com `DEMO_AUTH_ENABLED=true` em desenvolvimento/teste. Imagens devem ficar em bucket privado e dados só devem ser enviados ao provedor após consentimento específico. O serviço limita imagens, tamanho, chamadas simultâneas por redação, chamadas diárias por usuário e tempo de resposta do provedor.
 
 Erros preservam a transcrição confirmada e nunca expõem detalhes internos. A política operacional de consentimento, retenção e exclusão está em [AI_ESSAY_RECOGNITION.md](AI_ESSAY_RECOGNITION.md).

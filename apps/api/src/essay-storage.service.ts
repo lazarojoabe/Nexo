@@ -1,6 +1,6 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { relative, resolve } from 'node:path';
 
 type StoredImage = { originalPath: string; processedPath: string };
 
@@ -15,6 +15,7 @@ export class EssayStorageService {
   private readonly supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, '');
   private readonly serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   private readonly directory = resolve(process.env.ESSAY_UPLOAD_DIR ?? resolve(process.cwd(), 'tmp', 'essay-uploads'));
+  private privateBucketChecked = false;
 
   private get remoteEnabled() { return Boolean(this.supabaseUrl && this.serviceKey); }
 
@@ -23,10 +24,14 @@ export class EssayStorageService {
     const originalName = `essays/${essayId}/${page}-${stamp}-original${extension(originalMimeType)}`;
     const processedName = `essays/${essayId}/${page}-${stamp}-processed${extension(processedMimeType)}`;
     if (this.remoteEnabled) {
-      await Promise.all([
-        this.uploadRemote(originalName, original, originalMimeType),
-        this.uploadRemote(processedName, processed, processedMimeType),
-      ]);
+      await this.assertPrivateBucket();
+      try {
+        await this.uploadRemote(originalName, original, originalMimeType);
+        await this.uploadRemote(processedName, processed, processedMimeType);
+      } catch (error) {
+        await this.remove([originalName, processedName]);
+        throw error;
+      }
       return { originalPath: originalName, processedPath: processedName };
     }
     if (process.env.NODE_ENV === 'production') {
@@ -69,8 +74,18 @@ export class EssayStorageService {
 
   private localPath(path: string) {
     const target = resolve(this.directory, path);
-    if (!target.startsWith(this.directory)) throw new ServiceUnavailableException('Caminho de imagem inválido.');
+    const pathFromDirectory = relative(this.directory, target);
+    if (pathFromDirectory === '' || pathFromDirectory.startsWith('..') || resolve(target) === this.directory) throw new ServiceUnavailableException('Caminho de imagem inválido.');
     return target;
+  }
+
+  private async assertPrivateBucket() {
+    if (this.privateBucketChecked) return;
+    const response = await fetch(`${this.supabaseUrl}/storage/v1/bucket/${this.bucket}`, { headers: this.headers() });
+    if (!response.ok) throw new ServiceUnavailableException('O armazenamento privado de imagens não está configurado. Tente novamente mais tarde.');
+    const descriptor = await response.json().catch(() => null) as { public?: unknown } | null;
+    if (descriptor?.public === true) throw new ServiceUnavailableException('O armazenamento privado de imagens não está configurado. Tente novamente mais tarde.');
+    this.privateBucketChecked = true;
   }
 
   private headers() {

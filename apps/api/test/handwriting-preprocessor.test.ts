@@ -12,6 +12,7 @@ describe('preparo de imagens manuscritas', () => {
 
     expect(result).toMatchObject({ originalMimeType: 'image/jpeg', mimeType: 'image/jpeg', width: 120, height: 160, enhanced: true });
     expect((await sharp(Buffer.from(result.data, 'base64')).metadata()).format).toBe('jpeg');
+    expect((await sharp(Buffer.from(result.originalData, 'base64')).metadata()).format).toBe('jpeg');
   });
 
   it('rejeita dados que não são uma imagem, com orientação acionável', async () => {
@@ -19,10 +20,15 @@ describe('preparo de imagens manuscritas', () => {
       .rejects.toThrow('Use uma foto em JPEG, PNG ou WebP');
   });
 
-  it('preserva um JPEG de celular quando o aprimoramento não consegue decodificá-lo', async () => {
+  it('rejeita um JPEG incompleto em vez de armazenar bytes não validados', async () => {
     const jpegComDadosIncompletos = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46]);
 
     await expect(new HandwritingPreprocessor().enhance(jpegComDadosIncompletos))
-      .resolves.toMatchObject({ originalMimeType: 'image/jpeg', mimeType: 'image/jpeg', enhanced: false, data: jpegComDadosIncompletos.toString('base64') });
+      .rejects.toThrow('Use uma foto em JPEG, PNG ou WebP');
+  });
+
+  it('recusa dimensões acima do limite de segurança', async () => {
+    const large = await sharp({ create: { width: 10_001, height: 10, channels: 3, background: '#fff' } }).jpeg().toBuffer();
+    await expect(new HandwritingPreprocessor().enhance(large)).rejects.toThrow('dimensões de até 10.000 px');
   });
 });
