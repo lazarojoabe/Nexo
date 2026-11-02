@@ -5,16 +5,18 @@ import { Icon } from './ui/icon';
 export function EssayUpload({ files, uploadedCount, uploading, onChange, onUpload, onValidationError }: { files: File[]; uploadedCount: number; uploading: boolean; onChange: (files: File[]) => void; onUpload: () => void; onValidationError?: (message: string) => void }) {
   const [previews, setPreviews] = useState<string[]>([]);
   useEffect(() => { const urls = files.map((file) => URL.createObjectURL(file)); setPreviews(urls); return () => urls.forEach(URL.revokeObjectURL); }, [files]);
-  async function addFiles(event: ChangeEvent<HTMLInputElement>) {
+  function addFiles(event: ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(event.target.files ?? []);
     const sized = selected.filter((file) => file.size <= 8 * 1024 * 1024);
-    const signatures = await Promise.all(sized.map(async (file) => hasSupportedSignature(file)));
-    const valid = sized.filter((_, index) => signatures[index]);
+    // Do not reject files based on the browser's MIME/extension metadata. Some
+    // Android providers expose screenshots with an empty or generic type. The
+    // API performs the authoritative signature and decoding validation.
+    const valid = sized;
     const available = Math.max(0, 5 - files.length);
     onChange([...files, ...valid.slice(0, available)]);
     const invalidCount = selected.length - valid.length;
     const excessCount = Math.max(0, valid.length - available);
-    if (invalidCount) onValidationError?.('Algumas páginas não puderam ser adicionadas. Use fotos em JPG/JPEG, PNG ou WebP de até 8 MB.');
+    if (invalidCount) onValidationError?.('Algumas páginas excedem o limite de 8 MB por página.');
     else if (excessCount) onValidationError?.('Você pode enviar no máximo 5 páginas por redação.');
     else onValidationError?.('');
     event.target.value = '';
@@ -28,22 +30,3 @@ export function EssayUpload({ files, uploadedCount, uploading, onChange, onUploa
 }
 
 function formatSize(size: number) { return `${(size / (1024 * 1024)).toFixed(size > 1024 * 1024 ? 1 : 2)} MB`; }
-
-async function hasSupportedSignature(file: File) {
-  try {
-    const bytes = new Uint8Array(await file.slice(0, 12).arrayBuffer());
-    const isJpeg = bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
-    const isPng = bytes.length >= 8 && [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a].every((value, index) => bytes[index] === value);
-    const isWebp = bytes.length >= 12 && String.fromCharCode(...bytes.slice(0, 4)) === 'RIFF' && String.fromCharCode(...bytes.slice(8, 12)) === 'WEBP';
-    // Some Android file providers expose a valid image with a generic or
-    // non-standard MIME value. Keep the signature check as the primary guard,
-    // but allow the declared JPG/PNG/WebP type or extension as a fallback so
-    // native gallery captures are not discarded before upload.
-    const declaredType = file.type.toLowerCase();
-    const declaredImage = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(declaredType);
-    const declaredExtension = /\.(?:jpe?g|png|webp)$/i.test(file.name);
-    return isJpeg || isPng || isWebp || declaredImage || declaredExtension;
-  } catch {
-    return /\.(?:jpe?g|png|webp)$/i.test(file.name) || ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type.toLowerCase());
-  }
-}
