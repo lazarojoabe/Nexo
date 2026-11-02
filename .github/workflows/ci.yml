@@ -38,6 +38,9 @@ jobs:
       - name: Instalar dependências
         run: pnpm install --frozen-lockfile
 
+      - name: Gerar Prisma Client
+        run: pnpm db:generate
+
       - name: Verificar tipos
         run: pnpm typecheck
 

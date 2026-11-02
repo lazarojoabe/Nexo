@@ -23,7 +23,7 @@ As URLs dos hooks são credenciais de publicação; não as exponha em variávei
 
 ## Render — API
 
-- **Build Command:** `corepack enable && pnpm install --frozen-lockfile && pnpm --filter @nexo/shared build && pnpm --filter @nexo/api build`
+- **Build Command:** `corepack enable && pnpm install --frozen-lockfile && pnpm db:generate && pnpm --filter @nexo/shared build && pnpm --filter @nexo/api build`
 - **Start Command:** `pnpm --filter @nexo/api start`
 - **Health Check Path:** `/health`
 - **Pre-Deploy Command (após o banco estar configurado):** `pnpm db:deploy`
