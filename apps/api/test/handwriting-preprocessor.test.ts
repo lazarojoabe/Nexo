@@ -28,14 +28,14 @@ describe('preparo de imagens manuscritas', () => {
 
   it('rejeita dados que não são uma imagem, com orientação acionável', async () => {
     await expect(new HandwritingPreprocessor().enhance(Buffer.from('não é uma imagem')))
-      .rejects.toThrow('Use uma foto em JPEG, PNG ou WebP');
+      .rejects.toThrow('Use uma foto em JPG/JPEG, PNG ou WebP');
   });
 
   it('rejeita um JPEG incompleto em vez de armazenar bytes não validados', async () => {
     const jpegComDadosIncompletos = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46]);
 
     await expect(new HandwritingPreprocessor().enhance(jpegComDadosIncompletos))
-      .rejects.toThrow('Use uma foto em JPEG, PNG ou WebP');
+      .rejects.toThrow('Use uma foto em JPG/JPEG, PNG ou WebP');
   });
 
   it('recusa dimensões acima do limite de segurança', async () => {

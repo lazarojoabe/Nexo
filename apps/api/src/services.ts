@@ -233,7 +233,7 @@ export class EssayService {
     const essay = await this.owned(id, userId);
     if (essay.images.length >= maxEssayImages) throw new BadRequestException('Máximo de 5 imagens por redação.');
     const page = essay.images.length + 1;
-    const processed = await this.runStage('validation', id, () => this.preprocessor.enhance(file.buffer), 'Não foi possível validar esta imagem. Envie uma foto em JPEG, PNG ou WebP.');
+    const processed = await this.runStage('validation', id, () => this.preprocessor.enhance(file.buffer), 'Não foi possível validar esta imagem. Envie uma foto em JPG/JPEG, PNG ou WebP.');
     const sanitizedOriginal = Buffer.from(processed.originalData ?? processed.data, 'base64');
     const stored = await this.runStage('storage', id, () => this.storage.save(id, page, sanitizedOriginal, processed.originalMimeType, Buffer.from(processed.data, 'base64'), processed.mimeType), 'Não foi possível armazenar a imagem com segurança. Tente novamente.');
     try {

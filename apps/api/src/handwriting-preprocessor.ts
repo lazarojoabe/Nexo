@@ -43,7 +43,7 @@ export class HandwritingPreprocessor {
       // fresh validated JPEG below instead of persisting the original bytes.
       metadata = await sharp(input, { limitInputPixels: maxPixels, failOn: 'none' }).metadata();
     } catch {
-      throw new BadRequestException('Não foi possível ler este arquivo como imagem. Use uma foto em JPEG, PNG ou WebP.');
+      throw new BadRequestException('Não foi possível ler este arquivo como imagem. Use uma foto em JPG/JPEG, PNG ou WebP.');
     }
     const decodedMimeType = mimeByFormat[metadata.format ?? ''];
     const width = metadata.width;
@@ -52,7 +52,7 @@ export class HandwritingPreprocessor {
     // when available, but Android providers sometimes wrap valid JPEGs with a
     // generic signature or MIME value.
     if (!decodedMimeType || (signedMimeType && decodedMimeType !== signedMimeType && metadata.format !== 'avif' && metadata.format !== 'heif') || !width || !height || width > maxDimension || height > maxDimension || width * height > maxPixels) {
-      throw new BadRequestException('A imagem precisa ser JPEG, PNG ou WebP e ter dimensões de até 10.000 px por lado.');
+      throw new BadRequestException('A imagem precisa ser JPG/JPEG, PNG ou WebP e ter dimensões de até 10.000 px por lado.');
     }
 
     try {
@@ -72,7 +72,7 @@ export class HandwritingPreprocessor {
         .toBuffer();
       return { originalMimeType: 'image/jpeg', originalData: original.toString('base64'), mimeType: 'image/jpeg', data: enhanced.toString('base64'), width, height, enhanced: true };
     } catch {
-      throw new BadRequestException('Não foi possível processar esta imagem com segurança. Envie outra foto em JPEG, PNG ou WebP.');
+      throw new BadRequestException('Não foi possível processar esta imagem com segurança. Envie outra foto em JPG/JPEG, PNG ou WebP.');
     }
   }
 }
