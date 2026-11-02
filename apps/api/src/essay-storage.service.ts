@@ -1,4 +1,4 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { relative, resolve } from 'node:path';
 
@@ -11,6 +11,7 @@ type StoredImage = { originalPath: string; processedPath: string };
  */
 @Injectable()
 export class EssayStorageService {
+  private readonly logger = new Logger(EssayStorageService.name);
   private readonly bucket = process.env.SUPABASE_ESSAY_BUCKET ?? 'essay-images';
   private readonly supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, '');
   private readonly serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -35,6 +36,7 @@ export class EssayStorageService {
       return { originalPath: originalName, processedPath: processedName };
     }
     if (process.env.NODE_ENV === 'production') {
+      this.logger.error(`essay_storage_not_configured bucket=${this.bucket} supabaseUrlConfigured=${Boolean(this.supabaseUrl)} serviceRoleConfigured=${Boolean(this.serviceKey)}`);
       throw new ServiceUnavailableException('O armazenamento privado de imagens não está configurado. Tente novamente mais tarde.');
     }
     await Promise.all([
@@ -81,10 +83,39 @@ export class EssayStorageService {
 
   private async assertPrivateBucket() {
     if (this.privateBucketChecked) return;
-    const response = await fetch(`${this.supabaseUrl}/storage/v1/bucket/${this.bucket}`, { headers: this.headers() });
-    if (!response.ok) throw new ServiceUnavailableException('O armazenamento privado de imagens não está configurado. Tente novamente mais tarde.');
+    let response: Response;
+    try {
+      response = await fetch(`${this.supabaseUrl}/storage/v1/bucket/${this.bucket}`, { headers: this.headers() });
+    } catch (error) {
+      this.logger.error(`essay_storage_bucket_check_failed bucket=${this.bucket} reason=${safeError(error)}`);
+      throw new ServiceUnavailableException('O armazenamento privado de imagens não está configurado. Tente novamente mais tarde.');
+    }
+    if (response.status === 404) {
+      try {
+        const created = await fetch(`${this.supabaseUrl}/storage/v1/bucket`, {
+          method: 'POST',
+          headers: this.headers(),
+          body: JSON.stringify({ id: this.bucket, name: this.bucket, public: false }),
+        });
+        // A concurrent first upload may have created it between the GET and
+        // POST. In either case, verify the final bucket configuration below.
+        if (!created.ok && created.status !== 409) {
+          this.logger.error(`essay_storage_bucket_create_failed bucket=${this.bucket} status=${created.status}`);
+        }
+        response = await fetch(`${this.supabaseUrl}/storage/v1/bucket/${this.bucket}`, { headers: this.headers() });
+      } catch (error) {
+        this.logger.error(`essay_storage_bucket_create_failed bucket=${this.bucket} reason=${safeError(error)}`);
+      }
+    }
+    if (!response.ok) {
+      this.logger.error(`essay_storage_bucket_unavailable bucket=${this.bucket} status=${response.status}`);
+      throw new ServiceUnavailableException('O armazenamento privado de imagens não está configurado. Tente novamente mais tarde.');
+    }
     const descriptor = await response.json().catch(() => null) as { public?: unknown } | null;
-    if (descriptor?.public === true) throw new ServiceUnavailableException('O armazenamento privado de imagens não está configurado. Tente novamente mais tarde.');
+    if (descriptor?.public === true) {
+      this.logger.error(`essay_storage_bucket_public bucket=${this.bucket}`);
+      throw new ServiceUnavailableException('O armazenamento privado de imagens não está configurado. Tente novamente mais tarde.');
+    }
     this.privateBucketChecked = true;
   }
 
@@ -106,6 +137,10 @@ export class EssayStorageService {
     if (!response.ok) throw new ServiceUnavailableException('Não foi possível acessar uma imagem da redação. Envie-a novamente.');
     return Buffer.from(await response.arrayBuffer());
   }
+}
+
+function safeError(error: unknown) {
+  return error instanceof Error ? error.message.split('\n', 1)[0].slice(0, 160) : typeof error;
 }
 
 function extension(mimeType: string) {
