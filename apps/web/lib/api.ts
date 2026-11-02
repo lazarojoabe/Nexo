@@ -13,6 +13,7 @@ export type Question = { id: string; examId?: string; number?: number; area: str
 export type QuizAnswer = { correct: boolean; correctOptionId: string; explanation: string };
 export type QuizSession = { id: string; examId?: string; questionIds: string[]; attempts?: Array<{ questionId: string; optionId: string; correct: boolean }> };
 export type QuizSummary = { total: number; answered: number; correct: number; attempts: Array<{ questionId: string; optionId: string; correct: boolean }>; areas: Array<{ area: string; total: number; answered: number; correct: number; accuracy: number | null }> };
+export type QuizHistory = { summary: { sessions: number; completed: number; answered: number; correct: number; percentage: number | null }; sessions: Array<{ id: string; examId?: string; createdAt: string; total: number; answered: number; correct: number; percentage: number | null; complete: boolean }> };
 export type Dashboard = { examCount: number; progress: { answered: number; correct: number; percentage: number } | null; lastSession: ResumeSession | null; resumeSession: ResumeSession | null };
 export type ResumeSession = { id: string; examId?: string; total: number; answered: number; correct: number; complete: boolean };
 export type TranscriptionParagraph = { index: number; rawText: string; normalizedText: string; confidence: number; lineRange: { start: number; end: number } };
@@ -109,6 +110,7 @@ export const api = {
   questions: (examId: string, area?: string) => request<Question[]>(`/questions?examId=${encodeURIComponent(examId)}${area ? `&area=${encodeURIComponent(area)}` : ''}`),
   signUp: (email: string, password: string) => request<{ confirmationRequired: true }>('/auth/sign-up', { method: 'POST', body: JSON.stringify({ email, password }) }),
   dashboard: () => request<Dashboard>('/dashboard', { requiresAuth: true }),
+  quizHistory: () => request<QuizHistory>('/quiz-history', { requiresAuth: true }),
   createSession: (examId: string, area?: string) => request<QuizSession>('/quiz-sessions', { method: 'POST', body: JSON.stringify({ examId, ...(area ? { area } : {}) }), requiresAuth: true }),
   session: (id: string) => request<QuizSession>(`/quiz-sessions/${id}`, { requiresAuth: true }),
   answer: (sessionId: string, questionId: string, optionId: string) => request<QuizAnswer>(`/quiz-sessions/${sessionId}/answers?questionId=${encodeURIComponent(questionId)}`, { method: 'POST', body: JSON.stringify({ optionId }), requiresAuth: true }),

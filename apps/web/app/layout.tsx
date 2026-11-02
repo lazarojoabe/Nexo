@@ -4,8 +4,10 @@ import './refinements.css';
 import './quiz-session.css';
 import './quiz-navigator.css';
 import './question-assets.css';
+import './quiz-history.css';
 import './exam-selector.css';
 import './transcription-fidelity.css';
+import './mobile-usability.css';
 import { ServiceWorker } from './service-worker';
 import { AuthProvider } from '../components/auth-provider';
 

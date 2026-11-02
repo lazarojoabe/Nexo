@@ -26,6 +26,17 @@ describe('cliente HTTP', () => {
     expect(new Headers(options.headers).get('x-user-id')).toBeNull();
   });
 
+  it('protege o histórico de quiz com o mesmo Bearer token', async () => {
+    setApiAuthAdapterForTests({ accessToken: async () => 'access-token', refreshAccessToken: async () => null, clearSession: async () => undefined });
+    globalThis.fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({ summary: { sessions: 0, completed: 0, answered: 0, correct: 0, percentage: null }, sessions: [] }), { status: 200, headers: { 'content-type': 'application/json' } }));
+
+    await api.quizHistory();
+
+    const [url, options] = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [string, RequestInit];
+    expect(url).toContain('/quiz-history');
+    expect(new Headers(options.headers).get('authorization')).toBe('Bearer access-token');
+  });
+
   it('atualiza a sessão uma vez após 401 e repete a requisição com o novo Bearer token', async () => {
     const refresh = vi.fn().mockResolvedValue('fresh-token');
     const clear = vi.fn().mockResolvedValue(undefined);

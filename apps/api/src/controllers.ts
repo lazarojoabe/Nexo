@@ -43,6 +43,7 @@ export class QuizController {
   @Get('questions') questions(@Query('area') area?: string, @Query('examId') examId?: string) { return this.quiz.listQuestions(area, examId); }
   @Get('questions/:id') async question(@Param('id') id: string) { const { correctOptionId, ...question } = await this.quiz.question(id); return question; }
   @Get('dashboard') async dashboard(@Headers('authorization') authorization: string | undefined) { return this.quiz.dashboard(await this.userId(authorization)); }
+  @Get('quiz-history') async history(@Headers('authorization') authorization: string | undefined) { return this.quiz.history(await this.userId(authorization)); }
   @Post('quiz-sessions') async start(@Headers('authorization') authorization: string | undefined, @Body() dto: StartQuizDto) { return this.quiz.createSession(dto.questionIds, dto.examId, await this.userId(authorization), dto.area); }
   @Get('quiz-sessions/:id') async session(@Param('id') id: string, @Headers('authorization') authorization: string | undefined) { return this.quiz.session(id, await this.userId(authorization)); }
   @Post('quiz-sessions/:id/answers') async answer(@Param('id') id: string, @Headers('authorization') authorization: string | undefined, @Body() dto: AnswerDto, @Query('questionId') questionId: string) { return this.quiz.answer(id, questionId, dto.optionId, await this.userId(authorization)); }

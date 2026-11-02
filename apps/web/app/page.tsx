@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { api, type Dashboard, type EssayDetail, type EssayEvaluation, type EssayHistory, type Exam, type Question, type QuizAnswer, type QuizSession, type QuizSummary, type Transcription } from '../lib/api';
+import { api, type Dashboard, type EssayDetail, type EssayEvaluation, type EssayHistory, type Exam, type Question, type QuizAnswer, type QuizHistory, type QuizSession, type QuizSummary, type Transcription } from '../lib/api';
 import { ErrorState } from '../components/error-state';
 import { LoadingState } from '../components/loading-state';
 import { ExamSelector } from '../components/exam-selector';
@@ -9,6 +9,7 @@ import { EssayUpload } from '../components/essay-upload';
 import { TranscriptionEditor } from '../components/transcription-editor';
 import { EvaluationResult } from '../components/evaluation-result';
 import { EssayHistoryPanel } from '../components/essay-history';
+import { QuizHistoryPanel } from '../components/quiz-history';
 import { Icon } from '../components/ui/icon';
 import { RequireAuth } from '../components/require-auth';
 import { accountName, useAuth } from '../components/auth-provider';
@@ -25,6 +26,9 @@ function AuthenticatedHome() {
   const [view, setView] = useState<View>('home');
   const [dashboard, setDashboard] = useState<Dashboard>();
   const [dashboardError, setDashboardError] = useState('');
+  const [quizHistory, setQuizHistory] = useState<QuizHistory>();
+  const [quizHistoryError, setQuizHistoryError] = useState('');
+  const [loadingQuizHistory, setLoadingQuizHistory] = useState(true);
   const [exams, setExams] = useState<Exam[]>([]);
   const [loadingExams, setLoadingExams] = useState(false);
   const [startingExamId, setStartingExamId] = useState('');
@@ -57,11 +61,16 @@ function AuthenticatedHome() {
   const [loadingEssayHistory, setLoadingEssayHistory] = useState(false);
 
   const greeting = useMemo(() => new Date().getHours() < 12 ? 'Bom dia' : new Date().getHours() < 18 ? 'Boa tarde' : 'Boa noite', []);
-  useEffect(() => { void loadDashboard(); }, []);
+  useEffect(() => { void loadDashboard(); void loadQuizHistory(); }, []);
 
   async function loadDashboard() {
     setDashboardError('');
     try { setDashboard(await api.dashboard()); } catch (error) { setDashboardError(message(error)); }
+  }
+
+  async function loadQuizHistory() {
+    setLoadingQuizHistory(true); setQuizHistoryError('');
+    try { setQuizHistory(await api.quizHistory()); } catch (error) { setQuizHistoryError(message(error)); } finally { setLoadingQuizHistory(false); }
   }
 
   async function openExams() {
@@ -84,17 +93,17 @@ function AuthenticatedHome() {
     } catch (error) { setFlowError(message(error)); } finally { setStartingExamId(''); }
   }
 
-  async function resumeQuiz(id: string) {
+  async function resumeQuiz(id: string, showResult = false) {
     setFlowError('');
     try {
-      const [savedSession, currentExams] = await Promise.all([api.session(id), exams.length ? Promise.resolve(exams) : api.exams()]);
+      const [savedSession, currentExams, savedSummary] = await Promise.all([api.session(id), exams.length ? Promise.resolve(exams) : api.exams(), showResult ? api.results(id) : Promise.resolve(undefined)]);
       const selectedExam = currentExams.find((item) => item.id === savedSession.examId);
       if (!selectedExam) throw new Error('A prova desta sessão não está mais disponível.');
       const list = await api.questions(selectedExam.id);
       const byId = new Map(list.map((question) => [question.id, question]));
       const orderedQuestions = savedSession.questionIds.map((questionId) => byId.get(questionId)).filter((question): question is Question => Boolean(question));
       if (!orderedQuestions.length) throw new Error('As questões desta sessão não estão disponíveis.');
-      setExams(currentExams); setExam(selectedExam); setQuestions(orderedQuestions); setSession(savedSession); setQuestionIndex(Math.min(savedSession.attempts?.length ?? 0, orderedQuestions.length - 1)); setSelected(undefined); setAnswer(undefined); setSummary(undefined); setAnsweredQuestionIds(savedSession.attempts?.map((attempt) => attempt.questionId) ?? []); setView('quiz');
+      setExams(currentExams); setExam(selectedExam); setQuestions(orderedQuestions); setSession(savedSession); setQuestionIndex(showResult ? 0 : Math.min(savedSession.attempts?.length ?? 0, orderedQuestions.length - 1)); setSelected(undefined); setAnswer(undefined); setSummary(savedSummary); setAnsweredQuestionIds(savedSession.attempts?.map((attempt) => attempt.questionId) ?? []); setView('quiz');
     } catch (error) { setFlowError(message(error)); }
   }
 
@@ -112,13 +121,13 @@ function AuthenticatedHome() {
   async function nextQuestion() {
     if (!session) return;
     if (questionIndex + 1 < questions.length) { setQuestionIndex((index) => index + 1); setSelected(undefined); setAnswer(undefined); return; }
-    try { setSummary(await api.results(session.id)); void loadDashboard(); } catch (error) { setFlowError(message(error)); }
+    try { setSummary(await api.results(session.id)); void loadDashboard(); void loadQuizHistory(); } catch (error) { setFlowError(message(error)); }
   }
 
   async function finishQuiz() {
     if (!session) return;
     setFlowError('');
-    try { setSummary(await api.results(session.id)); void loadDashboard(); } catch (error) { setFlowError(message(error)); }
+    try { setSummary(await api.results(session.id)); void loadDashboard(); void loadQuizHistory(); } catch (error) { setFlowError(message(error)); }
   }
 
   function goToQuestion(nextIndex: number) {
@@ -189,16 +198,16 @@ function AuthenticatedHome() {
   }
 
   return <div className="app-shell"><header className="app-header"><div className="brand-lockup"><img className="brand-logo" src="/icon.svg" alt="" /><span>nexo</span></div><div className="account-panel"><span className="account-copy"><b>{user ? accountName(user) : 'Estudante'}</b><small>{user?.email}</small></span><button type="button" onClick={() => void leaveAccount()} aria-label="Sair da conta">Sair</button></div></header><main>
-    {view === 'home' && <HomeView greeting={greeting} dashboard={dashboard} error={dashboardError} onRetry={() => void loadDashboard()} onExams={() => void openExams()} onEssay={chooseEssay} onResume={(id) => void resumeQuiz(id)} />}
+    {view === 'home' && <HomeView greeting={greeting} dashboard={dashboard} error={dashboardError} quizHistory={quizHistory} quizHistoryError={quizHistoryError} loadingQuizHistory={loadingQuizHistory} onRetry={() => void loadDashboard()} onRetryQuizHistory={() => void loadQuizHistory()} onExams={() => void openExams()} onEssay={chooseEssay} onResume={(id) => void resumeQuiz(id)} onOpenQuizHistory={(id, complete) => void resumeQuiz(id, complete)} />}
     {view === 'exams' && <ScreenHeader title="Provas" onBack={backHome}>{loadingExams ? <LoadingState label="Carregando provas…" /> : flowError ? <ErrorState message={flowError} retry={() => void openExams()} /> : <ExamSelector exams={exams} startingExamId={startingExamId} onStart={(item, area) => void startExam(item, area)} />}</ScreenHeader>}
     {view === 'quiz' && <ScreenHeader title="Resolver prova" onBack={() => setView('exams')}>{flowError && <ErrorState message={flowError} />}{exam && <QuizSessionView exam={exam} questions={questions} index={questionIndex} selected={selected} feedback={answer} sending={sendingAnswer} summary={summary} answeredQuestionIds={answeredQuestionIds} onSelect={selectAnswer} onConfirm={() => { if (selected) void submitAnswer(selected); }} onSkip={() => void nextQuestion()} onFinish={() => void finishQuiz()} onGoToQuestion={goToQuestion} onNext={() => void nextQuestion()} onRetry={retryExam} onChooseExam={() => void openExams()} />}</ScreenHeader>}
     {view === 'essay' && <ScreenHeader title="Minha redação" onBack={backHome}><EssayView phase={essayPhase} topic={topic} essayFiles={essayFiles} uploadedCount={uploadedCount} uploading={uploading} consent={consent} transcribing={transcribing} transcription={transcription} text={transcribedText} savingText={savingText} evaluation={evaluation} evaluating={evaluating} error={essayError} history={essayHistory} historyLoading={loadingEssayHistory} onTopic={setTopic} onCreate={() => void createEssay()} onFiles={setEssayFiles} onFileValidationError={setEssayError} onUpload={() => void uploadPages()} onConsent={setConsent} onTranscribe={() => void transcribeEssay()} onText={setTranscribedText} onConfirm={() => void confirmText()} onEvaluate={() => void evaluateEssay()} onOpenHistory={(id) => void openHistoryEssay(id)} onNew={resetEssay} /></ScreenHeader>}
   </main><nav className="bottom-nav" aria-label="Navegação principal"><button className={view === 'home' ? 'active' : ''} onClick={backHome}><Icon name="home" size={20} /><span>Início</span></button><button className={view === 'exams' || view === 'quiz' ? 'active' : ''} onClick={() => void openExams()}><Icon name="book" size={20} /><span>Provas</span></button><button className={view === 'essay' ? 'active' : ''} onClick={chooseEssay}><Icon name="pen" size={20} /><span>Redação</span></button></nav></div>;
 }
 
-function HomeView({ greeting, dashboard, error, onRetry, onExams, onEssay, onResume }: { greeting: string; dashboard?: Dashboard; error: string; onRetry: () => void; onExams: () => void; onEssay: () => void; onResume: (id: string) => void }) {
+function HomeView({ greeting, dashboard, error, quizHistory, quizHistoryError, loadingQuizHistory, onRetry, onRetryQuizHistory, onExams, onEssay, onResume, onOpenQuizHistory }: { greeting: string; dashboard?: Dashboard; error: string; quizHistory?: QuizHistory; quizHistoryError: string; loadingQuizHistory: boolean; onRetry: () => void; onRetryQuizHistory: () => void; onExams: () => void; onEssay: () => void; onResume: (id: string) => void; onOpenQuizHistory: (id: string, complete: boolean) => void }) {
   return <section className="home-view"><p className="eyebrow">{greeting.toUpperCase()}, ESTUDANTE</p><h1>Seu estudo, em<br /><em>movimento real.</em></h1><p className="home-intro">Resolva provas importadas do ENEM ou transforme uma redação manuscrita em um plano de evolução.</p><div className="primary-actions"><button className="hero-action dark" onClick={onExams}><Icon name="book" size={22} /><span><b>Resolver uma prova</b><small>Escolha o ano, dia e caderno</small></span><Icon name="arrow" size={19} /></button><button className="hero-action light" onClick={onEssay}><Icon name="pen" size={22} /><span><b>Corrigir minha redação</b><small>Foto, transcrição e devolutiva</small></span><Icon name="arrow" size={19} /></button></div>
-    {error ? <ErrorState message={error} retry={onRetry} /> : !dashboard ? <LoadingState label="Carregando seu resumo…" /> : <><section className="real-summary"><article><strong>{dashboard.examCount}</strong><span>{dashboard.examCount === 1 ? 'prova disponível' : 'provas disponíveis'}</span></article>{dashboard.progress && <article><strong>{dashboard.progress.percentage}%</strong><span>aproveitamento em {dashboard.progress.answered} resposta{dashboard.progress.answered === 1 ? '' : 's'}</span></article>}</section>{dashboard.resumeSession && <section className="resume-card"><p className="eyebrow">CONTINUAR SESSÃO</p><h2>{dashboard.resumeSession.answered} de {dashboard.resumeSession.total} questões respondidas</h2><p>{dashboard.resumeSession.correct} acerto{dashboard.resumeSession.correct === 1 ? '' : 's'} até agora.</p><button className="secondary-button" onClick={() => onResume(dashboard.resumeSession!.id)}>Continuar de onde parei <Icon name="arrow" size={17} /></button></section>}</>}
+    {error ? <ErrorState message={error} retry={onRetry} /> : !dashboard ? <LoadingState label="Carregando seu resumo…" /> : <><section className="real-summary"><article><strong>{dashboard.examCount}</strong><span>{dashboard.examCount === 1 ? 'prova disponível' : 'provas disponíveis'}</span></article>{dashboard.progress && <article><strong>{dashboard.progress.percentage}%</strong><span>aproveitamento em {dashboard.progress.answered} resposta{dashboard.progress.answered === 1 ? '' : 's'}</span></article>}</section>{dashboard.resumeSession && <section className="resume-card"><p className="eyebrow">CONTINUAR SESSÃO</p><h2>{dashboard.resumeSession.answered} de {dashboard.resumeSession.total} questões respondidas</h2><p>{dashboard.resumeSession.correct} acerto{dashboard.resumeSession.correct === 1 ? '' : 's'} até agora.</p><button className="secondary-button" onClick={() => onResume(dashboard.resumeSession!.id)}>Continuar de onde parei <Icon name="arrow" size={17} /></button></section>}<QuizHistoryPanel history={quizHistory} loading={loadingQuizHistory} error={quizHistoryError} onRetry={onRetryQuizHistory} onOpen={onOpenQuizHistory} /></>}
     <p className="disclaimer home-disclaimer">A correção de redação é educacional e não representa uma nota oficial do ENEM.</p>
   </section>;
 }

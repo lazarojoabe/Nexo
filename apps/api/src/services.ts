@@ -12,7 +12,7 @@ import type { HandwritingAiProvider } from './essay-engine/provider';
 type Option = { id: string; label: string; content: string };
 type QuestionAsset = { id: string; url: string; placement: 'before_statement' | 'after_statement' | 'option'; optionLabel?: string | null; displayOrder: number; mimeType: string; altText: string };
 type Question = { id: string; number?: number; area: string; statement: string; explanation: string; imageUrl?: string | null; assets: QuestionAsset[]; correctOptionId: string; options: Option[]; source: string };
-type MemorySession = { userId?: string; examId?: string; questionIds: string[]; attempts: Map<string, { optionId: string; correct: boolean }> };
+type MemorySession = { userId?: string; examId?: string; questionIds: string[]; attempts: Map<string, { optionId: string; correct: boolean }>; createdAt: Date };
 type StoredEssayImage = { id: string; storagePath: string; originalStoragePath?: string | null; mimeType: string; size: number; page: number };
 type MemoryEssay = { id: string; userId: string; topic: string; transcription?: string; transcriptionResult?: unknown; confirmedText?: string; consentAt?: Date; status: string; createdAt: Date; evaluatedAt?: Date; images: StoredEssayImage[]; evaluation?: { payload: unknown } };
 
@@ -80,7 +80,7 @@ export class QuizService implements OnModuleInit {
     await Promise.all(resolvedIds.map((id) => this.question(id)));
     if (!this.databaseEnabled || !this.prisma) {
       const id = crypto.randomUUID();
-      this.sessions.set(id, { userId, examId, questionIds: resolvedIds, attempts: new Map() });
+      this.sessions.set(id, { userId, examId, questionIds: resolvedIds, attempts: new Map(), createdAt: new Date() });
       return { id, questionIds: resolvedIds, examId };
     }
     if (userId) await this.prisma.userProfile.upsert({ where: { id: userId }, update: {}, create: { id: userId } });
@@ -149,12 +149,42 @@ export class QuizService implements OnModuleInit {
     return this.dashboardPayload(exams.length, { id: session.id, examId: session.examId ?? undefined, questionIds: ids, attempts: new Map(session.attempts.map((attempt) => [attempt.questionId, { optionId: attempt.optionId, correct: attempt.correct }])) });
   }
 
+  async history(userId: string) {
+    if (!this.databaseEnabled || !this.prisma) {
+      const sessions = [...this.sessions.entries()]
+        .filter(([, session]) => session.userId === userId)
+        .reverse()
+        .map(([id, session]) => ({ id, examId: session.examId, questionIds: session.questionIds, attempts: [...session.attempts.values()], createdAt: session.createdAt }));
+      return this.historyPayload(sessions);
+    }
+    const sessions = await this.prisma.quizSession.findMany({ where: { userId }, include: { attempts: true }, orderBy: { createdAt: 'desc' } });
+    return this.historyPayload(sessions.map((session) => ({
+      id: session.id,
+      examId: session.examId ?? undefined,
+      questionIds: Array.isArray(session.questionIds) ? session.questionIds.filter((id): id is string => typeof id === 'string') : [],
+      attempts: session.attempts.map((attempt) => ({ correct: attempt.correct })),
+      createdAt: session.createdAt,
+    })));
+  }
+
   private dashboardPayload(examCount: number, session?: { id: string; examId?: string; questionIds: string[]; attempts: Map<string, { optionId: string; correct: boolean }> }) {
     if (!session) return { examCount, progress: null, lastSession: null, resumeSession: null };
     const attempts = [...session.attempts.values()];
     const lastSession = { id: session.id, examId: session.examId, total: session.questionIds.length, answered: attempts.length, correct: attempts.filter((attempt) => attempt.correct).length, complete: attempts.length >= session.questionIds.length };
     const progress = attempts.length ? { answered: attempts.length, correct: lastSession.correct, percentage: Math.round((lastSession.correct / attempts.length) * 100) } : null;
     return { examCount, progress, lastSession, resumeSession: lastSession.complete ? null : lastSession };
+  }
+
+  private historyPayload(sessions: Array<{ id: string; examId?: string; questionIds: string[]; attempts: Array<{ correct: boolean }>; createdAt: Date }>) {
+    const items = sessions.map((session) => {
+      const answered = session.attempts.length;
+      const correct = session.attempts.filter((attempt) => attempt.correct).length;
+      const total = session.questionIds.length;
+      return { id: session.id, examId: session.examId, createdAt: session.createdAt, total, answered, correct, percentage: answered ? Math.round((correct / answered) * 100) : null, complete: answered >= total };
+    });
+    const answered = items.reduce((total, session) => total + session.answered, 0);
+    const correct = items.reduce((total, session) => total + session.correct, 0);
+    return { summary: { sessions: items.length, completed: items.filter((session) => session.complete).length, answered, correct, percentage: answered ? Math.round((correct / answered) * 100) : null }, sessions: items };
   }
 
   private withoutAnswer(question: Question) { const { correctOptionId, ...safe } = question; return [safe]; }
