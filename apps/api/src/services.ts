@@ -56,7 +56,7 @@ export class QuizService implements OnModuleInit {
   async listQuestions(area?: string, examId?: string) {
     if (!this.databaseEnabled || !this.prisma) return this.withoutAnswer(demoQuestion);
     const questions = await this.prisma.question.findMany({ where: { isCancelled: false, ...(area ? { area } : {}), ...(examId ? { examId } : {}) }, include: { options: true, exam: true, assets: { orderBy: [{ placement: 'asc' }, { displayOrder: 'asc' }] } }, orderBy: [{ examId: 'asc' }, { number: 'asc' }] });
-    return questions.map((question) => ({ id: question.id, examId: question.examId, number: question.number, area: question.area, statement: question.statement, explanation: question.explanation ?? 'Explicação ainda não disponível.', imageUrl: question.imageUrl, assets: question.assets.map(presentQuestionAsset), source: question.exam.sourceVersion ?? 'Material importado', options: question.options.map((option) => ({ id: option.id, label: option.label, content: option.content })) }));
+    return questions.map((question) => ({ id: question.id, examId: question.examId, number: question.number, area: question.area, statement: question.statement, explanation: question.explanation ?? 'Explicação ainda não disponível.', imageUrl: normalizeExamAssetUrl(question.imageUrl), assets: question.assets.map(presentQuestionAsset), source: question.exam.sourceVersion ?? 'Material importado', options: question.options.map((option) => ({ id: option.id, label: option.label, content: option.content })) }));
   }
 
   async question(id: string): Promise<Question> {
@@ -66,7 +66,7 @@ export class QuizService implements OnModuleInit {
     }
     const question = await this.prisma.question.findUnique({ where: { id }, include: { options: true, exam: true, assets: { orderBy: [{ placement: 'asc' }, { displayOrder: 'asc' }] } } });
     if (!question || question.isCancelled) throw new NotFoundException('Questão não encontrada.');
-    return { id: question.id, number: question.number, area: question.area, statement: question.statement, explanation: question.explanation ?? 'Explicação ainda não disponível.', imageUrl: question.imageUrl, assets: question.assets.map(presentQuestionAsset), correctOptionId: question.correctOptionId, source: question.exam.sourceVersion ?? 'Material importado', options: question.options.map((option) => ({ id: option.id, label: option.label, content: option.content })) };
+    return { id: question.id, number: question.number, area: question.area, statement: question.statement, explanation: question.explanation ?? 'Explicação ainda não disponível.', imageUrl: normalizeExamAssetUrl(question.imageUrl), assets: question.assets.map(presentQuestionAsset), correctOptionId: question.correctOptionId, source: question.exam.sourceVersion ?? 'Material importado', options: question.options.map((option) => ({ id: option.id, label: option.label, content: option.content })) };
   }
 
   async createSession(questionIds?: string[], examId?: string, userId?: string, area?: string) {
@@ -471,5 +471,24 @@ function confirmedTextToParagraphs(text: string) {
 
 function presentQuestionAsset(asset: { id: string; url: string; placement: string; optionLabel: string | null; displayOrder: number; mimeType: string; altText: string }): QuestionAsset {
   const placement = asset.placement === 'before_statement' || asset.placement === 'after_statement' || asset.placement === 'option' ? asset.placement : 'after_statement';
-  return { id: asset.id, url: asset.url, placement, optionLabel: asset.optionLabel, displayOrder: asset.displayOrder, mimeType: asset.mimeType, altText: asset.altText };
+  return { id: asset.id, url: normalizeExamAssetUrl(asset.url) ?? asset.url, placement, optionLabel: asset.optionLabel, displayOrder: asset.displayOrder, mimeType: asset.mimeType, altText: asset.altText };
+}
+
+/**
+ * Older imports may contain the local development URL. Rewrite only that
+ * known local asset origin when a public production base is configured; other
+ * external URLs remain untouched.
+ */
+function normalizeExamAssetUrl(value: string | null | undefined) {
+  if (!value) return value;
+  const publicBase = process.env.EXAM_ASSET_PUBLIC_URL?.replace(/\/+$/, '');
+  if (!publicBase) return value;
+  try {
+    const parsed = new URL(value);
+    if (!['localhost', '127.0.0.1'].includes(parsed.hostname)) return value;
+    if (!parsed.pathname.startsWith('/exam-assets/')) return value;
+    return `${publicBase}${parsed.pathname.slice('/exam-assets'.length)}${parsed.search}${parsed.hash}`;
+  } catch {
+    return value;
+  }
 }

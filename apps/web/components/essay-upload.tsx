@@ -14,7 +14,7 @@ export function EssayUpload({ files, uploadedCount, uploading, onChange, onUploa
     onChange([...files, ...valid.slice(0, available)]);
     const invalidCount = selected.length - valid.length;
     const excessCount = Math.max(0, valid.length - available);
-    if (invalidCount) onValidationError?.('Algumas páginas não puderam ser adicionadas. Use fotos em JPEG, PNG ou WebP de até 8 MB.');
+    if (invalidCount) onValidationError?.('Algumas páginas não puderam ser adicionadas. Use fotos em JPG/JPEG, PNG ou WebP de até 8 MB.');
     else if (excessCount) onValidationError?.('Você pode enviar no máximo 5 páginas por redação.');
     else onValidationError?.('');
     event.target.value = '';
@@ -35,8 +35,15 @@ async function hasSupportedSignature(file: File) {
     const isJpeg = bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
     const isPng = bytes.length >= 8 && [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a].every((value, index) => bytes[index] === value);
     const isWebp = bytes.length >= 12 && String.fromCharCode(...bytes.slice(0, 4)) === 'RIFF' && String.fromCharCode(...bytes.slice(8, 12)) === 'WEBP';
-    return isJpeg || isPng || isWebp;
+    // Some Android file providers expose a valid image with a generic or
+    // non-standard MIME value. Keep the signature check as the primary guard,
+    // but allow the declared JPG/PNG/WebP type or extension as a fallback so
+    // native gallery captures are not discarded before upload.
+    const declaredType = file.type.toLowerCase();
+    const declaredImage = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(declaredType);
+    const declaredExtension = /\.(?:jpe?g|png|webp)$/i.test(file.name);
+    return isJpeg || isPng || isWebp || declaredImage || declaredExtension;
   } catch {
-    return false;
+    return /\.(?:jpe?g|png|webp)$/i.test(file.name) || ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type.toLowerCase());
   }
 }
