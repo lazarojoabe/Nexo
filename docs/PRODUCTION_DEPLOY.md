@@ -2,6 +2,17 @@
 
 O caminho recomendado para este monorepo é **Vercel** para a web Next.js/PWA, **Render** para a API NestJS e **Supabase** para autenticação, banco e imagens. A automação em [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) valida tipos, testes e os builds em todo pull request e em cada envio para `main`.
 
+O workflow [`Deploy production`](../.github/workflows/deploy-production.yml) só aciona a publicação automática depois que esse CI termina com sucesso. Desabilite o auto-deploy por push nos dois provedores para que o GitHub seja a única origem do deploy.
+
+## Secrets do GitHub
+
+Em **GitHub > Settings > Secrets and variables > Actions**, crie estes secrets de repositório:
+
+- `RENDER_DEPLOY_HOOK_URL`: URL do **Deploy Hook** do Web Service da API no Render.
+- `VERCEL_DEPLOY_HOOK_URL`: URL do **Deploy Hook** do projeto web na Vercel.
+
+As URLs dos hooks são credenciais de publicação; não as exponha em variáveis comuns, logs, commits ou no navegador. Depois de criadas, abra **Actions > Deploy production > Run workflow** e escolha `both` para a primeira publicação manual. Nos próximos commits em `main`, o deploy será disparado automaticamente após o CI verde.
+
 ## Ordem de publicação
 
 1. Envie este commit ao GitHub e confirme que o workflow **CI / Qualidade e build** ficou verde. Em **Settings > Branches**, torne esse check obrigatório antes de aceitar mudanças em `main`.
