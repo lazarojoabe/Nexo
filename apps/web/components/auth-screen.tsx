@@ -48,7 +48,7 @@ export function AuthScreen({ mode }: { mode: AuthScreenMode }) {
         router.replace('/');
       } else if (mode === 'sign-up') {
         await signUp(email, password);
-        router.replace(`/confirmar-email?email=${encodeURIComponent(email.trim())}`);
+        router.replace('/');
       } else if (mode === 'recovery') {
         await requestPasswordReset(email);
         setEmail('');
@@ -67,7 +67,7 @@ export function AuthScreen({ mode }: { mode: AuthScreenMode }) {
 
   if (mode === 'confirm-email') return <AuthFrame title="Confirme seu e-mail" intro="Enviamos um link seguro para ativar sua conta.">
     <p className="auth-notice" role="status">{email ? <>Confira a caixa de entrada de <strong>{email}</strong> e também a pasta de spam.</> : 'Confira sua caixa de entrada e também a pasta de spam.'}</p>
-    <p className="auth-support">Após confirmar, volte para entrar. Se o link expirar, crie o cadastro novamente usando o mesmo e-mail autorizado.</p>
+    <p className="auth-support">Após confirmar, volte para entrar. Se o link expirar, crie o cadastro novamente usando o mesmo e-mail.</p>
     <Link className="auth-primary-link" href="/entrar">Ir para entrar</Link>
   </AuthFrame>;
 
@@ -75,10 +75,10 @@ export function AuthScreen({ mode }: { mode: AuthScreenMode }) {
   const isNewPassword = mode === 'new-password';
   const isSignUp = mode === 'sign-up';
   const title = isRecovery ? 'Redefinir senha' : isNewPassword ? 'Escolha uma nova senha' : isSignUp ? 'Criar sua conta' : 'Entrar no Nexo';
-  const intro = isRecovery ? 'Informe seu e-mail. Não revelaremos se ele possui uma conta.' : isNewPassword ? 'Use o link recebido por e-mail para definir uma senha forte.' : isSignUp ? 'A beta é restrita aos e-mails convidados.' : 'Acesse seu estudo com segurança.';
+  const intro = isRecovery ? 'Informe seu e-mail. Não revelaremos se ele possui uma conta.' : isNewPassword ? 'Use o link recebido por e-mail para definir uma senha forte.' : isSignUp ? 'Crie sua conta para começar seus estudos.' : 'Acesse seu estudo com segurança.';
 
   return <AuthFrame title={title} intro={intro}>
-    {params.get('confirmado') === '1' && mode === 'sign-in' && <p className="auth-notice" role="status">E-mail confirmado. Entre para continuar.</p>}
+    {params.get('cadastro') === '1' && mode === 'sign-in' && <p className="auth-notice" role="status">Cadastro concluído. Entre com sua senha para continuar.</p>}
     {error && <p className="auth-notice auth-error" role="alert" tabIndex={-1} ref={errorRef}>{error}</p>}
     {confirmation && <p className="auth-notice" role="status">{confirmation}</p>}
     <form className="auth-form" onSubmit={(event) => void submit(event)} noValidate>
@@ -89,7 +89,7 @@ export function AuthScreen({ mode }: { mode: AuthScreenMode }) {
       {isNewPassword && <PasswordField id="auth-password-confirmation" label="Repita a nova senha" value={confirmation} onChange={setConfirmation} visible={showPassword} onVisibility={() => setShowPassword((value) => !value)} autoComplete="new-password" />}
       <button className="auth-submit" type="submit" disabled={busy}>{busy ? 'Aguarde…' : isRecovery ? 'Enviar instruções' : isNewPassword ? 'Atualizar senha' : isSignUp ? 'Criar conta' : 'Entrar'}</button>
     </form>
-    {mode === 'sign-in' && <div className="auth-links"><Link href="/recuperar-senha">Esqueci minha senha</Link><Link href="/cadastro">Recebi um convite</Link></div>}
+    {mode === 'sign-in' && <div className="auth-links"><Link href="/recuperar-senha">Esqueci minha senha</Link><Link href="/cadastro">Criar conta</Link></div>}
     {mode === 'sign-up' && <p className="auth-links"><Link href="/entrar">Já tenho conta</Link></p>}
     {mode === 'recovery' && <p className="auth-links"><Link href="/entrar">Voltar para entrar</Link></p>}
     {mode === 'new-password' && <p className="auth-links"><Link href="/entrar">Voltar para entrar</Link></p>}

@@ -108,7 +108,7 @@ function redirectToSignIn() {
 export const api = {
   exams: () => request<Exam[]>('/exams'),
   questions: (examId: string, area?: string) => request<Question[]>(`/questions?examId=${encodeURIComponent(examId)}${area ? `&area=${encodeURIComponent(area)}` : ''}`),
-  signUp: (email: string, password: string) => request<{ confirmationRequired: true }>('/auth/sign-up', { method: 'POST', body: JSON.stringify({ email, password }) }),
+  signUp: (email: string, password: string) => request<{ readyToSignIn: true }>('/auth/sign-up', { method: 'POST', body: JSON.stringify({ email, password }) }),
   dashboard: () => request<Dashboard>('/dashboard', { requiresAuth: true }),
   quizHistory: () => request<QuizHistory>('/quiz-history', { requiresAuth: true }),
   createSession: (examId: string, area?: string) => request<QuizSession>('/quiz-sessions', { method: 'POST', body: JSON.stringify({ examId, ...(area ? { area } : {}) }), requiresAuth: true }),

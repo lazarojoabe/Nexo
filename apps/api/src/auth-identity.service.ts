@@ -1,8 +1,10 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import { createHmac, createPublicKey, timingSafeEqual, verify as verifySignature, type KeyObject } from 'node:crypto';
 
-type JwtHeader = { alg?: unknown; typ?: unknown };
+type JwtHeader = { alg?: unknown; typ?: unknown; kid?: unknown };
 type JwtPayload = { sub?: unknown; aud?: unknown; exp?: unknown; nbf?: unknown; iat?: unknown; role?: unknown; iss?: unknown; email?: unknown; user_metadata?: unknown };
+type Jwk = { kid?: unknown; kty?: unknown; alg?: unknown; use?: unknown; crv?: unknown; x?: unknown; y?: unknown };
+type SigningKeys = { keys: Map<string, KeyObject>; expiresAt: number };
 
 export type AuthenticatedUser = { id: string; email?: string; displayName?: string };
 
@@ -12,31 +14,77 @@ export type AuthenticatedUser = { id: string; email?: string; displayName?: stri
  */
 @Injectable()
 export class AuthIdentityService {
-  identity(authorization?: string): AuthenticatedUser {
+  private signingKeys?: SigningKeys;
+
+  async identity(authorization?: string): Promise<AuthenticatedUser> {
     if (authorization?.startsWith('Bearer ')) return this.fromBearerToken(authorization.slice('Bearer '.length));
     if (this.demoEnabled()) return { id: 'demo-user', displayName: 'Estudante demonstrativo' };
     throw new UnauthorizedException('Autenticação é obrigatória neste ambiente.');
   }
 
   /** Kept for service-level callers that only need the subject. */
-  userId(authorization?: string) { return this.identity(authorization).id; }
+  async userId(authorization?: string) { return (await this.identity(authorization)).id; }
 
   private demoEnabled() {
     return (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') && process.env.DEMO_AUTH_ENABLED === 'true';
   }
 
-  private fromBearerToken(token: string): AuthenticatedUser {
-    const secret = process.env.SUPABASE_JWT_SECRET;
-    if (!secret || token.length < 32 || token.length > 8_000) throw invalidToken();
+  private async fromBearerToken(token: string): Promise<AuthenticatedUser> {
+    if (token.length < 32 || token.length > 8_000) throw invalidToken();
     const parts = token.split('.');
     if (parts.length !== 3 || parts.some((part) => part.length > 5_400)) throw invalidToken();
     const header = parsePart<JwtHeader>(parts[0]);
     const payload = parsePart<JwtPayload>(parts[1]);
-    if (!header || header.alg !== 'HS256' || (header.typ !== undefined && header.typ !== 'JWT') || !payload) throw invalidToken();
-    const expected = createHmac('sha256', secret).update(`${parts[0]}.${parts[1]}`).digest();
+    if (!header || (header.typ !== undefined && header.typ !== 'JWT') || !payload) throw invalidToken();
     const received = decodeBase64Url(parts[2]);
-    if (!received || received.length !== expected.length || !timingSafeEqual(received, expected)) throw invalidToken();
+    if (!received) throw invalidToken();
 
+    const signingInput = `${parts[0]}.${parts[1]}`;
+    if (header.alg === 'HS256') this.verifyHs256(signingInput, received);
+    else if (header.alg === 'ES256') await this.verifyEs256(signingInput, received, header.kid);
+    else throw invalidToken();
+
+    return this.authenticatedUser(payload);
+  }
+
+  private verifyHs256(signingInput: string, received: Buffer) {
+    const secret = process.env.SUPABASE_JWT_SECRET;
+    if (!secret) throw invalidToken();
+    const expected = createHmac('sha256', secret).update(signingInput).digest();
+    if (received.length !== expected.length || !timingSafeEqual(received, expected)) throw invalidToken();
+  }
+
+  private async verifyEs256(signingInput: string, received: Buffer, kid: unknown) {
+    if (typeof kid !== 'string' || !kid || kid.length > 256 || received.length !== 64) throw invalidToken();
+    const key = (await this.supabaseSigningKeys()).get(kid);
+    if (!key || !verifySignature('sha256', Buffer.from(signingInput), { key, dsaEncoding: 'ieee-p1363' }, received)) throw invalidToken();
+  }
+
+  private async supabaseSigningKeys(): Promise<Map<string, KeyObject>> {
+    if (this.signingKeys && this.signingKeys.expiresAt > Date.now()) return this.signingKeys.keys;
+
+    const url = process.env.SUPABASE_URL?.replace(/\/$/, '');
+    if (!url) throw invalidToken();
+    try {
+      const response = await fetch(`${url}/auth/v1/.well-known/jwks.json`, { signal: AbortSignal.timeout(5_000) });
+      if (!response.ok) throw new Error('jwks-response');
+      const value: unknown = await response.json();
+      if (!value || typeof value !== 'object' || !Array.isArray((value as { keys?: unknown }).keys)) throw new Error('jwks-payload');
+
+      const keys = new Map<string, KeyObject>();
+      for (const candidate of (value as { keys: unknown[] }).keys.slice(0, 20)) {
+        if (!isEs256Jwk(candidate)) continue;
+        try { keys.set(candidate.kid, createPublicKey({ key: candidate, format: 'jwk' })); } catch { /* Ignore malformed public keys. */ }
+      }
+      if (!keys.size) throw new Error('jwks-keys');
+      this.signingKeys = { keys, expiresAt: Date.now() + 5 * 60 * 1000 };
+      return keys;
+    } catch {
+      throw invalidToken();
+    }
+  }
+
+  private authenticatedUser(payload: JwtPayload): AuthenticatedUser {
     const now = Math.floor(Date.now() / 1000);
     if (!isTimestamp(payload.exp) || payload.exp <= now || (isTimestamp(payload.nbf) && payload.nbf > now) || (isTimestamp(payload.iat) && payload.iat > now + 60)) {
       throw new UnauthorizedException('Token de acesso expirado ou inválido.');
@@ -62,6 +110,14 @@ function displayName(metadata: unknown) {
 }
 
 function invalidToken() { return new UnauthorizedException('Token de acesso inválido.'); }
+
+function isEs256Jwk(value: unknown): value is Jwk & { kid: string; kty: 'EC'; alg: 'ES256'; crv: 'P-256'; x: string; y: string } {
+  if (!value || typeof value !== 'object') return false;
+  const key = value as Jwk;
+  return typeof key.kid === 'string' && key.kid.length > 0 && key.kid.length <= 256
+    && key.kty === 'EC' && key.alg === 'ES256' && key.crv === 'P-256'
+    && typeof key.x === 'string' && typeof key.y === 'string';
+}
 
 function parsePart<T>(part: string) {
   const decoded = decodeBase64Url(part);

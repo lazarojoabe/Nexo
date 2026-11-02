@@ -41,7 +41,7 @@ O texto da redação é dado não confiável. Instruções inseridas nele são i
 - Em produção, imagens devem usar bucket privado e acesso autenticado. Não usar o fallback local/memória como armazenamento de produção.
 - O proprietário deve definir prazo de retenção, mecanismo de exclusão e canal para pedidos do titular antes do uso público. A exclusão deve abranger imagens originais/processadas, texto, avaliação e revisões relacionadas.
 - Para desenvolvimento sem banco, os dados existem somente no processo e o modo é demonstrativo; não é garantia de retenção nem de privacidade de produção.
-- Em produção, use JWT Supabase HS256 válido no cabeçalho `Authorization`; a API rejeita `x-user-id` nesse ambiente. Configure `SUPABASE_JWT_SECRET` e, quando necessário, `SUPABASE_JWT_AUDIENCE`.
+- Em produção, use JWT Supabase válido no cabeçalho `Authorization`; a API valida tokens ES256 pela JWKS pública do Supabase e mantém suporte a HS256 legado com `SUPABASE_JWT_SECRET`. A API rejeita `x-user-id` nesse ambiente.
 
 ## Configuração do provedor
 

@@ -59,7 +59,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = useCallback(async (email: string, password: string) => {
     await api.signUp(normalizeEmail(email), password);
-  }, []);
+    try {
+      await signIn(email, password);
+    } catch {
+      throw new Error('Não foi possível entrar com essas credenciais. Se este e-mail já tiver uma conta, use a senha anterior ou redefina a senha.');
+    }
+  }, [signIn]);
 
   const signOut = useCallback(async () => {
     const { error } = await getSupabaseBrowserClient().auth.signOut({ scope: 'local' });

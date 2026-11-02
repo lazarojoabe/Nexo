@@ -65,7 +65,7 @@ export class QuizController {
   @Get('quiz-sessions/:id/results') async results(@Param('id') id: string, @Headers('authorization') authorization: string | undefined) { return this.quiz.results(id, await this.userId(authorization)); }
 
   private async userId(authorization?: string) {
-    const user = this.identity.identity(authorization);
+    const user = await this.identity.identity(authorization);
     await this.profiles.ensure(user);
     return user.id;
   }
@@ -86,7 +86,7 @@ export class EssayController {
   @Get(':id/evaluation') async evaluation(@Param('id') id: string, @Headers('authorization') authorization: string | undefined) { return this.essays.evaluation(id, await this.userId(authorization)); }
 
   private async userId(authorization?: string) {
-    const user = this.identity.identity(authorization);
+    const user = await this.identity.identity(authorization);
     await this.profiles.ensure(user);
     return user.id;
   }
@@ -120,7 +120,7 @@ export class AdminExamImportController {
   }
 
   private async authorize(authorization: string | undefined, key: string | undefined) {
-    const user = this.identity.identity(authorization);
+    const user = await this.identity.identity(authorization);
     await this.profiles.ensure(user);
     this.imports.assertAuthorized(key);
     return user.id;

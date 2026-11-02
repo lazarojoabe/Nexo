@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Qualidade e build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Obter código
+        uses: actions/checkout@v4
+
+      - name: Configurar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+
+      - name: Configurar Node e cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Verificar tipos
+        run: pnpm typecheck
+
+      - name: Executar testes
+        run: pnpm test
+
+      - name: Gerar builds de produção
+        run: pnpm build
