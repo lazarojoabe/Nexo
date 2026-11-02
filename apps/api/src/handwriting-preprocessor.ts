@@ -38,7 +38,10 @@ export class HandwritingPreprocessor {
     const signedMimeType = mimeFromSignature(input);
     let metadata: { format?: string; width?: number; height?: number };
     try {
-      metadata = await sharp(input, { limitInputPixels: maxPixels, failOn: 'error' }).metadata();
+      // Mobile/WhatsApp JPEGs can contain recoverable metadata warnings even
+      // though the pixels are readable. Decode tolerantly, then always emit a
+      // fresh validated JPEG below instead of persisting the original bytes.
+      metadata = await sharp(input, { limitInputPixels: maxPixels, failOn: 'none' }).metadata();
     } catch {
       throw new BadRequestException('Não foi possível ler este arquivo como imagem. Use uma foto em JPEG, PNG ou WebP.');
     }
@@ -55,11 +58,11 @@ export class HandwritingPreprocessor {
     try {
       // Re-encoding strips EXIF (including camera location) before either
       // private copy is stored. The source bytes are never persisted.
-      const original = await sharp(input, { limitInputPixels: maxPixels, failOn: 'error' })
+      const original = await sharp(input, { limitInputPixels: maxPixels, failOn: 'none' })
         .rotate()
         .jpeg({ quality: 94, chromaSubsampling: '4:4:4' })
         .toBuffer();
-      const enhanced = await sharp(original, { limitInputPixels: maxPixels, failOn: 'error' })
+      const enhanced = await sharp(original, { limitInputPixels: maxPixels, failOn: 'none' })
         .rotate()
         .resize({ width: 2400, height: 3200, fit: 'inside', withoutEnlargement: true })
         .grayscale()
