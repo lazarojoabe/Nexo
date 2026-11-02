@@ -12,7 +12,7 @@ Para a sequência recomendada com CI no GitHub, Vercel e Render, veja [Publicaç
 ## Checklist de produção e celular
 
 - [ ] `DEMO_AUTH_ENABLED` não está definido como `true`; `x-user-id` é recusado em produção.
-- [ ] Bucket `essay-images` está privado e as credenciais service-role estão apenas no host da API.
+- [ ] Bucket `essay-images` está privado, `GEMINI_MODEL=gemini-2.5-flash` está configurado e as credenciais service-role estão apenas no host da API.
 - [ ] `WEB_ORIGIN`, CORS, CSP e as Redirect URLs correspondem às URLs HTTPS reais.
 - [ ] A confirmação de e-mail está desativada temporariamente no Supabase e o limite de cadastros por IP foi revisado.
 - [ ] Teste login, logout, expiração/refresh da sessão e recuperação de senha em 320, 360, 390 e 430 px.

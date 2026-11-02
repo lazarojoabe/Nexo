@@ -29,7 +29,7 @@ As URLs dos hooks são credenciais de publicação; não as exponha em variávei
 - **Pre-Deploy Command (após o banco estar configurado):** `pnpm db:deploy`
 - **Auto-Deploy:** branch `main`; prefira aguardar a conclusão dos checks do GitHub, quando a opção estiver disponível.
 
-Crie no painel do Render, como segredos, `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `GEMINI_API_KEY` e `ADMIN_IMPORT_KEY`. Crie como variáveis normais `NODE_ENV=production`, `WEB_ORIGIN=https://SEU-APP.vercel.app`, `SUPABASE_JWT_AUDIENCE=authenticated`, `SUPABASE_ESSAY_BUCKET=essay-images`, `AI_EVALUATIONS_PER_DAY=3` e, se usar imagens de provas persistidas, `EXAM_ASSET_PUBLIC_URL=https://SUA-API.onrender.com/exam-assets`.
+Crie no painel do Render, como segredos, `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `GEMINI_API_KEY` e `ADMIN_IMPORT_KEY`. Crie como variáveis normais `NODE_ENV=production`, `WEB_ORIGIN=https://SEU-APP.vercel.app`, `SUPABASE_JWT_AUDIENCE=authenticated`, `SUPABASE_ESSAY_BUCKET=essay-images`, `GEMINI_MODEL=gemini-2.5-flash`, `AI_EVALUATIONS_PER_DAY=3` e, se usar imagens de provas persistidas, `EXAM_ASSET_PUBLIC_URL=https://SUA-API.onrender.com/exam-assets`.
 
 `SUPABASE_JWT_SECRET` não é necessário para o Supabase atual, que assina tokens ES256 pela JWKS pública.
 

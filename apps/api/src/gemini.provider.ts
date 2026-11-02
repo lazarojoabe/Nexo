@@ -9,7 +9,7 @@ import type { EssayAiProvider, EssayEvaluationRepairRequest, EssayEvaluationRequ
 export class GeminiProvider implements EssayAiProvider {
   private readonly logger = new Logger(GeminiProvider.name);
   private key = process.env.GEMINI_API_KEY;
-  private model = process.env.GEMINI_MODEL ?? 'gemini-2.0-flash';
+  private model = process.env.GEMINI_MODEL ?? 'gemini-2.5-flash';
   readonly providerName = 'gemini';
   get modelName() { return this.model; }
   private get timeout() {
@@ -28,7 +28,7 @@ export class GeminiProvider implements EssayAiProvider {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.key}`, { method: 'POST', signal: controller.signal, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ contents: [{ role: 'user', parts }], generationConfig: { responseMimeType: 'application/json', temperature: this.temperature } }) });
       if (response.status === 429) throw new ServiceUnavailableException('A cota gratuita de IA foi atingida. Tente novamente mais tarde; seus dados foram preservados.');
       if (!response.ok) {
-        this.logger.warn(`gemini_request_failure operation=${operation} status=${response.status}`);
+        this.logger.warn(`gemini_request_failure operation=${operation} model=${this.model} status=${response.status}`);
         const errorPayload = await response.json().catch(() => null) as { error?: { message?: unknown; status?: unknown } } | null;
         const providerMessage = typeof errorPayload?.error?.message === 'string' ? errorPayload.error.message : '';
         const invalidKey = response.status === 400 && /api\s*key\s*(?:not\s*valid|invalid)|invalid\s*api\s*key/i.test(providerMessage);
