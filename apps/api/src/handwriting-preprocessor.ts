@@ -17,6 +17,11 @@ const mimeByFormat: Record<string, EssayImageMimeType | undefined> = {
   jpeg: 'image/jpeg',
   png: 'image/png',
   webp: 'image/webp',
+  // Sharp decodes these formats and re-encodes them to JPEG below before
+  // storage/AI processing, so the rest of the pipeline still receives one
+  // of the supported Gemini image types.
+  avif: 'image/jpeg',
+  heif: 'image/jpeg',
 };
 const maxDimension = 10_000;
 const maxPixels = 25_000_000;
@@ -31,9 +36,6 @@ const maxPixels = 25_000_000;
 export class HandwritingPreprocessor {
   async enhance(input: Buffer): Promise<ProcessedImage> {
     const signedMimeType = mimeFromSignature(input);
-    if (!signedMimeType) {
-      throw new BadRequestException('Não foi possível ler este arquivo como imagem. Use uma foto em JPEG, PNG ou WebP.');
-    }
     let metadata: { format?: string; width?: number; height?: number };
     try {
       metadata = await sharp(input, { limitInputPixels: maxPixels, failOn: 'error' }).metadata();
@@ -43,7 +45,10 @@ export class HandwritingPreprocessor {
     const decodedMimeType = mimeByFormat[metadata.format ?? ''];
     const width = metadata.width;
     const height = metadata.height;
-    if (!decodedMimeType || decodedMimeType !== signedMimeType || !width || !height || width > maxDimension || height > maxDimension || width * height > maxPixels) {
+    // The decoder is authoritative. Signature checks remain an extra guard
+    // when available, but Android providers sometimes wrap valid JPEGs with a
+    // generic signature or MIME value.
+    if (!decodedMimeType || (signedMimeType && decodedMimeType !== signedMimeType && metadata.format !== 'avif' && metadata.format !== 'heif') || !width || !height || width > maxDimension || height > maxDimension || width * height > maxPixels) {
       throw new BadRequestException('A imagem precisa ser JPEG, PNG ou WebP e ter dimensões de até 10.000 px por lado.');
     }
 
