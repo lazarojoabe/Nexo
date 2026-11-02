@@ -117,7 +117,14 @@ export const api = {
   results: (id: string) => request<QuizSummary>(`/quiz-sessions/${id}/results`, { requiresAuth: true }),
   createEssay: (topic: string) => request<{ id: string; topic: string; status: string }>('/essays', { method: 'POST', body: JSON.stringify({ topic }), requiresAuth: true }),
   discardEssay: (essayId: string) => request<{ discarded: boolean }>(`/essays/${essayId}`, { method: 'DELETE', requiresAuth: true }),
-  uploadEssayImage: async (essayId: string, image: File) => { const body = new FormData(); body.append('image', await normalizeEssayImage(image)); return request<{ accepted: boolean; images: number; page: number }>(`/essays/${essayId}/images`, { method: 'POST', body, timeout: 45_000, requiresAuth: true }); },
+  uploadEssayImage: async (essayId: string, image: File) => {
+    const prepared = await normalizeEssayImage(image);
+    const body = new FormData();
+    // Passing the filename explicitly also works in older Android WebViews
+    // that expose Blob/File APIs but do not implement the File constructor.
+    body.append('image', prepared.blob, prepared.name);
+    return request<{ accepted: boolean; images: number; page: number }>(`/essays/${essayId}/images`, { method: 'POST', body, timeout: 45_000, requiresAuth: true });
+  },
   transcribe: (essayId: string, consent: boolean) => request<Transcription>(`/essays/${essayId}/transcribe`, { method: 'POST', body: JSON.stringify({ consent }), timeout: 75_000, requiresAuth: true }),
   saveTranscription: (essayId: string, text: string) => request<{ status: string }>(`/essays/${essayId}/transcription`, { method: 'PATCH', body: JSON.stringify({ text }), requiresAuth: true }),
   evaluateEssay: (essayId: string, consent: boolean) => request<EssayEvaluation>(`/essays/${essayId}/evaluate`, { method: 'POST', body: JSON.stringify({ consent }), timeout: 75_000, requiresAuth: true }),
@@ -132,8 +139,10 @@ export const api = {
  * the edge and send a well-formed JPEG to the API. If the browser cannot
  * decode it, keep the original so the API can return the actionable error.
  */
-async function normalizeEssayImage(image: File): Promise<File> {
-  if (typeof window === 'undefined') return image;
+type PreparedEssayImage = { blob: Blob; name: string };
+
+async function normalizeEssayImage(image: File): Promise<PreparedEssayImage> {
+  if (typeof window === 'undefined') return { blob: image, name: image.name || 'redacao' };
   let bitmap: ImageBitmap | undefined;
   let element: HTMLImageElement | undefined;
   let objectUrl: string | undefined;
@@ -173,7 +182,7 @@ async function normalizeEssayImage(image: File): Promise<File> {
     canvas.width = width;
     canvas.height = height;
     const context = canvas.getContext('2d');
-    if (!context) return image;
+    if (!context) return { blob: image, name: image.name || 'redacao' };
     context.drawImage(source, 0, 0, width, height);
     let blob = typeof canvas.toBlob === 'function'
       ? await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.94))
@@ -183,16 +192,16 @@ async function normalizeEssayImage(image: File): Promise<File> {
     if (!blob) {
       const dataUrl = canvas.toDataURL('image/jpeg', 0.94);
       const comma = dataUrl.indexOf(',');
-      if (comma < 0) return image;
+      if (comma < 0) return { blob: image, name: image.name || 'redacao' };
       const binary = atob(dataUrl.slice(comma + 1));
       const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
       blob = new Blob([bytes], { type: 'image/jpeg' });
     }
-    if (!blob) return image;
+    if (!blob) return { blob: image, name: image.name || 'redacao' };
     const name = image.name.replace(/\.[^.]+$/, '') || 'redacao';
-    return new File([blob], `${name}.jpg`, { type: 'image/jpeg', lastModified: image.lastModified });
+    return { blob, name: `${name}.jpg` };
   } catch {
-    return image;
+    return { blob: image, name: image.name || 'redacao' };
   } finally {
     bitmap?.close();
     if (objectUrl) URL.revokeObjectURL(objectUrl);

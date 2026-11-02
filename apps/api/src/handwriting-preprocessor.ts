@@ -15,6 +15,8 @@ export type ProcessedImage = {
 
 const mimeByFormat: Record<string, EssayImageMimeType | undefined> = {
   jpeg: 'image/jpeg',
+  // Keep the extension spelling as an alias as some decoders report `jpg`.
+  jpg: 'image/jpeg',
   png: 'image/png',
   webp: 'image/webp',
   // Sharp decodes these formats and re-encodes them to JPEG below before
@@ -45,13 +47,14 @@ export class HandwritingPreprocessor {
     } catch {
       throw new BadRequestException('Não foi possível ler este arquivo como imagem. Use uma foto em JPG/JPEG, PNG ou WebP.');
     }
-    const decodedMimeType = mimeByFormat[metadata.format ?? ''];
+    const decodedFormat = (metadata.format ?? '').toLowerCase();
+    const decodedMimeType = mimeByFormat[decodedFormat];
     const width = metadata.width;
     const height = metadata.height;
     // The decoder is authoritative. Signature checks remain an extra guard
     // when available, but Android providers sometimes wrap valid JPEGs with a
     // generic signature or MIME value.
-    if (!decodedMimeType || (signedMimeType && decodedMimeType !== signedMimeType && metadata.format !== 'avif' && metadata.format !== 'heif') || !width || !height || width > maxDimension || height > maxDimension || width * height > maxPixels) {
+    if (!decodedMimeType || (signedMimeType && decodedMimeType !== signedMimeType && decodedFormat !== 'avif' && decodedFormat !== 'heif') || !width || !height || width > maxDimension || height > maxDimension || width * height > maxPixels) {
       throw new BadRequestException('A imagem precisa ser JPG/JPEG, PNG ou WebP e ter dimensões de até 10.000 px por lado.');
     }
 
