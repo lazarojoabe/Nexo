@@ -38,6 +38,19 @@ describe('preparo de imagens manuscritas', () => {
       .resolves.toMatchObject({ width: 90, height: 110, mimeType: 'image/jpeg' });
   });
 
+  it('não bloqueia um JPEG estruturalmente identificado quando o decoder falha', async () => {
+    const jpegHeader = Buffer.alloc(128);
+    jpegHeader.set([0xff, 0xd8, 0xff, 0xc0], 0);
+    jpegHeader.writeUInt16BE(17, 4);
+    jpegHeader[6] = 8;
+    jpegHeader.writeUInt16BE(120, 7);
+    jpegHeader.writeUInt16BE(90, 9);
+    jpegHeader[11] = 3;
+
+    await expect(new HandwritingPreprocessor().enhance(jpegHeader))
+      .resolves.toMatchObject({ width: 90, height: 120, mimeType: 'image/jpeg', enhanced: false });
+  });
+
   it('rejeita dados que não são uma imagem, com orientação acionável', async () => {
     await expect(new HandwritingPreprocessor().enhance(Buffer.from('não é uma imagem')))
       .rejects.toThrow('Use uma foto em JPG/JPEG, PNG ou WebP');

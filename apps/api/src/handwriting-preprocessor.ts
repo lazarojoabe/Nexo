@@ -63,10 +63,14 @@ export class HandwritingPreprocessor {
     }
     if (!metadata) {
       const dimensions = jpegDimensions(source);
-      if (signedMimeType === 'image/jpeg' && dimensions && isSafeDimensions(dimensions.width, dimensions.height)) {
-        this.logger.warn(`essay_image_decoder_fallback bytes=${input.length} width=${dimensions.width} height=${dimensions.height}`);
+      // A browser can display valid mobile JPEGs that libvips refuses because
+      // of a vendor-specific marker. The upload itself must not be blocked by
+      // that optional enhancement step: the 8 MB Multer limit already applies
+      // before this method, and Gemini can consume the original JPEG bytes.
+      if (signedMimeType === 'image/jpeg' && source.length >= 128 && (!dimensions || isSafeDimensions(dimensions.width, dimensions.height))) {
+        this.logger.warn(`essay_image_raw_jpeg_fallback bytes=${input.length} width=${dimensions?.width ?? 'unknown'} height=${dimensions?.height ?? 'unknown'}`);
         const data = source.toString('base64');
-        return { originalMimeType: 'image/jpeg', originalData: data, mimeType: 'image/jpeg', data, width: dimensions.width, height: dimensions.height, enhanced: false };
+        return { originalMimeType: 'image/jpeg', originalData: data, mimeType: 'image/jpeg', data, width: dimensions?.width, height: dimensions?.height, enhanced: false };
       }
       const detail = metadataError instanceof Error ? metadataError.message.split('\n', 1)[0].slice(0, 180) : typeof metadataError;
       this.logger.warn(`essay_image_decode_failure bytes=${input.length} normalizedBytes=${source.length} signature=${signedMimeType ?? 'unknown'} error=${detail}`);
