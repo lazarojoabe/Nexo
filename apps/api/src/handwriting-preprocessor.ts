@@ -4,7 +4,7 @@ import sharp from 'sharp';
 export type EssayImageMimeType = 'image/jpeg' | 'image/png' | 'image/webp';
 export type ProcessedImage = {
   originalMimeType: EssayImageMimeType;
-  /** Sanitized re-encoding; no EXIF or original camera metadata is retained. */
+  /** Re-encoded when possible; the validated JPEG fallback may preserve bytes. */
   originalData: string;
   mimeType: EssayImageMimeType;
   data: string;
@@ -39,16 +39,36 @@ export class HandwritingPreprocessor {
   private readonly logger = new Logger(HandwritingPreprocessor.name);
 
   async enhance(input: Buffer): Promise<ProcessedImage> {
-    const source = normalizeImageBuffer(input);
+    let source = normalizeImageBuffer(input);
     const signedMimeType = mimeFromSignature(source);
-    let metadata: { format?: string; width?: number; height?: number };
+    let metadata: { format?: string; width?: number; height?: number } | undefined;
+    let metadataError: unknown;
     try {
       // Mobile/WhatsApp JPEGs can contain recoverable metadata warnings even
       // though the pixels are readable. Decode tolerantly, then always emit a
       // fresh validated JPEG below instead of persisting the original bytes.
       metadata = await readMetadata(source);
     } catch (error) {
-      const detail = error instanceof Error ? error.message.split('\n', 1)[0].slice(0, 180) : typeof error;
+      metadataError = error;
+      const sanitized = sanitizeJpegMetadata(source);
+      if (sanitized) {
+        source = sanitized;
+        try {
+          metadata = await readMetadata(sanitized);
+          this.logger.warn(`essay_image_metadata_recovered bytes=${input.length} normalizedBytes=${source.length}`);
+        } catch {
+          // Fall through to the structural JPEG fallback below.
+        }
+      }
+    }
+    if (!metadata) {
+      const dimensions = jpegDimensions(source);
+      if (signedMimeType === 'image/jpeg' && dimensions && isSafeDimensions(dimensions.width, dimensions.height)) {
+        this.logger.warn(`essay_image_decoder_fallback bytes=${input.length} width=${dimensions.width} height=${dimensions.height}`);
+        const data = source.toString('base64');
+        return { originalMimeType: 'image/jpeg', originalData: data, mimeType: 'image/jpeg', data, width: dimensions.width, height: dimensions.height, enhanced: false };
+      }
+      const detail = metadataError instanceof Error ? metadataError.message.split('\n', 1)[0].slice(0, 180) : typeof metadataError;
       this.logger.warn(`essay_image_decode_failure bytes=${input.length} normalizedBytes=${source.length} signature=${signedMimeType ?? 'unknown'} error=${detail}`);
       throw new BadRequestException('Não foi possível ler este arquivo como imagem. Use uma foto em JPG/JPEG, PNG ou WebP.');
     }
@@ -59,7 +79,7 @@ export class HandwritingPreprocessor {
     // The decoder is authoritative. Signature checks remain an extra guard
     // when available, but Android providers sometimes wrap valid JPEGs with a
     // generic signature or MIME value.
-    if (!decodedMimeType || (signedMimeType && decodedMimeType !== signedMimeType && decodedFormat !== 'avif' && decodedFormat !== 'heif') || !width || !height || width > maxDimension || height > maxDimension || width * height > maxPixels) {
+    if (!decodedMimeType || (signedMimeType && decodedMimeType !== signedMimeType && decodedFormat !== 'avif' && decodedFormat !== 'heif') || !width || !height || !isSafeDimensions(width, height)) {
       throw new BadRequestException('A imagem precisa ser JPG/JPEG, PNG ou WebP e ter dimensões de até 10.000 px por lado.');
     }
 
@@ -118,6 +138,61 @@ function normalizeImageBuffer(input: Buffer) {
   const jpegMarker = input.indexOf(Buffer.from([0xff, 0xd8, 0xff]));
   if (jpegMarker > 0 && jpegMarker <= 4096) return input.subarray(jpegMarker);
   return input;
+}
+
+function isSafeDimensions(width: number, height: number) {
+  return width > 0 && height > 0 && width <= maxDimension && height <= maxDimension && width * height <= maxPixels;
+}
+
+function jpegDimensions(input: Buffer): { width: number; height: number } | undefined {
+  if (mimeFromSignature(input) !== 'image/jpeg') return undefined;
+  let offset = 2;
+  while (offset + 3 < input.length) {
+    if (input[offset] !== 0xff) return undefined;
+    while (offset < input.length && input[offset] === 0xff) offset += 1;
+    const marker = input[offset++];
+    if (marker === undefined) return undefined;
+    if (marker === 0xd8 || marker === 0xd9 || (marker >= 0xd0 && marker <= 0xd7) || marker === 0x01) continue;
+    if (offset + 2 > input.length) return undefined;
+    const segmentLength = input.readUInt16BE(offset);
+    if (segmentLength < 2 || offset + segmentLength > input.length) return undefined;
+    const isStartOfFrame = (marker >= 0xc0 && marker <= 0xc3) || (marker >= 0xc5 && marker <= 0xc7) || (marker >= 0xc9 && marker <= 0xcb) || (marker >= 0xcd && marker <= 0xcf);
+    if (isStartOfFrame && segmentLength >= 7) return { height: input.readUInt16BE(offset + 3), width: input.readUInt16BE(offset + 5) };
+    if (marker === 0xda) return undefined;
+    offset += segmentLength;
+  }
+  return undefined;
+}
+
+function sanitizeJpegMetadata(input: Buffer) {
+  if (mimeFromSignature(input) !== 'image/jpeg') return undefined;
+  const chunks = [input.subarray(0, 2)];
+  let offset = 2;
+  let changed = false;
+  while (offset + 3 < input.length) {
+    const markerStart = offset;
+    if (input[offset] !== 0xff) return undefined;
+    while (offset < input.length && input[offset] === 0xff) offset += 1;
+    const marker = input[offset++];
+    if (marker === undefined) return undefined;
+    if (marker === 0xda) {
+      chunks.push(input.subarray(markerStart));
+      return changed ? Buffer.concat(chunks) : undefined;
+    }
+    if (marker === 0xd8 || marker === 0xd9 || (marker >= 0xd0 && marker <= 0xd7) || marker === 0x01) {
+      chunks.push(input.subarray(markerStart, offset));
+      continue;
+    }
+    if (offset + 2 > input.length) return undefined;
+    const segmentLength = input.readUInt16BE(offset);
+    if (segmentLength < 2 || offset + segmentLength > input.length) return undefined;
+    const segmentEnd = offset + segmentLength;
+    const isMetadata = (marker >= 0xe0 && marker <= 0xef) || marker === 0xfe;
+    if (!isMetadata) chunks.push(input.subarray(markerStart, segmentEnd));
+    else changed = true;
+    offset = segmentEnd;
+  }
+  return undefined;
 }
 
 function mimeFromSignature(input: Buffer): EssayImageMimeType | undefined {
