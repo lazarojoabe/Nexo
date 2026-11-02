@@ -90,7 +90,9 @@ export class EssayStorageService {
       this.logger.error(`essay_storage_bucket_check_failed bucket=${this.bucket} reason=${safeError(error)}`);
       throw new ServiceUnavailableException('O armazenamento privado de imagens não está configurado. Tente novamente mais tarde.');
     }
-    if (response.status === 404) {
+    const initialDescriptor = await response.clone().json().catch(() => null) as { message?: unknown } | null;
+    const bucketMissing = response.status === 404 || (response.status === 400 && initialDescriptor?.message === 'Bucket not found');
+    if (bucketMissing) {
       try {
         const created = await fetch(`${this.supabaseUrl}/storage/v1/bucket`, {
           method: 'POST',
