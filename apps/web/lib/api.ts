@@ -175,7 +175,19 @@ async function normalizeEssayImage(image: File): Promise<File> {
     const context = canvas.getContext('2d');
     if (!context) return image;
     context.drawImage(source, 0, 0, width, height);
-    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.94));
+    let blob = typeof canvas.toBlob === 'function'
+      ? await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.94))
+      : null;
+    // Older Android WebViews expose canvas.toDataURL but not canvas.toBlob.
+    // Keep the conversion working there instead of sending the original file.
+    if (!blob) {
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.94);
+      const comma = dataUrl.indexOf(',');
+      if (comma < 0) return image;
+      const binary = atob(dataUrl.slice(comma + 1));
+      const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+      blob = new Blob([bytes], { type: 'image/jpeg' });
+    }
     if (!blob) return image;
     const name = image.name.replace(/\.[^.]+$/, '') || 'redacao';
     return new File([blob], `${name}.jpg`, { type: 'image/jpeg', lastModified: image.lastModified });
