@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import sharp from 'sharp';
 
 export type EssayImageMimeType = 'image/jpeg' | 'image/png' | 'image/webp';
@@ -36,15 +36,20 @@ const maxPixels = 25_000_000;
  */
 @Injectable()
 export class HandwritingPreprocessor {
+  private readonly logger = new Logger(HandwritingPreprocessor.name);
+
   async enhance(input: Buffer): Promise<ProcessedImage> {
-    const signedMimeType = mimeFromSignature(input);
+    const source = normalizeImageBuffer(input);
+    const signedMimeType = mimeFromSignature(source);
     let metadata: { format?: string; width?: number; height?: number };
     try {
       // Mobile/WhatsApp JPEGs can contain recoverable metadata warnings even
       // though the pixels are readable. Decode tolerantly, then always emit a
       // fresh validated JPEG below instead of persisting the original bytes.
-      metadata = await sharp(input, { limitInputPixels: maxPixels, failOn: 'none' }).metadata();
-    } catch {
+      metadata = await readMetadata(source);
+    } catch (error) {
+      const detail = error instanceof Error ? error.message.split('\n', 1)[0].slice(0, 180) : typeof error;
+      this.logger.warn(`essay_image_decode_failure bytes=${input.length} normalizedBytes=${source.length} signature=${signedMimeType ?? 'unknown'} error=${detail}`);
       throw new BadRequestException('Não foi possível ler este arquivo como imagem. Use uma foto em JPG/JPEG, PNG ou WebP.');
     }
     const decodedFormat = (metadata.format ?? '').toLowerCase();
@@ -61,7 +66,7 @@ export class HandwritingPreprocessor {
     try {
       // Re-encoding strips EXIF (including camera location) before either
       // private copy is stored. The source bytes are never persisted.
-      const original = await sharp(input, { limitInputPixels: maxPixels, failOn: 'none' })
+      const original = await sharp(source, { limitInputPixels: maxPixels, failOn: 'none' })
         .rotate()
         .jpeg({ quality: 94, chromaSubsampling: '4:4:4' })
         .toBuffer();
@@ -78,6 +83,41 @@ export class HandwritingPreprocessor {
       throw new BadRequestException('Não foi possível processar esta imagem com segurança. Envie outra foto em JPG/JPEG, PNG ou WebP.');
     }
   }
+}
+
+async function readMetadata(input: Buffer) {
+  try {
+    return await sharp(input, { limitInputPixels: maxPixels, failOn: 'none' }).metadata();
+  } catch (error) {
+    // A decoder can reject the pixel limit before exposing dimensions. Retry
+    // metadata-only without that limit so the explicit dimension checks below
+    // can return the correct, actionable validation error.
+    try {
+      return await sharp(input, { limitInputPixels: false, failOn: 'none' }).metadata();
+    } catch {
+      throw error;
+    }
+  }
+}
+
+function normalizeImageBuffer(input: Buffer) {
+  // Accept a data URL accidentally materialized as a text file by a gallery
+  // provider. This keeps the server-side contract binary and bounded.
+  const prefix = input.subarray(0, 256).toString('ascii');
+  const dataUrl = prefix.match(/^data:image\/(?:jpe?g|png|webp);base64,/i);
+  if (dataUrl) {
+    try {
+      return Buffer.from(input.subarray(dataUrl[0].length).toString('ascii'), 'base64');
+    } catch {
+      return input;
+    }
+  }
+
+  // Some mobile file providers prepend a small text/BOM wrapper. Strip only a
+  // prefix before a real JPEG SOI marker; normal JPEGs are unchanged.
+  const jpegMarker = input.indexOf(Buffer.from([0xff, 0xd8, 0xff]));
+  if (jpegMarker > 0 && jpegMarker <= 4096) return input.subarray(jpegMarker);
+  return input;
 }
 
 function mimeFromSignature(input: Buffer): EssayImageMimeType | undefined {

@@ -26,6 +26,18 @@ describe('preparo de imagens manuscritas', () => {
     expect((await sharp(Buffer.from(result.originalData, 'base64')).metadata()).format).toBe('jpeg');
   });
 
+  it('aceita JPEGs que chegam com wrapper de data URL ou prefixo de provedor mobile', async () => {
+    const photo = await sharp({ create: { width: 90, height: 110, channels: 3, background: '#f6f0df' } })
+      .jpeg({ quality: 80 })
+      .toBuffer();
+    const preprocessor = new HandwritingPreprocessor();
+
+    await expect(preprocessor.enhance(Buffer.concat([Buffer.from('data:image/jpeg;base64,'), Buffer.from(photo.toString('base64'))])))
+      .resolves.toMatchObject({ width: 90, height: 110, mimeType: 'image/jpeg' });
+    await expect(preprocessor.enhance(Buffer.concat([Buffer.from([0xef, 0xbb, 0xbf]), photo])))
+      .resolves.toMatchObject({ width: 90, height: 110, mimeType: 'image/jpeg' });
+  });
+
   it('rejeita dados que não são uma imagem, com orientação acionável', async () => {
     await expect(new HandwritingPreprocessor().enhance(Buffer.from('não é uma imagem')))
       .rejects.toThrow('Use uma foto em JPG/JPEG, PNG ou WebP');
