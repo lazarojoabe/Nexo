@@ -216,6 +216,17 @@ export class EssayService {
     return { id: essay.id, topic: essay.topic, status: essay.status, images: [], createdAt: essay.createdAt };
   }
 
+  async discard(id: string, userId: string) {
+    if (this.activeEvaluations.has(id)) throw new BadRequestException('A avaliação já está em andamento. Aguarde a conclusão antes de descartar esta redação.');
+    const essay = await this.owned(id, userId);
+    if (essay.evaluation?.payload) throw new BadRequestException('Apenas rascunhos sem nota podem ser descartados. As redações avaliadas ficam preservadas no seu histórico.');
+    const imagePaths = essay.images.flatMap((image) => [image.storagePath, image.originalStoragePath].filter((path): path is string => Boolean(path)));
+    if (!this.databaseEnabled || !this.prisma) this.essays.delete(id);
+    else await this.prisma.essay.delete({ where: { id } });
+    await this.storage.remove(imagePaths);
+    return { discarded: true };
+  }
+
   async addImage(id: string, userId: string, file?: Express.Multer.File) {
     if (!file) throw new BadRequestException('Envie uma imagem.');
     if (file.size > maxImageBytes) throw new BadRequestException('Use uma imagem de até 8 MB por página.');
@@ -300,8 +311,17 @@ export class EssayService {
     try {
       const signals = preAnalyzeEssay(confirmedText);
       const paragraphs = confirmedTextToParagraphs(confirmedText);
-      const raw = await this.runStage('ai_evaluation', id, () => this.aiProvider.evaluate({ topic: essay.topic, text: confirmedText, paragraphs, signals }), 'Não foi possível avaliar a redação agora. Seu texto confirmado foi preservado; tente novamente em instantes.');
-      const evaluation = await this.runStage('ai_evaluation', id, async () => validateEssayEvaluation(raw, confirmedText, signals, this.aiProvider), 'A resposta da IA não passou na validação pedagógica. Seu texto foi preservado; tente novamente em instantes.');
+      const request = { topic: essay.topic, text: confirmedText, paragraphs, signals };
+      const raw = await this.runStage('ai_evaluation', id, () => this.aiProvider.evaluate(request), 'Não foi possível avaliar a redação agora. Seu texto confirmado foi preservado; tente novamente em instantes.');
+      let evaluation;
+      try {
+        evaluation = validateEssayEvaluation(raw, confirmedText, signals, this.aiProvider);
+      } catch (error) {
+        if (!this.aiProvider.repairEvaluation) this.raiseStageFailure('ai_evaluation', id, error, 'A resposta da IA não passou na validação pedagógica. Seu texto foi preservado; tente novamente em instantes.');
+        this.logger.warn(`essay_evaluation_format_remediation essayId=${id} error=${error instanceof Error ? error.constructor.name : typeof error}`);
+        const repaired = await this.runStage('ai_evaluation', id, () => this.aiProvider.repairEvaluation!({ ...request, invalidResponse: raw, validationError: error instanceof Error ? error.message : 'Formato inválido.' }), 'Não foi possível concluir a correção pedagógica agora. Seu texto confirmado foi preservado; tente novamente em instantes.');
+        evaluation = await this.runStage('ai_evaluation', id, async () => validateEssayEvaluation(repaired, confirmedText, signals, this.aiProvider), 'A resposta da IA não passou na validação pedagógica. Seu texto foi preservado; tente novamente em instantes.');
+      }
       const evaluatedAt = new Date();
       if (!this.databaseEnabled || !this.prisma) Object.assign(essay.memory!, { evaluation: { payload: evaluation }, status: 'evaluated', evaluatedAt, consentAt: evaluatedAt });
       else await this.prisma.$transaction([

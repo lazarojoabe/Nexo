@@ -55,3 +55,7 @@ Monorepo pnpm com `apps/web` (Next.js/App Router, PWA, interface mobile), `apps/
 - Redação permite texto manual, revisão e tentativa de avaliação.
 - A PWA dispõe de manifesto e cache somente de recursos públicos estáticos.
 - Testes cobrem correção, totalização, validação de IA, autorização e fluxo de quiz.
+data/essay-benchmarks/
+data/exam-imports/
+data/exam-assets/imports/
+**/__pycache__/

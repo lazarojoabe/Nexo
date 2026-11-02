@@ -22,6 +22,23 @@ describe('fluxo de redação', () => {
     await expect(essays.transcribe(essay.id, 'student', true)).rejects.toThrow('ao menos uma imagem');
   });
 
+  it('descarta um rascunho e remove as imagens enviadas', async () => {
+    let removedPaths: string[] = [];
+    const essays = new EssayService(
+      { transcribe: async () => ({ text: 'Texto transcrito com tamanho suficiente.', lowConfidenceSegments: [] }), evaluate: async () => validEvaluation } as never,
+      { enhance: async () => ({ originalMimeType: 'image/jpeg' as const, mimeType: 'image/jpeg' as const, data: Buffer.from('processed').toString('base64'), enhanced: true }) } as never,
+      { save: async () => ({ originalPath: 'original.jpg', processedPath: 'processed.jpg' }), read: async () => Buffer.from('processed'), remove: async (paths: string[]) => { removedPaths = paths; } } as never,
+    );
+    const essay = await essays.create('student', 'Tema de redação');
+    const file = { mimetype: 'image/jpeg', size: 200, buffer: Buffer.from('original') } as Express.Multer.File;
+    await essays.addImage(essay.id, 'student', file);
+
+    await expect(essays.discard(essay.id, 'student')).resolves.toEqual({ discarded: true });
+    expect(removedPaths).toEqual(['processed.jpg', 'original.jpg']);
+    await expect(essays.get(essay.id, 'student')).rejects.toThrow('não encontrada');
+    await expect(essays.history('student')).resolves.toMatchObject({ summary: { total: 0 } });
+  });
+
   it('limita imagens, confirma texto e persiste uma avaliação validada', async () => {
     const essays = service();
     const essay = await essays.create('student', 'Tema de redação');
@@ -35,6 +52,26 @@ describe('fluxo de redação', () => {
     expect(history.essays[0].competencies).toHaveLength(5);
     await expect(essays.addImage(essay.id, 'another-student', file)).rejects.toThrow('não encontrada');
     await expect(essays.get(essay.id, 'another-student')).rejects.toThrow('não encontrada');
+  });
+
+  it('pede uma única correção de formato ao provedor antes de desistir da avaliação', async () => {
+    let repairCalls = 0;
+    const essays = new EssayService(
+      {
+        providerName: 'test-provider',
+        modelName: 'test-model',
+        transcribe: async () => ({ text: 'Texto transcrito com tamanho suficiente.', lowConfidenceSegments: [] }),
+        evaluate: async () => ({ competencies: [] }),
+        repairEvaluation: async () => { repairCalls += 1; return validEvaluation; },
+      } as never,
+      { enhance: async () => ({ originalMimeType: 'image/jpeg' as const, mimeType: 'image/jpeg' as const, data: Buffer.from('processed').toString('base64'), enhanced: true }) } as never,
+      { save: async () => ({ originalPath: 'original.jpg', processedPath: 'processed.jpg' }), read: async () => Buffer.from('processed'), remove: async () => undefined } as never,
+    );
+    const essay = await essays.create('student', 'Tema de redação');
+    await essays.setText(essay.id, 'student', 'Este é um texto confirmado com mais de vinte caracteres.');
+
+    await expect(essays.evaluate(essay.id, 'student', true)).resolves.toMatchObject({ totalScore: 600 });
+    expect(repairCalls).toBe(1);
   });
 
   it('aplica limite diário sem apagar o texto confirmado', async () => {

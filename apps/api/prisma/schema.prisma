@@ -26,6 +26,7 @@ model Exam {
   sourceUrl     String?
   sourceVersion String?
   questions     Question[]
+  importBatches ExamImportBatch[]
 
   @@unique([year, day, color, language, version])
 }
@@ -37,16 +38,62 @@ model Question {
   number          Int
   area            String
   statement       String
+  sourcePage      Int?
+  sourceDocumentHash String?
   explanation     String?
   imageUrl        String?
   isCancelled     Boolean           @default(false)
   correctOptionId String
+  // Any question already available in the quiz is considered published. The
+  // administrative importer uses this marker to require an explicit diff
+  // confirmation before overwriting its content.
+  publishedAt     DateTime          @default(now())
   options         QuestionOption[]
   assets          QuestionAsset[]
   attempts        QuestionAttempt[]
 
   @@index([examId, area])
   @@unique([examId, number])
+}
+
+model ExamImportBatch {
+  id          String             @id @default(cuid())
+  previewId   String             @unique
+  examId      String?
+  exam        Exam?              @relation(fields: [examId], references: [id])
+  status      String
+  year        Int
+  day         Int
+  color       String
+  language    String?
+  version     String
+  report      Json
+  approvedAt  DateTime
+  persistedAt DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  sources     ExamImportSource[]
+
+  @@index([examId, createdAt])
+  @@index([year, day, color, language, version])
+}
+
+model ExamImportSource {
+  id             String          @id @default(cuid())
+  batchId        String
+  batch          ExamImportBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  role           String
+  origin         String
+  originalName   String
+  storagePath    String
+  mimeType       String
+  byteSize       Int
+  sha256         String
+  pageCount      Int?
+  createdAt      DateTime        @default(now())
+
+  @@unique([batchId, role])
+  @@index([sha256])
 }
 
 model QuestionOption {

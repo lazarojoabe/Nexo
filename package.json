@@ -14,7 +14,8 @@
     "import:exams": "pnpm --filter @nexo/api import:exams",
     "exams:fetch": "pnpm --filter @nexo/api exams:fetch",
     "exams:download": "pnpm --filter @nexo/api exams:download",
-    "exams:assets": "pnpm --filter @nexo/api exams:assets"
+    "exams:assets": "pnpm --filter @nexo/api exams:assets",
+    "essays:benchmark": "pnpm --filter @nexo/api exec tsx ../../scripts/run-essay-benchmark.ts"
   },
   "devDependencies": {
     "typescript": "^5.7.3"

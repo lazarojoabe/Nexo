@@ -12,7 +12,7 @@ Antes de marcar o consentimento, a interface deve explicar a finalidade (transcr
 
 ## Reconhecimento
 
-O pré-processamento prioriza preservação: rotação, escala de cinza, contraste e nitidez. Segmentação agressiva por linhas ou palavras não é aplicada automaticamente porque pode apagar acentos e pontuação. Se a leitura for incerta, a transcrição usa `[trecho ilegível]`; isso reduz a confiança da avaliação e pode recomendar revisão humana, sem penalização automática.
+O pré-processamento prioriza preservação: rotação, escala de cinza, contraste e nitidez. Segmentação agressiva por linhas ou palavras não é aplicada automaticamente porque pode apagar acentos e pontuação. A leitura aceita páginas manuscritas, digitadas, impressas e capturas de tela; a confiança mede legibilidade e completude, nunca o tipo de suporte. Se a leitura for incerta, a transcrição usa `[trecho ilegível]`; isso reduz a confiança da avaliação e pode recomendar revisão humana, sem penalização automática.
 
 ### Transcrição fiel, normalização visual e revisão
 
@@ -68,6 +68,6 @@ Evolução planejada:
 
 `HumanEssayReview` e `calculateCalibrationMetrics` preparam a comparação de notas da IA e professor: diferença absoluta por competência, diferença total, distribuição e taxa de baixa confiança/revisão. O sistema não é declarado calibrado sem uma base humana revisada.
 
-Redações nota 1000 isoladas não bastam para treinar um corretor. Antes de qualquer fine-tuning — que não faz parte deste projeto — são necessários dados anonimizados e consentidos de várias faixas, tema, notas por competência, justificativas de corretores, controle de qualidade, base legal, divisão treino/validação/teste e avaliação cega por especialistas.
+Redações nota 1000 isoladas não bastam para treinar um corretor. Antes de qualquer fine-tuning — que não faz parte deste projeto — são necessários dados anonimizados e consentidos de várias faixas, tema, notas por competência, justificativas de corretores, controle de qualidade, base legal, divisão treino/validação/teste e avaliação cega por especialistas. Uma coleção autorizada de redações nota máxima pode, porém, ser usada como benchmark local de regressão para detectar subavaliação e falhas de OCR; consulte [CARTILHA_BENCHMARK.md](CARTILHA_BENCHMARK.md).
 
 Referências oficiais: [Cartilha do Enem 2026](https://www.gov.br/inep/pt-br/centrais-de-conteudo/noticias/enem/enem-2026-cartilha-da-redacao-esta-disponivel) e [documentos e manuais do Enem](https://www.gov.br/inep/pt-br/areas-de-atuacao/avaliacao-e-exames-educacionais/enem/outros-documentos).

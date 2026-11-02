@@ -1,0 +1,11 @@
+/* Keeps the estimate secondary to the student's competency-by-competency revision. */
+.score-range-label{margin:13px 0 0;color:#6358a9;font-size:12px;font-weight:800;letter-spacing:.35px;text-transform:uppercase}
+.feedback-review-guide{margin:18px 0;border:1px solid #dcd8fd;border-radius:16px;background:#f6f4ff;padding:15px;color:#4e4c72}
+.feedback-review-guide h3,.competency-section-heading h3{margin:0;color:#24244d;font-size:14px;line-height:1.35}
+.feedback-review-guide ol{display:grid;gap:6px;margin:10px 0 0;padding-left:20px;font-size:12px;line-height:1.45}
+.competency-section{margin-top:22px}
+.competency-section-heading{margin-bottom:12px}
+.competency-section-heading p{margin:5px 0 0;color:#697089;font-size:12px;line-height:1.45}
+.competency-card h4{margin:12px 0 0;color:#35395a;font-size:12px}
+.priority-actions>p{margin:7px 0 0;color:#596078;font-size:12px;line-height:1.45}
+@media(max-width:420px){.feedback-review-guide{padding:13px}.feedback-review-guide ol,.competency-section-heading p,.priority-actions>p{font-size:11px}}

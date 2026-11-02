@@ -16,7 +16,10 @@ if (states.some(Boolean)) {
 }
 
 const command = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
-const child = spawn(command, ['--parallel', '--filter', '@nexo/api', '--filter', '@nexo/web', 'dev:fixed-port'], { stdio: 'inherit' });
+const child = spawn(command, ['--parallel', '--filter', '@nexo/api', '--filter', '@nexo/web', 'dev:fixed-port'], {
+  stdio: 'inherit',
+  shell: process.platform === 'win32'
+});
 child.on('exit', (code) => process.exit(code ?? 1));
 
 for (const signal of ['SIGINT', 'SIGTERM']) {

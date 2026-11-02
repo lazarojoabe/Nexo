@@ -1,1 +1,6 @@
 PyMuPDF>=1.24,<2
+# Needed only when the answer key is an image without embedded text. The
+# Tesseract executable itself must be installed locally; otherwise the API
+# returns a review exception and never invents an answer.
+pytesseract>=0.3.10,<1
+Pillow>=10,<12

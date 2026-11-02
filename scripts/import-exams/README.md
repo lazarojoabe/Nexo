@@ -2,6 +2,29 @@
 
 O importador aceita JSON revisado manualmente, valida a estrutura e pode persistir de forma idempotente. Não publique uma prova extraída de PDF sem comparar cada questão, alternativa e gabarito com o material oficial correspondente (ano, dia, cor, idioma e versão).
 
+## Fluxo administrativo local: prova + gabarito
+
+O fluxo administrativo foi feito para arquivos já recebidos pela equipe. Ele **não faz scraping, não consulta páginas do Inep e não baixa arquivos**. Acesse `http://localhost:3002/admin/importar-prova` com a API em execução.
+
+1. Configure `ADMIN_IMPORT_KEY` em `apps/api/.env` (não use um valor público) e, se necessário, `EXAM_ASSET_PUBLIC_URL`.
+2. Instale o extrator local: `python -m pip install -r scripts/import-exams/requirements.txt`.
+3. Gere e aplique a migração no ambiente desejado: `pnpm db:generate` e `pnpm db:migrate` (ou `pnpm db:deploy` em produção).
+4. Inicie API e web: `pnpm dev` e abra a página administrativa.
+5. Envie o PDF da prova e o PDF/PNG/JPEG/WebP oficial do gabarito, informe ano, dia, cor, idioma e versão.
+6. Revise a prévia, a fila de exceções e o diff. Apenas o botão **Aprovar e persistir no banco** envia `approved: true`; nenhuma questão é gravada no passo de prévia.
+
+A prova aceita até 50 MB; o gabarito aceita até 20 MB. O servidor valida os bytes, a assinatura (`%PDF-`/`%%EOF`, PNG, JPEG ou WebP), o tipo efetivo e SHA-256; MIME type e extensão do navegador não são usados como prova. A prévia extrai enunciado, A–E, área, páginas e recortes raster. Figuras vetoriais ou associações ambíguas continuam sujeitas à revisão/crop humano antes da aprovação. O gabarito é analisado separadamente e só gera pares `número → letra`.
+
+O parser/OCR pode apenas sugerir leitura. Ele não completa alternativas, não adivinha texto e não escolhe gabarito. Em particular, letras obtidas por OCR de um gabarito-imagem **nunca** se tornam gabarito automaticamente: entram como sugestão e cada letra deve ser confirmada pelo administrador no JSON, diretamente contra o arquivo oficial. Para uma imagem sem texto incorporado, o OCR local requer também o executável Tesseract; se ele não estiver instalado, a prévia abre exceções e exige revisão humana. Em Windows, a instalação padrão `C:\Program Files\Tesseract-OCR\tesseract.exe` é encontrada automaticamente; em outro local, configure `TESSERACT_CMD` em `apps/api/.env`. `TESSERACT_LANGUAGE=por` é preferível; se não houver base portuguesa, `eng` é suficiente para ler números e A–E do gabarito, ainda sempre como sugestão. O resultado bloqueia persistência enquanto houver conteúdo incompleto. Ao editar o JSON da prévia, mantenha cada ativo extraído associado à questão/alternativa; a API recusa ativos externos ou removidos sem vínculo.
+
+Cada envio persistido cria um lote de auditoria com origem `local-upload`, hash, nome, tipo, tamanho, páginas e relatório em `ExamImportBatch`/`ExamImportSource`. Os arquivos auditáveis vão para `data/exam-imports/<preview-id>` e os recortes para `data/exam-assets/imports/<preview-id>`. A identidade `(ano, dia, cor, idioma, versão)` permanece idempotente. Se a prova já existe, a prévia lista as mudanças por questão; alterações em questões publicadas exigem a confirmação explícita `confirmPublishedChanges`.
+
+Endpoints da interface:
+
+- `POST /admin/exam-imports/preview` (multipart: `exam`, `answerKey`, metadados) cria apenas a prévia;
+- `GET /admin/exam-imports/:id` recupera uma prévia local ainda disponível;
+- `POST /admin/exam-imports/:id/approve` exige `{ "approved": true }`, confirma exceções resolvidas e, quando aplicável, o diff publicado.
+
 Formato mínimo: `{ "sourceUrl": "https://...", "sourceVersion": "Inep 2024 — gabarito definitivo", "exam": { "year": 2024, "day": 1, "color": "azul", "version": "caderno-1" }, "questions": [{ "number": 1, "area": "Linguagens", "statement": "...", "options": [{"label":"A","content":"..."},{"label":"B","content":"..."},{"label":"C","content":"..."},{"label":"D","content":"..."},{"label":"E","content":"..."}], "correctOptionLabel": "C" }] }`. Registros anulados devem informar `isCancelled: true`.
 
 Valide sem gravar: `pnpm import:exams caminho/da-prova.json`.

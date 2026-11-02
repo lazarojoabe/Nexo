@@ -1,10 +1,12 @@
-import { Body, Controller, Get, Headers, HttpCode, Param, Patch, Post, Query, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, HttpCode, Param, Patch, Post, Query, Req, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { ArrayMaxSize, IsArray, IsBoolean, IsEmail, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import { Type } from 'class-transformer';
+import { ArrayMaxSize, IsArray, IsBoolean, IsEmail, IsInt, IsOptional, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
 import { EssayService, QuizService } from './services';
 import { PrismaService } from './prisma.service';
 import { AuthIdentityService } from './auth-identity.service';
+import { AdminExamImportService } from './admin-exam-import.service';
 import { UserProfileService } from './user-profile.service';
 import { RateLimitService } from './rate-limit.service';
 import { AuthSignupService } from './auth-signup.service';
@@ -15,6 +17,19 @@ class CreateEssayDto { @IsString() @MinLength(3) @MaxLength(300) topic!: string;
 class TextDto { @IsString() @MinLength(20) @MaxLength(8000) text!: string; }
 class EvaluateDto { @IsBoolean() consent!: boolean; }
 class SignUpDto { @IsEmail() @MaxLength(320) email!: string; @IsString() @MinLength(10) @MaxLength(128) password!: string; }
+class ExamImportPreviewDto {
+  @Type(() => Number) @IsInt() @Min(1998) @Max(2100) year!: number;
+  @Type(() => Number) @IsInt() @Min(1) @Max(6) day!: number;
+  @IsString() @MinLength(1) @MaxLength(40) color!: string;
+  @IsOptional() @IsString() @MinLength(1) @MaxLength(40) language?: string;
+  @IsString() @MinLength(1) @MaxLength(80) version!: string;
+}
+class ApproveExamImportDto {
+  @IsBoolean() approved!: boolean;
+  @IsOptional() @IsBoolean() confirmPublishedChanges?: boolean;
+  @IsOptional() @IsArray() @IsString({ each: true }) @ArrayMaxSize(1000) resolvedExceptionCodes?: string[];
+  @IsOptional() reviewedPayload?: unknown;
+}
 
 @ApiTags('health')
 @Controller('health')
@@ -62,6 +77,7 @@ export class EssayController {
   constructor(private readonly essays: EssayService, private readonly identity: AuthIdentityService, private readonly profiles: UserProfileService, private readonly rateLimit: RateLimitService) {}
   @Post() async create(@Headers('authorization') authorization: string | undefined, @Body() dto: CreateEssayDto) { return this.essays.create(await this.userId(authorization), dto.topic); }
   @Get() async history(@Headers('authorization') authorization: string | undefined) { return this.essays.history(await this.userId(authorization)); }
+  @Delete(':id') async discard(@Param('id') id: string, @Headers('authorization') authorization: string | undefined) { return this.essays.discard(id, await this.userId(authorization)); }
   @Post(':id/images') @ApiConsumes('multipart/form-data') @UseInterceptors(FileInterceptor('image', { limits: { fileSize: 8 * 1024 * 1024, files: 1 } })) async image(@Param('id') id: string, @Headers('authorization') authorization: string | undefined, @UploadedFile() file?: Express.Multer.File) { const userId = await this.userId(authorization); this.rateLimit.consume('essay-upload', userId, 10, 10 * 60 * 1000); return this.essays.addImage(id, userId, file); }
   @Post(':id/transcribe') @HttpCode(200) async transcribe(@Param('id') id: string, @Headers('authorization') authorization: string | undefined, @Body() dto: EvaluateDto) { const userId = await this.userId(authorization); this.rateLimit.consume('essay-transcribe', userId, 6, 10 * 60 * 1000); return this.essays.transcribe(id, userId, dto.consent); }
   @Patch(':id/transcription') async text(@Param('id') id: string, @Headers('authorization') authorization: string | undefined, @Body() dto: TextDto) { return this.essays.setText(id, await this.userId(authorization), dto.text); }
@@ -72,6 +88,41 @@ export class EssayController {
   private async userId(authorization?: string) {
     const user = this.identity.identity(authorization);
     await this.profiles.ensure(user);
+    return user.id;
+  }
+}
+
+@ApiTags('admin-exam-imports')
+@Controller('admin/exam-imports')
+export class AdminExamImportController {
+  constructor(private readonly imports: AdminExamImportService, private readonly identity: AuthIdentityService, private readonly profiles: UserProfileService, private readonly rateLimit: RateLimitService) {}
+
+  @Post('preview')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'exam', maxCount: 1 }, { name: 'answerKey', maxCount: 1 }], { limits: { fileSize: 50 * 1024 * 1024, files: 2 } }))
+  async preview(@Headers('authorization') authorization: string | undefined, @Headers('x-admin-import-key') key: string | undefined, @Body() dto: ExamImportPreviewDto, @UploadedFiles() files?: { exam?: Express.Multer.File[]; answerKey?: Express.Multer.File[] }) {
+    const userId = await this.authorize(authorization, key);
+    this.rateLimit.consume('admin-import-preview', userId, 3, 10 * 60 * 1000);
+    return this.imports.preview(dto, files?.exam?.[0], files?.answerKey?.[0]);
+  }
+
+  @Get(':id')
+  async get(@Headers('authorization') authorization: string | undefined, @Headers('x-admin-import-key') key: string | undefined, @Param('id') id: string) {
+    await this.authorize(authorization, key);
+    return this.imports.getPreview(id);
+  }
+
+  @Post(':id/approve')
+  async approve(@Headers('authorization') authorization: string | undefined, @Headers('x-admin-import-key') key: string | undefined, @Param('id') id: string, @Body() dto: ApproveExamImportDto) {
+    const userId = await this.authorize(authorization, key);
+    this.rateLimit.consume('admin-import-approve', userId, 3, 10 * 60 * 1000);
+    return this.imports.approve(id, dto);
+  }
+
+  private async authorize(authorization: string | undefined, key: string | undefined) {
+    const user = this.identity.identity(authorization);
+    await this.profiles.ensure(user);
+    this.imports.assertAuthorized(key);
     return user.id;
   }
 }

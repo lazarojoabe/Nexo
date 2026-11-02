@@ -34,6 +34,15 @@ describe('motor pedagógico de redação', () => {
     expect(prompt).toContain('<essay_paragraphs_json>');
   });
 
+  it('não impõe teto informal a uma competência plenamente atendida', () => {
+    const prompt = buildEvaluationPrompt({ topic: 'Tema de teste', text, paragraphs: [{ index: 1, normalizedText: text }], signals: preAnalyzeEssay(text) });
+    expect(prompt).toContain('Não imponha teto informal a notas altas');
+    expect(prompt).toContain('200 é uma nota possível');
+    expect(prompt).toContain('o travessão é aceitável em dissertação');
+    expect(prompt).toContain('sujeito composto posposto continua admitindo/exigindo verbo no plural');
+    expect(prompt).toContain('uma única repetição isolada que possa ser artefato de transcrição');
+  });
+
   it('rejeita resposta truncada, nota fora da escala e total divergente', () => {
     const signals = preAnalyzeEssay(text);
     expect(() => validateEssayEvaluation({ competencies: [] }, text, signals, provider)).toThrow();
@@ -60,6 +69,52 @@ describe('motor pedagógico de redação', () => {
 
     expect(evaluation.competencies[0].evidence).toEqual([]);
     expect(evaluation.competencies[0].feedbackPoints[0].excerpt).toBeUndefined();
+  });
+
+  it('aceita aliases de formatação do provedor sem flexibilizar notas ou evidências', () => {
+    const raw = response();
+    const longText = `${text} ${text} ${text}`;
+    raw.competencies[0].level = 'mediano';
+    raw.competencies[0].evidence = Array.from({ length: 4 }, () => ({
+      excerpt: longText,
+      explanation: 'A evidência é exibida somente como um trecho literal limitado.',
+    }));
+    raw.competencies[0].feedbackPoints = [{
+      category: 'gramática',
+      severity: 'média',
+      excerpt: text,
+      diagnosis: 'Há um ponto de revisão de norma-padrão.',
+      suggestion: 'Revise a construção indicada.',
+    }];
+
+    const evaluation = validateEssayEvaluation(raw, longText, preAnalyzeEssay(longText), provider);
+
+    expect(evaluation.competencies[0].level).toBe('regular');
+    expect(evaluation.competencies[0].evidence).toHaveLength(3);
+    expect(evaluation.competencies[0].feedbackPoints[0]).toMatchObject({ category: 'norma_culta', severity: 'atencao' });
+  });
+
+  it('normaliza rótulos acentuados, maiúsculas e números serializados sem alterar a nota', () => {
+    const raw = response() as unknown as { competencies: Array<Record<string, unknown>>; totalScore?: unknown };
+    raw.competencies[0] = {
+      ...raw.competencies[0],
+      id: '1',
+      score: '120',
+      level: 'Regular',
+      feedbackPoints: [{
+        category: 'Proposta de intervenção',
+        severity: 'Atenção',
+        diagnosis: 'A proposta pode explicitar melhor o meio.',
+        suggestion: 'Nomeie o meio de execução da medida.',
+      }],
+    };
+    raw.totalScore = '600';
+
+    const evaluation = validateEssayEvaluation(raw, text, preAnalyzeEssay(text), provider);
+
+    expect(evaluation.totalScore).toBe(600);
+    expect(evaluation.competencies[0]).toMatchObject({ id: 1, score: 120, level: 'regular' });
+    expect(evaluation.competencies[0].feedbackPoints[0]).toMatchObject({ category: 'proposta_intervencao', severity: 'atencao' });
   });
 
   it('agrega calibração, distribuição e taxas sem reter textos', () => {

@@ -30,6 +30,26 @@ O importador gera IDs determinísticos (`examId-qN` e `examId-qN-a`) e faz `upse
 
 ## Operação
 
+### Importação administrativa de arquivos locais
+
+O caminho de administração é diferente do importador JSON histórico e é a opção indicada para uma nova prova oficial recebida pela equipe:
+
+```text
+upload local (prova PDF + gabarito PDF/imagem)
+        ↓ assinatura/tamanho/tipo real + SHA-256
+prévia temporária (extração separada + exceções + diff)
+        ↓ aprovação explícita do administrador
+Exam/Question + ExamImportBatch/ExamImportSource + recortes auditáveis
+```
+
+Não há qualquer busca, scraping ou download automático nesse fluxo. O arquivo da prova fornece apenas questões, alternativas, área, páginas e recortes. O arquivo de gabarito fornece apenas número e letra correta. OCR é tratado como sugestão e uma leitura incompleta, duplicada ou de baixa confiança entra na fila de exceções.
+
+As exceções bloqueantes são: número duplicado, alternativa A–E incompleta, conflito/ausência de gabarito, gabarito sem questão, metadado divergente e ativo visual sem vínculo. A prévia também marca leituras de baixa confiança para revisão. O contrato compartilhado volta a validar todas as questões ativas antes da aprovação.
+
+O lote final retém hashes, páginas, origem `local-upload`, caminhos de origem e o relatório JSON. `Question.sourcePage` e `Question.sourceDocumentHash` conectam cada questão ao PDF. A chave da prova continua `(year, day, color, language, version)`; repetir o mesmo pacote não cria outra prova. Antes de atualizar uma questão existente — tratada como publicada quando já está disponível no quiz — o administrador deve conferir o diff e enviar confirmação explícita.
+
+Consulte o [guia operacional](../scripts/import-exams/README.md#fluxo-administrativo-local-prova--gabarito) para variáveis, limites, rota da interface e comandos de desenvolvimento.
+
 ```text
 pnpm import:exams caminho/prova-revisada.json
 ```

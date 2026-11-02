@@ -45,6 +45,17 @@ describe('normalização visual de manuscrito', () => {
     expect(transcription.requiresReview).toBe(true);
   });
 
+  it('nunca reescreve a redação a partir de uma segunda leitura, mesmo com alta confiança', () => {
+    const verification: TranscriptionVerification = { divergences: [{ observed: 'uma frase possível', suggestion: 'uma frase plausível', confidence: 0.99, visuallyConfirmed: true, reason: 'Leitura visual divergente.' }], overallConfidence: 0.99 };
+    const transcription = buildStructuredTranscription(firstPass('Há uma frase possível no texto.', ['Há uma frase possível no texto.']), verification);
+
+    expect(transcription.normalizedText).toBe('Há uma frase possível no texto.');
+    expect(transcription.corrections).toEqual([]);
+    expect(transcription.uncertainTerms).toContainEqual(expect.objectContaining({ observed: 'uma frase possível', suggestion: 'uma frase plausível', requiresReview: true }));
+    expect(transcription.overallConfidence).toBe(0.84);
+    expect(transcription.requiresReview).toBe(true);
+  });
+
   it('preserva a quantidade de parágrafos detectada visualmente, seja quatro, menor ou maior', () => {
     const four = buildStructuredTranscription(firstPass('um\n\ndois\n\ntrês\n\nquatro', ['um', 'dois', 'três', 'quatro']));
     const two = buildStructuredTranscription(firstPass('um\n\ndois', ['um', 'dois']));

@@ -5,8 +5,6 @@ import {
   type TranscriptionVerification,
 } from '@nexo/shared';
 
-const automaticVisualCorrectionThreshold = 0.985;
-
 // These are independent words frequently joined with a lexical hyphen in
 // Portuguese. Keeping this small, explicit allowlist makes the normalizer
 // conservative: an unknown hyphen stays untouched instead of "correcting" a
@@ -52,38 +50,25 @@ export function buildStructuredTranscription(firstPass: TranscriptionFirstPass, 
   // Any term explicitly marked uncertain stays reviewable even if a provider
   // accidentally returns a false flag.
   const uncertainTerms = firstPass.uncertainTerms.map((term) => ({ ...term, requiresReview: true }));
+  // The verification pass is an auditor, not an editor. Even a model that
+  // declares high visual confidence can substitute a plausible word for the
+  // student's actual wording; this must never silently change the text that
+  // will be graded. Every reported divergence is therefore preserved as an
+  // explicit human-review item.
   for (const divergence of verification?.divergences ?? []) {
-    const canCorrect = divergence.visuallyConfirmed
-      && divergence.confidence >= automaticVisualCorrectionThreshold
-      && countOccurrences(paragraphs.map((paragraph) => paragraph.normalizedText).join('\n\n'), divergence.observed) === 1;
-
-    if (!canCorrect) {
-      addUncertainTerm(uncertainTerms, {
-        observed: divergence.observed,
-        suggestion: divergence.suggestion,
-        confidence: divergence.confidence,
-        requiresReview: true,
-      });
-      continue;
-    }
-
-    let corrected = false;
-    paragraphs = paragraphs.map((paragraph) => {
-      if (corrected || !paragraph.normalizedText.includes(divergence.observed)) return paragraph;
-      corrected = true;
-      return { ...paragraph, normalizedText: paragraph.normalizedText.replace(divergence.observed, divergence.suggestion) };
-    });
-    if (corrected) corrections.push({
-      original: divergence.observed,
-      normalized: divergence.suggestion,
-      type: 'visual_ocr_correction',
+    addUncertainTerm(uncertainTerms, {
+      observed: divergence.observed,
+      suggestion: divergence.suggestion,
       confidence: divergence.confidence,
-      requiresReview: false,
-      reason: divergence.reason,
+      requiresReview: true,
     });
   }
 
-  const overallConfidence = Math.min(firstPass.overallConfidence, verification?.overallConfidence ?? 1);
+  const overallConfidence = Math.min(
+    firstPass.overallConfidence,
+    verification?.overallConfidence ?? 1,
+    (verification?.divergences.length ?? 0) > 0 ? 0.84 : 1,
+  );
   const requiresReview = firstPass.requiresReview || uncertainTerms.some((term) => term.requiresReview) || overallConfidence < 0.85;
   return transcriptionSchema.parse({
     rawText: firstPass.rawText,
@@ -113,11 +98,6 @@ function isClearlyVisualBreak(prefix: string, continuation: string) {
   // fragment is the only pattern changed automatically. Uppercase, numbers,
   // symbols, and known compounds retain their hyphen exactly as written.
   return /^[\p{Ll}\p{M}]+$/u.test(continuation);
-}
-
-function countOccurrences(text: string, value: string) {
-  if (!value) return 0;
-  return text.split(value).length - 1;
 }
 
 function addUncertainTerm(terms: Array<{ observed: string; suggestion: string; confidence: number; requiresReview: boolean }>, term: { observed: string; suggestion: string; confidence: number; requiresReview: boolean }) {

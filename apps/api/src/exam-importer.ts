@@ -18,6 +18,8 @@ export type NormalizedExamImport = {
     number: number;
     area: string;
     statement: string;
+    sourcePage?: number;
+    sourceDocumentHash?: string;
     explanation?: string;
     imageUrl?: string;
     assets: Array<{

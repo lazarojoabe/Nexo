@@ -93,6 +93,17 @@ export type TranscriptionVerification = z.infer<typeof transcriptionVerification
 
 export const optionLabelSchema = z.enum(['A', 'B', 'C', 'D', 'E']);
 
+/** Metadata that identifies one immutable ENEM booklet variant. */
+export const examImportMetadataSchema = z.object({
+  year: z.number().int().min(1998).max(2100),
+  day: z.number().int().min(1).max(6),
+  color: z.string().trim().min(1).max(40),
+  language: z.string().trim().min(1).max(40).optional(),
+  version: z.string().trim().min(1).max(80),
+});
+
+export type ExamImportMetadata = z.infer<typeof examImportMetadataSchema>;
+
 const importedOptionSchema = z.object({
   label: optionLabelSchema,
   content: z.string().trim().min(1).max(6000),
@@ -113,20 +124,27 @@ export const importedQuestionAssetSchema = z.object({
 });
 
 export const examImportSchema = z.object({
-  sourceUrl: z.string().url(),
+  // The reviewed JSON pipeline accepts an official URL. The administrative
+  // upload flow has no remote source by design, so it records a stable local
+  // upload URI whose SHA-256 is persisted separately in the audit trail.
+  sourceUrl: z.string().trim().min(1).max(2048).refine((value) => {
+    try {
+      const url = new URL(value);
+      return ['http:', 'https:', 'local-upload:'].includes(url.protocol);
+    } catch {
+      return false;
+    }
+  }, 'A origem deve ser uma URL HTTP(S) ou um URI local-upload válido.'),
   sourceVersion: z.string().trim().min(1).max(160),
-  exam: z.object({
+  exam: examImportMetadataSchema.extend({
     id: z.string().trim().min(3).max(120).optional(),
-    year: z.number().int().min(1998).max(2100),
-    day: z.number().int().min(1).max(6),
-    color: z.string().trim().min(1).max(40),
-    language: z.string().trim().min(1).max(40).optional(),
-    version: z.string().trim().min(1).max(80),
   }),
   questions: z.array(z.object({
     number: z.number().int().positive(),
     area: z.string().trim().min(1).max(80),
     statement: z.string().trim().min(1).max(20000),
+    sourcePage: z.number().int().positive().max(500).optional(),
+    sourceDocumentHash: z.string().regex(/^[a-fA-F0-9]{64}$/, 'O hash da prova deve ser SHA-256.').optional(),
     explanation: z.string().trim().max(12000).optional(),
     imageUrl: z.string().url().optional(),
     assets: z.array(importedQuestionAssetSchema).max(12).default([]),

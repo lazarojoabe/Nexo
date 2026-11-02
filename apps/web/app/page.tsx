@@ -56,6 +56,8 @@ function AuthenticatedHome() {
   const [savingText, setSavingText] = useState(false);
   const [evaluation, setEvaluation] = useState<EssayEvaluation>();
   const [evaluating, setEvaluating] = useState(false);
+  const [evaluationMinimized, setEvaluationMinimized] = useState(false);
+  const [discardingEssay, setDiscardingEssay] = useState(false);
   const [essayError, setEssayError] = useState('');
   const [essayHistory, setEssayHistory] = useState<EssayHistory>();
   const [loadingEssayHistory, setLoadingEssayHistory] = useState(false);
@@ -74,6 +76,7 @@ function AuthenticatedHome() {
   }
 
   async function openExams() {
+    if (evaluating) setEvaluationMinimized(true);
     setView('exams'); setFlowError('');
     if (exams.length) return;
     setLoadingExams(true);
@@ -163,7 +166,7 @@ function AuthenticatedHome() {
 
   async function evaluateEssay() {
     if (!essayId || !consent) return;
-    setEvaluating(true); setEssayError('');
+    setEvaluating(true); setEvaluationMinimized(false); setEssayError('');
     try { setEvaluation(await api.evaluateEssay(essayId, consent)); setEssayPhase('evaluation'); void loadEssayHistory(); } catch (error) { setEssayError(message(error)); } finally { setEvaluating(false); }
   }
 
@@ -172,12 +175,27 @@ function AuthenticatedHome() {
     try { setEssayHistory(await api.essays()); } catch (error) { setEssayError(message(error)); } finally { setLoadingEssayHistory(false); }
   }
 
+  async function discardEssay() {
+    if (!essayId || discardingEssay || evaluating || uploading || transcribing || savingText) return;
+    if (!window.confirm('Descartar esta redação e todas as imagens enviadas? Essa ação não pode ser desfeita.')) return;
+    setDiscardingEssay(true); setEssayError('');
+    try {
+      await api.discardEssay(essayId);
+      resetEssay();
+      void loadEssayHistory();
+    } catch (error) {
+      setEssayError(message(error));
+    } finally {
+      setDiscardingEssay(false);
+    }
+  }
+
   function resetEssay() {
-    setTopic(''); setEssayId(''); setEssayPhase('topic'); setEssayFiles([]); setUploadedCount(0); setUploading(false); setConsent(false); setTranscription(undefined); setTranscribedText(''); setEvaluation(undefined); setEssayError('');
+    setTopic(''); setEssayId(''); setEssayPhase('topic'); setEssayFiles([]); setUploadedCount(0); setUploading(false); setConsent(false); setTranscription(undefined); setTranscribedText(''); setEvaluation(undefined); setEvaluationMinimized(false); setDiscardingEssay(false); setEssayError('');
   }
 
   async function openHistoryEssay(id: string) {
-    setEssayError('');
+    setEvaluationMinimized(false); setEssayError('');
     try {
       const essay = await api.essay(id);
       restoreEssay(essay);
@@ -191,8 +209,10 @@ function AuthenticatedHome() {
     setEssayPhase(essay.evaluation ? 'evaluation' : essay.confirmedText ? 'confirmed' : (essay.transcriptionResult || essay.transcription) ? 'review' : 'images');
   }
 
-  function chooseEssay() { setView('essay'); setEssayError(''); void loadEssayHistory(); }
-  function backHome() { setView('home'); setFlowError(''); }
+  function chooseEssay() { setView('essay'); setEvaluationMinimized(false); setEssayError(''); void loadEssayHistory(); }
+  function backHome() { if (evaluating) setEvaluationMinimized(true); setView('home'); setFlowError(''); }
+  function minimizeEvaluation() { if (!evaluating) return; setEvaluationMinimized(true); setView('home'); setFlowError(''); }
+  function resumeEvaluation() { setView('essay'); setEvaluationMinimized(false); setEssayError(''); }
   async function leaveAccount() {
     try { await signOut(); } catch (error) { setDashboardError(message(error)); }
   }
@@ -201,8 +221,8 @@ function AuthenticatedHome() {
     {view === 'home' && <HomeView greeting={greeting} dashboard={dashboard} error={dashboardError} quizHistory={quizHistory} quizHistoryError={quizHistoryError} loadingQuizHistory={loadingQuizHistory} onRetry={() => void loadDashboard()} onRetryQuizHistory={() => void loadQuizHistory()} onExams={() => void openExams()} onEssay={chooseEssay} onResume={(id) => void resumeQuiz(id)} onOpenQuizHistory={(id, complete) => void resumeQuiz(id, complete)} />}
     {view === 'exams' && <ScreenHeader title="Provas" onBack={backHome}>{loadingExams ? <LoadingState label="Carregando provas…" /> : flowError ? <ErrorState message={flowError} retry={() => void openExams()} /> : <ExamSelector exams={exams} startingExamId={startingExamId} onStart={(item, area) => void startExam(item, area)} />}</ScreenHeader>}
     {view === 'quiz' && <ScreenHeader title="Resolver prova" onBack={() => setView('exams')}>{flowError && <ErrorState message={flowError} />}{exam && <QuizSessionView exam={exam} questions={questions} index={questionIndex} selected={selected} feedback={answer} sending={sendingAnswer} summary={summary} answeredQuestionIds={answeredQuestionIds} onSelect={selectAnswer} onConfirm={() => { if (selected) void submitAnswer(selected); }} onSkip={() => void nextQuestion()} onFinish={() => void finishQuiz()} onGoToQuestion={goToQuestion} onNext={() => void nextQuestion()} onRetry={retryExam} onChooseExam={() => void openExams()} />}</ScreenHeader>}
-    {view === 'essay' && <ScreenHeader title="Minha redação" onBack={backHome}><EssayView phase={essayPhase} topic={topic} essayFiles={essayFiles} uploadedCount={uploadedCount} uploading={uploading} consent={consent} transcribing={transcribing} transcription={transcription} text={transcribedText} savingText={savingText} evaluation={evaluation} evaluating={evaluating} error={essayError} history={essayHistory} historyLoading={loadingEssayHistory} onTopic={setTopic} onCreate={() => void createEssay()} onFiles={setEssayFiles} onFileValidationError={setEssayError} onUpload={() => void uploadPages()} onConsent={setConsent} onTranscribe={() => void transcribeEssay()} onText={setTranscribedText} onConfirm={() => void confirmText()} onEvaluate={() => void evaluateEssay()} onOpenHistory={(id) => void openHistoryEssay(id)} onNew={resetEssay} /></ScreenHeader>}
-  </main><nav className="bottom-nav" aria-label="Navegação principal"><button className={view === 'home' ? 'active' : ''} onClick={backHome}><Icon name="home" size={20} /><span>Início</span></button><button className={view === 'exams' || view === 'quiz' ? 'active' : ''} onClick={() => void openExams()}><Icon name="book" size={20} /><span>Provas</span></button><button className={view === 'essay' ? 'active' : ''} onClick={chooseEssay}><Icon name="pen" size={20} /><span>Redação</span></button></nav></div>;
+    {view === 'essay' && <ScreenHeader title="Minha redação" onBack={backHome}><EssayView phase={essayPhase} topic={topic} essayFiles={essayFiles} uploadedCount={uploadedCount} uploading={uploading} consent={consent} transcribing={transcribing} transcription={transcription} text={transcribedText} savingText={savingText} evaluation={evaluation} evaluating={evaluating} discarding={discardingEssay} error={essayError} history={essayHistory} historyLoading={loadingEssayHistory} onTopic={setTopic} onCreate={() => void createEssay()} onFiles={setEssayFiles} onFileValidationError={setEssayError} onUpload={() => void uploadPages()} onConsent={setConsent} onTranscribe={() => void transcribeEssay()} onText={setTranscribedText} onConfirm={() => void confirmText()} onEvaluate={() => void evaluateEssay()} onMinimize={minimizeEvaluation} onDiscard={() => void discardEssay()} onOpenHistory={(id) => void openHistoryEssay(id)} onNew={resetEssay} /></ScreenHeader>}
+  </main>{evaluationMinimized && (evaluating || evaluation || essayError) && <EvaluationBackgroundStatus evaluating={evaluating} ready={Boolean(evaluation)} error={essayError} onOpen={resumeEvaluation} />}<nav className="bottom-nav" aria-label="Navegação principal"><button className={view === 'home' ? 'active' : ''} onClick={backHome}><Icon name="home" size={20} /><span>Início</span></button><button className={view === 'exams' || view === 'quiz' ? 'active' : ''} onClick={() => void openExams()}><Icon name="book" size={20} /><span>Provas</span></button><button className={view === 'essay' ? 'active' : ''} onClick={chooseEssay}><Icon name="pen" size={20} /><span>Redação</span></button></nav></div>;
 }
 
 function HomeView({ greeting, dashboard, error, quizHistory, quizHistoryError, loadingQuizHistory, onRetry, onRetryQuizHistory, onExams, onEssay, onResume, onOpenQuizHistory }: { greeting: string; dashboard?: Dashboard; error: string; quizHistory?: QuizHistory; quizHistoryError: string; loadingQuizHistory: boolean; onRetry: () => void; onRetryQuizHistory: () => void; onExams: () => void; onEssay: () => void; onResume: (id: string) => void; onOpenQuizHistory: (id: string, complete: boolean) => void }) {
@@ -216,7 +236,14 @@ function ScreenHeader({ title, onBack, children }: { title: string; onBack: () =
   return <section className="screen"><div className="screen-top"><button className="back-button" onClick={onBack} aria-label="Voltar">←</button><span>{title}</span></div>{children}</section>;
 }
 
-function EssayView({ phase, topic, essayFiles, uploadedCount, uploading, consent, transcribing, transcription, text, savingText, evaluation, evaluating, error, history, historyLoading, onTopic, onCreate, onFiles, onFileValidationError, onUpload, onConsent, onTranscribe, onText, onConfirm, onEvaluate, onOpenHistory, onNew }: { phase: EssayPhase; topic: string; essayFiles: File[]; uploadedCount: number; uploading: boolean; consent: boolean; transcribing: boolean; transcription?: Transcription; text: string; savingText: boolean; evaluation?: EssayEvaluation; evaluating: boolean; error: string; history?: EssayHistory; historyLoading: boolean; onTopic: (value: string) => void; onCreate: () => void; onFiles: (files: File[]) => void; onFileValidationError: (message: string) => void; onUpload: () => void; onConsent: (value: boolean) => void; onTranscribe: () => void; onText: (value: string) => void; onConfirm: () => void; onEvaluate: () => void; onOpenHistory: (id: string) => void; onNew: () => void }) {
+function EvaluationBackgroundStatus({ evaluating, ready, error, onOpen }: { evaluating: boolean; ready: boolean; error: string; onOpen: () => void }) {
+  const hasError = Boolean(error) && !evaluating && !ready;
+  const title = evaluating ? 'Sua redação está sendo avaliada' : hasError ? 'A avaliação precisa da sua atenção' : 'Sua devolutiva está pronta';
+  const detail = evaluating ? 'Você pode continuar estudando enquanto isso.' : hasError ? 'Abra a redação para tentar novamente.' : 'Abra para ver as cinco competências.';
+  return <aside className={`evaluation-background-status${hasError ? ' has-error' : ready ? ' is-ready' : ''}`} role="status" aria-live="polite"><span className="evaluation-background-icon">{evaluating ? <span className="button-spinner" /> : <Icon name={hasError ? 'retry' : 'check'} size={19} />}</span><span className="evaluation-background-copy"><b>{title}</b><small>{detail}</small></span><button type="button" onClick={onOpen}>{evaluating ? 'Ver andamento' : hasError ? 'Ver detalhes' : 'Ver resultado'} <Icon name="arrow" size={15} /></button></aside>;
+}
+
+function EssayView({ phase, topic, essayFiles, uploadedCount, uploading, consent, transcribing, transcription, text, savingText, evaluation, evaluating, discarding, error, history, historyLoading, onTopic, onCreate, onFiles, onFileValidationError, onUpload, onConsent, onTranscribe, onText, onConfirm, onEvaluate, onMinimize, onDiscard, onOpenHistory, onNew }: { phase: EssayPhase; topic: string; essayFiles: File[]; uploadedCount: number; uploading: boolean; consent: boolean; transcribing: boolean; transcription?: Transcription; text: string; savingText: boolean; evaluation?: EssayEvaluation; evaluating: boolean; discarding: boolean; error: string; history?: EssayHistory; historyLoading: boolean; onTopic: (value: string) => void; onCreate: () => void; onFiles: (files: File[]) => void; onFileValidationError: (message: string) => void; onUpload: () => void; onConsent: (value: boolean) => void; onTranscribe: () => void; onText: (value: string) => void; onConfirm: () => void; onEvaluate: () => void; onMinimize: () => void; onDiscard: () => void; onOpenHistory: (id: string) => void; onNew: () => void }) {
   if (phase === 'topic') return <section className="essay-intro">
     <p className="eyebrow">FLUXO DE REDAÇÃO</p><h1>Comece pelo tema.</h1>
     <p className="muted-copy">Você poderá escrever, fotografar ou fazer os dois. A revisão da transcrição é sempre sua.</p>
@@ -225,10 +252,12 @@ function EssayView({ phase, topic, essayFiles, uploadedCount, uploading, consent
     <EssayHistoryPanel history={history} loading={historyLoading} onOpen={onOpenHistory} />
     {error && <ErrorState message={error} />}
   </section>;
-  return <section className="essay-flow"><div className="essay-steps"><span className={phase === 'images' ? 'active' : ''}>1. Fotos</span><span className={phase === 'review' ? 'active' : ''}>2. Revisar</span><span className={phase === 'confirmed' || phase === 'evaluation' ? 'active' : ''}>3. Avaliar</span></div><p className="topic-chip">{topic}</p>
+  const activeStep = phase === 'images' ? 1 : phase === 'review' ? 2 : 3;
+  const steps = ['Fotos', 'Revisar', 'Avaliar'];
+  return <section className="essay-flow"><div className="essay-steps" aria-label="Etapas da correção">{steps.map((step, index) => { const position = index + 1; return <span key={step} className={position === activeStep ? 'active' : position < activeStep ? 'complete' : ''} aria-current={position === activeStep ? 'step' : undefined}><b>{position}</b><small>{step}</small></span>; })}</div><div className="topic-chip"><span>Redação atual</span><strong>{topic}</strong></div>{phase !== 'evaluation' && <div className="essay-flow-actions"><button type="button" className="discard-essay-button" onClick={onDiscard} disabled={discarding || uploading || transcribing || savingText || evaluating}><Icon name="close" size={16} />{discarding ? 'Descartando redação…' : 'Descartar redação'}</button><small>Remove este rascunho e as imagens enviadas.</small></div>}
     {phase === 'images' && <><EssayUpload files={essayFiles} uploadedCount={uploadedCount} uploading={uploading} onChange={onFiles} onUpload={onUpload} onValidationError={onFileValidationError} /><label className="consent-row"><input type="checkbox" checked={consent} onChange={(event) => onConsent(event.target.checked)} /><span>Concordo em enviar as imagens da minha redação para um provedor de IA com a finalidade de transcrever e avaliar meu texto.</span></label>{transcribing && <div className="transcription-progress" role="status"><span className="spinner" />Preparando imagens…<small>Lendo as páginas, reconhecendo o texto e identificando trechos incertos.</small></div>}<button className="primary-button" disabled={!consent || uploadedCount < 1 || uploading || transcribing} onClick={onTranscribe}>{transcribing ? 'Transcrevendo…' : 'Transcrever redação'}</button></>}
     {phase === 'review' && <TranscriptionEditor text={text} transcription={transcription} files={essayFiles} saving={savingText} onChange={onText} onConfirm={onConfirm} />}
-    {phase === 'confirmed' && <section className="ready-evaluation"><p className="eyebrow">TEXTO CONFIRMADO</p><h2>Pronto para a devolutiva.</h2><p className="muted-copy">A análise usa as cinco competências do ENEM e destaca evidências do seu próprio texto.</p><label className="consent-row"><input type="checkbox" checked={consent} onChange={(event) => onConsent(event.target.checked)} /><span>Confirmo o envio do texto para uma avaliação educacional por IA.</span></label><button className="primary-button" disabled={!consent || evaluating} onClick={onEvaluate}>{evaluating ? 'Avaliando…' : 'Avaliar pelas 5 competências'} <Icon name="spark" size={17} /></button></section>}
+    {phase === 'confirmed' && <section className="ready-evaluation"><div className="ready-evaluation-heading"><span className="ready-evaluation-icon"><Icon name="check" size={22} /></span><div><p className="eyebrow">TEXTO CONFIRMADO</p><h2>Pronto para a devolutiva.</h2></div></div><p className="muted-copy">Sua análise considera a redação completa e aponta caminhos claros para evoluir.</p><div className="evaluation-highlights" aria-label="O que a avaliação inclui"><span><b>5</b><small>competências do ENEM</small></span><span><Icon name="spark" size={18} /><small>feedbacks práticos</small></span></div><label className="consent-row"><input type="checkbox" checked={consent} onChange={(event) => onConsent(event.target.checked)} /><span>Confirmo o envio do texto para uma avaliação educacional por IA.</span></label><button className={`primary-button evaluation-button${evaluating ? ' is-loading' : ''}`} disabled={!consent || evaluating} onClick={onEvaluate}>{evaluating ? <><span className="button-spinner" />Avaliando sua redação…</> : <>Avaliar pelas 5 competências <Icon name="spark" size={18} /></>}</button>{evaluating && <button type="button" className="minimize-evaluation-button" onClick={onMinimize}>Continuar navegando <Icon name="arrow" size={16} /></button>}</section>}
     {phase === 'evaluation' && evaluation && <><EvaluationResult evaluation={evaluation} /><button className="secondary-button" onClick={onNew}>Começar nova redação</button></>}{error && <ErrorState message={error} retry={phase === 'images' ? uploadedCount < essayFiles.length ? onUpload : uploadedCount ? onTranscribe : undefined : phase === 'confirmed' ? onEvaluate : undefined} />}
   </section>;
 }
