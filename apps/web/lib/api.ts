@@ -133,20 +133,48 @@ export const api = {
  * decode it, keep the original so the API can return the actionable error.
  */
 async function normalizeEssayImage(image: File): Promise<File> {
-  if (typeof window === 'undefined' || typeof createImageBitmap !== 'function') return image;
+  if (typeof window === 'undefined') return image;
   let bitmap: ImageBitmap | undefined;
+  let element: HTMLImageElement | undefined;
+  let objectUrl: string | undefined;
   try {
-    bitmap = await createImageBitmap(image);
+    let source: CanvasImageSource;
+    let sourceWidth: number;
+    let sourceHeight: number;
+    if (typeof createImageBitmap === 'function') {
+      try {
+        bitmap = await createImageBitmap(image);
+        source = bitmap;
+        sourceWidth = bitmap.width;
+        sourceHeight = bitmap.height;
+      } catch {
+        // Some Android WebViews can render the file in an <img> but do not
+        // implement createImageBitmap for that same gallery provider.
+        objectUrl = URL.createObjectURL(image);
+        element = new Image();
+        await loadImageElement(element, objectUrl);
+        source = element;
+        sourceWidth = element.naturalWidth;
+        sourceHeight = element.naturalHeight;
+      }
+    } else {
+      objectUrl = URL.createObjectURL(image);
+      element = new Image();
+      await loadImageElement(element, objectUrl);
+      source = element;
+      sourceWidth = element.naturalWidth;
+      sourceHeight = element.naturalHeight;
+    }
     const maxDimension = 10_000;
-    const scale = Math.min(1, maxDimension / bitmap.width, maxDimension / bitmap.height);
-    const width = Math.max(1, Math.round(bitmap.width * scale));
-    const height = Math.max(1, Math.round(bitmap.height * scale));
+    const scale = Math.min(1, maxDimension / sourceWidth, maxDimension / sourceHeight);
+    const width = Math.max(1, Math.round(sourceWidth * scale));
+    const height = Math.max(1, Math.round(sourceHeight * scale));
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
     const context = canvas.getContext('2d');
     if (!context) return image;
-    context.drawImage(bitmap, 0, 0, width, height);
+    context.drawImage(source, 0, 0, width, height);
     const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.94));
     if (!blob) return image;
     const name = image.name.replace(/\.[^.]+$/, '') || 'redacao';
@@ -155,5 +183,14 @@ async function normalizeEssayImage(image: File): Promise<File> {
     return image;
   } finally {
     bitmap?.close();
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
   }
+}
+
+function loadImageElement(element: HTMLImageElement, source: string) {
+  return new Promise<void>((resolve, reject) => {
+    element.onload = () => resolve();
+    element.onerror = () => reject(new Error('Não foi possível decodificar a imagem no navegador.'));
+    element.src = source;
+  });
 }
