@@ -117,10 +117,43 @@ export const api = {
   results: (id: string) => request<QuizSummary>(`/quiz-sessions/${id}/results`, { requiresAuth: true }),
   createEssay: (topic: string) => request<{ id: string; topic: string; status: string }>('/essays', { method: 'POST', body: JSON.stringify({ topic }), requiresAuth: true }),
   discardEssay: (essayId: string) => request<{ discarded: boolean }>(`/essays/${essayId}`, { method: 'DELETE', requiresAuth: true }),
-  uploadEssayImage: (essayId: string, image: File) => { const body = new FormData(); body.append('image', image); return request<{ accepted: boolean; images: number; page: number }>(`/essays/${essayId}/images`, { method: 'POST', body, timeout: 45_000, requiresAuth: true }); },
+  uploadEssayImage: async (essayId: string, image: File) => { const body = new FormData(); body.append('image', await normalizeEssayImage(image)); return request<{ accepted: boolean; images: number; page: number }>(`/essays/${essayId}/images`, { method: 'POST', body, timeout: 45_000, requiresAuth: true }); },
   transcribe: (essayId: string, consent: boolean) => request<Transcription>(`/essays/${essayId}/transcribe`, { method: 'POST', body: JSON.stringify({ consent }), timeout: 75_000, requiresAuth: true }),
   saveTranscription: (essayId: string, text: string) => request<{ status: string }>(`/essays/${essayId}/transcription`, { method: 'PATCH', body: JSON.stringify({ text }), requiresAuth: true }),
   evaluateEssay: (essayId: string, consent: boolean) => request<EssayEvaluation>(`/essays/${essayId}/evaluate`, { method: 'POST', body: JSON.stringify({ consent }), timeout: 75_000, requiresAuth: true }),
   essays: () => request<EssayHistory>('/essays', { requiresAuth: true }),
   essay: (id: string) => request<EssayDetail>(`/essays/${id}`, { requiresAuth: true }),
 };
+
+/**
+ * Android gallery providers can expose a photo as a generic/incorrect MIME
+ * type or as a container that the server's image decoder cannot read. Since
+ * the browser already decoded the file to show its preview, normalize it at
+ * the edge and send a well-formed JPEG to the API. If the browser cannot
+ * decode it, keep the original so the API can return the actionable error.
+ */
+async function normalizeEssayImage(image: File): Promise<File> {
+  if (typeof window === 'undefined' || typeof createImageBitmap !== 'function') return image;
+  let bitmap: ImageBitmap | undefined;
+  try {
+    bitmap = await createImageBitmap(image);
+    const maxDimension = 10_000;
+    const scale = Math.min(1, maxDimension / bitmap.width, maxDimension / bitmap.height);
+    const width = Math.max(1, Math.round(bitmap.width * scale));
+    const height = Math.max(1, Math.round(bitmap.height * scale));
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext('2d');
+    if (!context) return image;
+    context.drawImage(bitmap, 0, 0, width, height);
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.94));
+    if (!blob) return image;
+    const name = image.name.replace(/\.[^.]+$/, '') || 'redacao';
+    return new File([blob], `${name}.jpg`, { type: 'image/jpeg', lastModified: image.lastModified });
+  } catch {
+    return image;
+  } finally {
+    bitmap?.close();
+  }
+}
