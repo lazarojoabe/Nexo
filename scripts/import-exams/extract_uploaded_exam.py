@@ -118,13 +118,15 @@ def question_language(page_text: str, offset: int, fallback: str | None = None) 
     metadata, so do not merge both versions or silently choose one.
     """
     prefix = page_text[:offset].lower()
-    markers = [
-        (prefix.rfind("opção inglês"), "en"),
-        (prefix.rfind("opcao ingles"), "en"),
-        (prefix.rfind("opção espanhol"), "es"),
-        (prefix.rfind("opcao espanhol"), "es"),
-    ]
-    position, language = max(markers, key=lambda item: item[0])
+    markers = []
+    for language, pattern in (
+        ("en", r"op(?:ção|cao)\s*:?\s*ingl(?:ês|es)"),
+        ("es", r"op(?:ção|cao)\s*:?\s*espanhol"),
+    ):
+        matches = list(re.finditer(pattern, prefix, re.IGNORECASE))
+        if matches:
+            markers.append((matches[-1].start(), language))
+    position, language = max(markers, key=lambda item: item[0], default=(-1, fallback))
     return language if position >= 0 else fallback
 
 
@@ -154,13 +156,15 @@ def extract_questions(path: Path, day: int | None, language: str | None) -> tupl
                     "sourcePage": page_number,
                     "confidence": confidence,
                 })
-            page_markers = [
-                (page_text.lower().rfind("opção inglês"), "en"),
-                (page_text.lower().rfind("opcao ingles"), "en"),
-                (page_text.lower().rfind("opção espanhol"), "es"),
-                (page_text.lower().rfind("opcao espanhol"), "es"),
-            ]
-            marker_position, marker_language = max(page_markers, key=lambda item: item[0])
+            page_markers = []
+            for marker_language, pattern in (
+                ("en", r"op(?:ção|cao)\s*:?\s*ingl(?:ês|es)"),
+                ("es", r"op(?:ção|cao)\s*:?\s*espanhol"),
+            ):
+                matches = list(re.finditer(pattern, page_text, re.IGNORECASE))
+                if matches:
+                    page_markers.append((matches[-1].start(), marker_language))
+            marker_position, marker_language = max(page_markers, key=lambda item: item[0], default=(-1, inherited_language))
             if marker_position >= 0:
                 inherited_language = marker_language
         return questions, len(document)
@@ -255,7 +259,7 @@ def extract_assets(path: Path, assets_dir: Path) -> tuple[list[dict[str, Any]], 
                         "file": relative_file,
                         "questionNumber": question_number,
                         "placement": "after_statement",
-                        "displayOrder": index - 1,
+                        "displayOrder": sum(1 for item in assets if item.get("questionNumber") == question_number),
                         "mimeType": "image/png",
                         "sourcePage": page_index + 1,
                         "sourceCrop": {"x": round(rectangle.x0, 2), "y": round(rectangle.y0, 2), "width": round(rectangle.width, 2), "height": round(rectangle.height, 2)},
@@ -293,7 +297,7 @@ def extract_assets(path: Path, assets_dir: Path) -> tuple[list[dict[str, Any]], 
                     "file": relative_file,
                     "questionNumber": question_number,
                     "placement": "after_statement",
-                    "displayOrder": index - 1,
+                    "displayOrder": sum(1 for item in assets if item.get("questionNumber") == question_number),
                     "mimeType": "image/png",
                     "sourcePage": page_index + 1,
                     "sourceCrop": {"x": round(rectangle.x0, 2), "y": round(rectangle.y0, 2), "width": round(rectangle.width, 2), "height": round(rectangle.height, 2)},
@@ -315,7 +319,11 @@ def metadata_from(texts: list[str]) -> dict[str, list[str]]:
     year = re.search(r"\bENEM\s*(20\d{2})\b", header)
     if year:
         result["year"] = [year.group(1)]
-    days = sorted({match.group(1) or match.group(2) for match in re.finditer(r"DIA\s*([1-6])\b|\b([1-6])(?:º|ª)?\s*DIA", joined)})
+    # Question statements can mention arbitrary days (for example, "dia 4").
+    # Only trust a day printed in the booklet header/footer alongside the
+    # exam/caderno marker.
+    day_lines = [line for line in header.splitlines() if "DIA" in line and ("CADERNO" in line or "LC -" in line or "CH -" in line)]
+    days = sorted({match.group(1) for line in day_lines for match in re.finditer(r"\b([1-6])\s*(?:º|ª|°|�)?\s*DIA\b", line)})
     if days:
         result["day"] = days
     colors = [normalized for source, normalized in COLORS.items() if re.search(rf"\b{source}\b", header)]
