@@ -20,8 +20,8 @@ from typing import Any
 import pymupdf as fitz
 
 
-QUESTION_RE = re.compile(r"(?:^|\n)\s*QUEST(?:A|Ã|Á)O\s+(\d{1,3})\s*", re.IGNORECASE)
-OPTION_RE = re.compile(r"^\s*\(?([A-E])\)?\s*[.)\-:]?\s+(.*\S)\s*$", re.IGNORECASE)
+QUESTION_RE = re.compile(r"(?:^|\n)\s*QUEST(?:A|Ã|Á|a|ã|á)O\s+(\d{1,3})\s*", re.IGNORECASE)
+OPTION_RE = re.compile(r"^\s*\(?([A-E])\)?\s*[.)\-:]?\s+(.*\S)\s*$")
 COLORS = {"AZUL": "azul", "AMARELO": "amarelo", "BRANCO": "branco", "ROSA": "rosa", "CINZA": "cinza", "LARANJA": "laranja", "VERDE": "verde"}
 
 
@@ -88,10 +88,12 @@ def parse_options(block: str) -> tuple[str, list[dict[str, str]]]:
         if match:
             if current:
                 options.append(current)
+                if len(options) == 5:
+                    break
             current = {"label": match.group(1).upper(), "content": normalize(match.group(2))}
         elif current and line:
             current["content"] = normalize(f"{current['content']} {line}")
-    if current:
+    if current and len(options) < 5:
         options.append(current)
     return statement, options
 
@@ -108,27 +110,65 @@ def area_for(day: int | None, number: int, page_text: str) -> str:
     return "Área não identificada"
 
 
-def extract_questions(path: Path, day: int | None) -> tuple[list[dict[str, Any]], int]:
-    texts, page_count, _warnings = pages_text(path)
+def question_language(page_text: str, offset: int, fallback: str | None = None) -> str | None:
+    """Return the language section active immediately before a question.
+
+    The regular first-day booklet contains both the English and Spanish
+    versions of questions 1–5.  The selected language is a piece of import
+    metadata, so do not merge both versions or silently choose one.
+    """
+    prefix = page_text[:offset].lower()
+    markers = [
+        (prefix.rfind("opção inglês"), "en"),
+        (prefix.rfind("opcao ingles"), "en"),
+        (prefix.rfind("opção espanhol"), "es"),
+        (prefix.rfind("opcao espanhol"), "es"),
+    ]
+    position, language = max(markers, key=lambda item: item[0])
+    return language if position >= 0 else fallback
+
+
+def extract_questions(path: Path, day: int | None, language: str | None) -> tuple[list[dict[str, Any]], int]:
     questions: list[dict[str, Any]] = []
-    for page_number, page_text in enumerate(texts, start=1):
-        matches = list(QUESTION_RE.finditer(page_text))
-        for index, match in enumerate(matches):
-            end = matches[index + 1].start() if index + 1 < len(matches) else len(page_text)
-            statement, options = parse_options(page_text[match.end():end])
-            confidence = 0.98 if statement and len(options) == 5 else 0.45
-            questions.append({
-                "number": int(match.group(1)),
-                "area": area_for(day, int(match.group(1)), page_text),
-                "statement": statement,
-                "options": options,
-                "sourcePage": page_number,
-                "confidence": confidence,
-            })
-    return questions, page_count
+    document = fitz.open(path)
+    try:
+        inherited_language: str | None = None
+        for page_number, page in enumerate(document, start=1):
+            # The proof uses two columns.  PyMuPDF's native block order keeps
+            # each question and its alternatives together; ``sort=True`` can
+            # interleave the columns and make valid alternatives disappear.
+            page_text = page.get_text("text")
+            matches = list(QUESTION_RE.finditer(page_text))
+            for index, match in enumerate(matches):
+                number = int(match.group(1))
+                if number <= 5 and language in {"en", "es"} and question_language(page_text, match.start(), inherited_language) != language:
+                    continue
+                end = matches[index + 1].start() if index + 1 < len(matches) else len(page_text)
+                statement, options = parse_options(page_text[match.end():end])
+                confidence = 0.98 if statement and len(options) == 5 else 0.45
+                questions.append({
+                    "number": number,
+                    "area": area_for(day, number, page_text),
+                    "statement": statement,
+                    "options": options,
+                    "sourcePage": page_number,
+                    "confidence": confidence,
+                })
+            page_markers = [
+                (page_text.lower().rfind("opção inglês"), "en"),
+                (page_text.lower().rfind("opcao ingles"), "en"),
+                (page_text.lower().rfind("opção espanhol"), "es"),
+                (page_text.lower().rfind("opcao espanhol"), "es"),
+            ]
+            marker_position, marker_language = max(page_markers, key=lambda item: item[0])
+            if marker_position >= 0:
+                inherited_language = marker_language
+        return questions, len(document)
+    finally:
+        document.close()
 
 
-def parse_answer_key(path: Path) -> tuple[list[dict[str, Any]], int, list[str]]:
+def parse_answer_key(path: Path, language: str | None) -> tuple[list[dict[str, Any]], int, list[str]]:
     texts, page_count, warnings = pages_text(path)
     answers: list[dict[str, Any]] = []
     ocr = bool(warnings)
@@ -140,6 +180,19 @@ def parse_answer_key(path: Path) -> tuple[list[dict[str, Any]], int, list[str]]:
             number = int(match.group(1))
             if 1 <= number <= 200:
                 answers.append({"number": number, "label": match.group(2).upper(), "sourcePage": page_number, "confidence": 0.72 if ocr else 0.98, "suggested": ocr})
+        # The regular first-day key prints two labels for questions 1–5:
+        # English first and Spanish second.  The compact regex above can only
+        # see the first label, so replace those five entries with the column
+        # selected in the import metadata.
+        selected_first_day: dict[int, str] = {}
+        row_pattern = re.compile(r"^\s*([1-5])\s+([A-E])\s+([A-E])\b")
+        for line in text.splitlines():
+            row = row_pattern.match(line)
+            if row:
+                selected_first_day[int(row.group(1))] = row.group(3) if language == "es" else row.group(2)
+        if selected_first_day:
+            answers = [answer for answer in answers if answer["number"] not in selected_first_day]
+            answers.extend({"number": number, "label": label, "sourcePage": page_number, "confidence": 0.72 if ocr else 0.98, "suggested": ocr} for number, label in selected_first_day.items())
     return answers, page_count, warnings
 
 
@@ -173,6 +226,11 @@ def extract_assets(path: Path, assets_dir: Path) -> tuple[list[dict[str, Any]], 
             index = 0
             seen: set[tuple[int, int, int, int, int]] = set()
             raster_rectangles: list[fitz.Rect] = []
+            # Cover, answer sheet and writing sheet pages may contain many
+            # vector decorations, but no question to which an asset could be
+            # linked.  They are not quiz content and must not block import.
+            if not markers:
+                continue
             for image_info in page.get_images(full=True):
                 xref = image_info[0]
                 for rectangle in page.get_image_rects(xref):
@@ -250,14 +308,17 @@ def extract_assets(path: Path, assets_dir: Path) -> tuple[list[dict[str, Any]], 
 
 def metadata_from(texts: list[str]) -> dict[str, list[str]]:
     joined = "\n".join(texts).upper()
+    header = "\n".join(texts[:3]).upper()
     result: dict[str, list[str]] = {}
-    years = sorted(set(re.findall(r"\b20\d{2}\b", joined)))
-    if years:
-        result["year"] = years
+    # References inside question statements contain many unrelated years.
+    # Only trust a year when it is explicitly attached to the ENEM heading.
+    year = re.search(r"\bENEM\s*(20\d{2})\b", header)
+    if year:
+        result["year"] = [year.group(1)]
     days = sorted({match.group(1) or match.group(2) for match in re.finditer(r"DIA\s*([1-6])\b|\b([1-6])(?:º|ª)?\s*DIA", joined)})
     if days:
         result["day"] = days
-    colors = [normalized for source, normalized in COLORS.items() if source in joined]
+    colors = [normalized for source, normalized in COLORS.items() if re.search(rf"\b{source}\b", header)]
     if colors:
         result["color"] = sorted(set(colors))
     languages: list[str] = []
@@ -277,13 +338,15 @@ def main() -> None:
     parser.add_argument("--out-json", type=Path, required=True)
     parser.add_argument("--assets-dir", type=Path, required=True)
     parser.add_argument("--day", type=int, choices=range(1, 7), help="Dia informado pelo administrador; usado apenas para classificar a área estrutural.")
+    parser.add_argument("--language", choices=("en", "es", "pt"), help="Idioma selecionado para as questões 1–5 do primeiro dia.")
     args = parser.parse_args()
 
     proof_text, _, _ = pages_text(args.exam)
     detected = metadata_from(proof_text)
     day = args.day if args.day is not None else (int(detected["day"][0]) if len(detected.get("day", [])) == 1 else None)
-    questions, proof_pages = extract_questions(args.exam, day)
-    answers, key_pages, warnings = parse_answer_key(args.key)
+    language = args.language or os.environ.get("EXAM_IMPORT_LANGUAGE")
+    questions, proof_pages = extract_questions(args.exam, day, language)
+    answers, key_pages, warnings = parse_answer_key(args.key, language)
     assets, unlinked_assets = extract_assets(args.exam, args.assets_dir)
     output = {
         "questions": questions,

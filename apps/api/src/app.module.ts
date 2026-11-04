@@ -11,6 +11,7 @@ import { AdminExamImportService } from './admin-exam-import.service';
 import { UserProfileService } from './user-profile.service';
 import { RateLimitService } from './rate-limit.service';
 import { AuthSignupService } from './auth-signup.service';
+import { ExamAssetStorageService } from './exam-asset-storage.service';
 
-@Module({ controllers: [HealthController, AuthController, QuizController, EssayController, AdminExamImportController], providers: [QuizService, EssayService, GeminiProvider, { provide: ESSAY_AI_PROVIDER, useExisting: GeminiProvider }, PrismaService, HandwritingPreprocessor, EssayStorageService, AuthIdentityService, UserProfileService, RateLimitService, AuthSignupService, AdminExamImportService] })
+@Module({ controllers: [HealthController, AuthController, QuizController, EssayController, AdminExamImportController], providers: [QuizService, EssayService, GeminiProvider, { provide: ESSAY_AI_PROVIDER, useExisting: GeminiProvider }, PrismaService, HandwritingPreprocessor, EssayStorageService, ExamAssetStorageService, AuthIdentityService, UserProfileService, RateLimitService, AuthSignupService, AdminExamImportService] })
 export class AppModule {}

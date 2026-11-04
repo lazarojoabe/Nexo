@@ -7,6 +7,7 @@ import { spawn } from 'node:child_process';
 import { examImportMetadataSchema, examImportSchema, type ExamImport, type ExamImportMetadata } from '@nexo/shared';
 import { normalizeExamImport, persistExamImport } from './exam-importer';
 import { PrismaService } from './prisma.service';
+import { ExamAssetStorageService } from './exam-asset-storage.service';
 
 const MAX_EXAM_BYTES = 50 * 1024 * 1024;
 const MAX_KEY_BYTES = 20 * 1024 * 1024;
@@ -205,7 +206,7 @@ export function buildPreviewDraft(input: { id: string; metadata: ExamImportMetad
 
 @Injectable()
 export class AdminExamImportService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, private readonly examAssets?: ExamAssetStorageService) {}
 
   assertAuthorized(key?: string) {
     const expected = process.env.ADMIN_IMPORT_KEY;
@@ -227,7 +228,7 @@ export class AdminExamImportService {
     const keyPath = resolve(workspaceDir, `answer-key${extensionFor(keyInfo.mimeType)}`);
     await Promise.all([writeFile(examPath, examFile.buffer), writeFile(keyPath, keyFile.buffer)]);
 
-    const extraction = await this.extract({ examPath, keyPath, outputPath: resolve(workspaceDir, 'extraction.json'), assetDirectory: resolve(workspaceDir, 'assets'), day: metadata.day });
+    const extraction = await this.extract({ examPath, keyPath, outputPath: resolve(workspaceDir, 'extraction.json'), assetDirectory: resolve(workspaceDir, 'assets'), day: metadata.day, language: metadata.language });
     const sources: SourceDescriptor[] = [
       { role: 'exam', originalName: safeFilename(examFile.originalname), mimeType: examInfo.mimeType, byteSize: examFile.size, sha256: examInfo.sha256, pageCount: extraction.pageCounts?.exam, temporaryPath: examPath },
       { role: 'answer-key', originalName: safeFilename(keyFile.originalname), mimeType: keyInfo.mimeType, byteSize: keyFile.size, sha256: keyInfo.sha256, pageCount: extraction.pageCounts?.answerKey, temporaryPath: keyPath },
@@ -280,7 +281,15 @@ export class AdminExamImportService {
       },
     });
     try {
-      const normalized = normalizeExamImport(payload);
+      const remoteUrls = this.examAssets ? await this.examAssets.publish(record.id, record.workspaceDir, payload.questions.flatMap((question) => question.assets)) : new Map<string, string>();
+      const persistedPayload = remoteUrls.size ? {
+        ...payload,
+        questions: payload.questions.map((question) => ({
+          ...question,
+          assets: question.assets.map((asset) => ({ ...asset, url: remoteUrls.get(asset.storagePath ?? '') ?? asset.url })),
+        })),
+      } : payload;
+      const normalized = normalizeExamImport(persistedPayload);
       const persisted = await persistExamImport(this.prisma, normalized);
       await this.prisma.examImportBatch.update({ where: { id: batch.id }, data: { status: 'persisted', examId: persisted.examId, persistedAt: new Date(), report: { ...auditReport, persisted } } });
       return { status: 'persisted', importBatchId: batch.id, previewId: id, ...persisted, diff };
@@ -290,11 +299,13 @@ export class AdminExamImportService {
     }
   }
 
-  private async extract(input: { examPath: string; keyPath: string; outputPath: string; assetDirectory: string; day: number }) {
+  private async extract(input: { examPath: string; keyPath: string; outputPath: string; assetDirectory: string; day: number; language?: string }) {
     const script = resolve(this.workspaceRoot(), 'scripts', 'import-exams', 'extract_uploaded_exam.py');
     const python = process.env.PYTHON_BIN || 'python';
     await new Promise<void>((resolvePromise, reject) => {
-      const child = spawn(python, [script, '--exam', input.examPath, '--key', input.keyPath, '--out-json', input.outputPath, '--assets-dir', input.assetDirectory, '--day', String(input.day)], { windowsHide: true });
+      const args = [script, '--exam', input.examPath, '--key', input.keyPath, '--out-json', input.outputPath, '--assets-dir', input.assetDirectory, '--day', String(input.day)];
+      if (input.language && ['en', 'es', 'pt'].includes(input.language)) args.push('--language', input.language);
+      const child = spawn(python, args, { windowsHide: true });
       let stderr = '';
       child.stderr.on('data', (chunk: Buffer) => { stderr += chunk.toString(); });
       child.once('error', () => reject(new UnprocessableEntityException('Não foi possível iniciar o extrator local. Instale Python 3.10+ e PyMuPDF.')));
