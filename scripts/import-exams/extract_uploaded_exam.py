@@ -99,14 +99,16 @@ def parse_options(block: str) -> tuple[str, list[dict[str, str]]]:
 
 
 def area_for(day: int | None, number: int, page_text: str) -> str:
-    upper = page_text.upper()
-    for marker, area in (("CIÊNCIAS DA NATUREZA", "Ciências da Natureza"), ("CIENCIAS DA NATUREZA", "Ciências da Natureza"), ("CIÊNCIAS HUMANAS", "Ciências Humanas"), ("CIENCIAS HUMANAS", "Ciências Humanas"), ("MATEMÁTICA", "Matemática"), ("MATEMATICA", "Matemática"), ("LINGUAGENS", "Linguagens")):
-        if marker in upper:
-            return area
+    # On the first day, the booklet's question ranges are fixed. Do not let a
+    # subject name quoted inside a question or source text override the range.
     if day == 1:
         return "Linguagens" if number <= 45 else "Ciências Humanas"
     if day == 2:
         return "Ciências da Natureza" if number <= 45 else "Matemática"
+    upper = page_text.upper()
+    for marker, area in (("CIÊNCIAS DA NATUREZA", "Ciências da Natureza"), ("CIENCIAS DA NATUREZA", "Ciências da Natureza"), ("CIÊNCIAS HUMANAS", "Ciências Humanas"), ("CIENCIAS HUMANAS", "Ciências Humanas"), ("MATEMÁTICA", "Matemática"), ("MATEMATICA", "Matemática"), ("LINGUAGENS", "Linguagens")):
+        if marker in upper:
+            return area
     return "Área não identificada"
 
 
