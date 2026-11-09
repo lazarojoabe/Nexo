@@ -1,0 +1,3330 @@
+{
+  "sourceUrl": "https://download.inep.gov.br/enem/provas_e_gabaritos/2025_PV_impresso_D4_CD7.pdf",
+  "sourceVersion": "Inep 2025 — 2º dia — Caderno 7 Azul — gabarito oficial",
+  "exam": {
+    "year": 2025,
+    "day": 2,
+    "color": "azul",
+    "version": "caderno-7"
+  },
+  "questions": [
+    {
+      "number": 91,
+      "area": "Ciências da Natureza",
+      "statement": "As temperaturas nas regiões urbanas e rurais de uma mesma cidade podem diferir significativamente. Isso ocorre,\nprincipalmente, pela diferença entre os níveis de irradiação térmica das duas regiões. Considerando que o nível de irradiação\ntérmica nas regiões urbanas pode até mesmo superar o valor percentual de 95%, uma opção viável para minimizar esse processo\ne melhorar o conforto térmico no interior das residências consiste em pintar o telhado com tinta branca.\nEssa opção é viável porque reduz a",
+      "options": [
+        {
+          "label": "A",
+          "content": "capacidade térmica do material."
+        },
+        {
+          "label": "B",
+          "content": "convecção térmica abaixo do telhado."
+        },
+        {
+          "label": "C",
+          "content": "reflexão da radiação solar pelo telhado."
+        },
+        {
+          "label": "D",
+          "content": "absorção de radiação solar pelo telhado."
+        },
+        {
+          "label": "E",
+          "content": "condução térmica através da superfície do telhado."
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 2,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 92,
+      "area": "Ciências da Natureza",
+      "statement": "A vazão do Rio Tietê na capital paulista aumentou de 174 m3/s no início do século XX para mais de 1 000 m3/s na primeira\ndécada do século XXI. O rebaixamento da calha foi uma obra concluída em 2005 que alargou o rio em até 30 m e o aprofundou\nem 2,5 m na região metropolitana. Mesmo assim, São Paulo ainda sofre com os problemas das enchentes.\nGoverno de SP deixou de limpar o Rio Tietê por quase três anos. Disponível em: http://noticias.uol.com.br. Acesso em: 13 nov. 2011 (adaptado).\nEsse problema vem ocorrendo em outros centros urbanos e tem como causa comum o aumento da",
+      "options": [
+        {
+          "label": "A",
+          "content": "industrialização."
+        },
+        {
+          "label": "B",
+          "content": "transposição de rios."
+        },
+        {
+          "label": "C",
+          "content": "área de solo impermeabilizado."
+        },
+        {
+          "label": "D",
+          "content": "descarga de resíduos químicos."
+        },
+        {
+          "label": "E",
+          "content": "eutrofização de ambientes aquáticos."
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 2,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 93,
+      "area": "Ciências da Natureza",
+      "statement": "Energia solar fotovoltaica\nA energia solar fotovoltaica é renovável e limpa, associada à radiação emitida pelo Sol para gerar eletricidade. Baseia-se no\ndenominado efeito fotoelétrico, por meio do qual determinados materiais são capazes de absorver fótons e liberar elétrons,\ngerando corrente elétrica. Para isso, utilizam-se placas com dispositivos semicondutores denominados células solares, ou\nfotovoltaicas, que podem ser feitos, por exemplo, de silício monocristalino, policristalino ou amorfo.\nDisponível em: www.ecycle.com.br. Acesso em: 2 dez. 2021 (adaptado).\nO principal impacto ambiental gerado pelo descarte desses dispositivos está associado ao(à)",
+      "options": [
+        {
+          "label": "A",
+          "content": "contaminação do solo."
+        },
+        {
+          "label": "B",
+          "content": "emissão de radioatividade."
+        },
+        {
+          "label": "C",
+          "content": "emissão de radiação ultravioleta."
+        },
+        {
+          "label": "D",
+          "content": "aumento da temperatura do solo."
+        },
+        {
+          "label": "E",
+          "content": "produção de gases de efeito estufa."
+        }
+      ],
+      "correctOptionLabel": "A",
+      "sourcePage": 2,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 94,
+      "area": "Ciências da Natureza",
+      "statement": "Nova vacina contra HIV utiliza DNA e proteínas recombinantes\nUma equipe de pesquisadores desenvolveu uma nova vacina que consiste em DNA e proteínas recombinantes. Associando a\nbiologia molecular e a bioinformática, rastrearam o genoma viral e obtiveram uma proteína que, quando ligada a anticorpos,\nresulta na destruição do vírus e das células infectadas por ele. Nos testes, a vacina se mostrou capaz de induzir anticorpos contra\no HIV. Essa técnica de produção de vacinas é chamada de “vacinologia reversa”.\nDisponível em: https://sciam.com.br. Acesso em: 22 nov. 2021 (adaptado).\nEssa tecnologia pode ser vantajosa em relação aos métodos tradicionais de preparo de vacinas porque",
+      "options": [
+        {
+          "label": "A",
+          "content": "necessita do agente causador da doença vivo e incapaz de fazer o ciclo infeccioso."
+        },
+        {
+          "label": "B",
+          "content": "elimina a necessidade de os agentes infecciosos serem cultivados e modificados."
+        },
+        {
+          "label": "C",
+          "content": "utiliza microrganismos modificados que são incapazes de causar a doença."
+        },
+        {
+          "label": "D",
+          "content": "extingue o uso de partes de proteínas e açúcares dos agentes infecciosos."
+        },
+        {
+          "label": "E",
+          "content": "aproveita uma toxina inativada do agente infeccioso em sua fabricação."
+        }
+      ],
+      "correctOptionLabel": "B",
+      "sourcePage": 2,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 95,
+      "area": "Ciências da Natureza",
+      "statement": "No mundo animal, quando comparamos machos e fêmeas\nde uma mesma espécie, muitas vezes observamos diferenças\nmarcantes entre eles. Em algumas espécies de aves, os machos,\nem relação às fêmeas, apresentam estrutura corpórea mais\navantajada, plumagem com cores mais chamativas, até mesmo\ndiferentes acessórios distribuídos pelo corpo.\nO texto caracteriza qual conceito biológico?",
+      "options": [
+        {
+          "label": "A",
+          "content": "Camuflagem."
+        },
+        {
+          "label": "B",
+          "content": "Metamorfose."
+        },
+        {
+          "label": "C",
+          "content": "Dimorfismo sexual."
+        },
+        {
+          "label": "D",
+          "content": "Divergência evolutiva."
+        },
+        {
+          "label": "E",
+          "content": "Isolamento reprodutivo."
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 3,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 96,
+      "area": "Ciências da Natureza",
+      "statement": "A febre maculosa brasileira é uma doença infecciosa febril\naguda e com elevada taxa de letalidade. A transmissão se dá\npela picada do carrapato do gênero Amblyomma infectado pela\nbactéria Rickettsia rickettsii. As capivaras e os cavalos assumem\ngrande importância na cadeia epidemiológica da doença, pois\nsão os principais reservatórios dos carrapatos transmissores.\nDisponível em: http://portalsaude.saude.gov.br.\nAcesso em: 27 jun. 2015 (adaptado).\nQue medida preventiva é importante para prevenir a transmissão\ndessa doença?",
+      "options": [
+        {
+          "label": "A",
+          "content": "Tratar os doentes."
+        },
+        {
+          "label": "B",
+          "content": "Utilizar telas em portas domiciliares."
+        },
+        {
+          "label": "C",
+          "content": "Retirar sobras de alimento dos quintais."
+        },
+        {
+          "label": "D",
+          "content": "Fazer o controle biológico do vetor."
+        },
+        {
+          "label": "E",
+          "content": "Manter fechados os reservatórios de água."
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 3,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 97,
+      "area": "Ciências da Natureza",
+      "statement": "A história evolutiva do grupo ao qual pertence a planta\ncomigo-ninguém-pode (Dieffenbachia spp.) remonta seu\nestabelecimento há aproximadamente 40 milhões de anos.\nEssas plantas podem produzir intoxicações sérias em adultos e\nmorte de crianças e animais domésticos, pois em seus tecidos\napresentam células que contêm “pequenas agulhas” de oxalato\nde cálcio, chamadas de ráfides, liberadas quando as células são\nde alguma forma danificadas.\nA hipótese aceita é a de que a presença dessas estruturas teria\nocorrido a partir da pressão seletiva exercida por",
+      "options": [
+        {
+          "label": "A",
+          "content": "alterações na temperatura."
+        },
+        {
+          "label": "B",
+          "content": "animais domésticos."
+        },
+        {
+          "label": "C",
+          "content": "insetos herbívoros."
+        },
+        {
+          "label": "D",
+          "content": "alterações no solo."
+        },
+        {
+          "label": "E",
+          "content": "seres humanos."
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 3,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 98,
+      "area": "Ciências da Natureza",
+      "statement": "A leptospirose é uma zoonose causada por uma bactéria do\ngênero Leptospira. A transmissão ocorre através da penetração\nativa da bactéria na pele e mucosas, quando em contato com\nágua, alimentos ou solo contendo urina de animais infectados.\nOs roedores sinantrópicos comensais, como as ratazanas,\ndesempenham o papel de principais reservatórios da doença\nem áreas urbanas.\nDisponível em: www.bio.fiocruz.br. Acesso em: 22 jun. 2015 (adaptado).\nQuais medidas são recomendadas para prevenir essa doença\nem áreas urbanas?",
+      "options": [
+        {
+          "label": "A",
+          "content": "Utilizar máscara para proteger a boca e evitar acúmulo de objetos nos quintais."
+        },
+        {
+          "label": "B",
+          "content": "Lavar as mãos antes das refeições e manter os terrenos baldios limpos e capinados."
+        },
+        {
+          "label": "C",
+          "content": "Evitar o contato com água de esgotos ou de enchentes e dar destino adequado ao lixo doméstico."
+        },
+        {
+          "label": "D",
+          "content": "Consumir água tratada e manter os alimentos em recipientes fechados e em locais elevados do solo."
+        },
+        {
+          "label": "E",
+          "content": "Aplicar repelentes corporais e retirar as sobras de alimento de animais domésticos antes do anoitecer."
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 3,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 99,
+      "area": "Ciências da Natureza",
+      "statement": "Existe grande expectativa quanto ao emprego de\ncélulas-tronco na terapia contra muitas doenças, uma vez que\nessas células podem se diferenciar em diversos tipos celulares.\nUm pesquisador, interessado em estudar as fibras musculares\nestriadas cardíacas (cardiomiócitos) obtidas de células-tronco,\niniciou seu trabalho analisando a ação de cinco fatores de\ndiferenciação celular e obteve células com as características\napresentadas no quadro.\nFator de\ndiferenciação\ncelular\nNúmero de núcleos\nComponentes\nintracelulares\nmais abundantes\nI\nMononucleada\nREG e FA\nII\nMononucleada\nREG e REL\nIII\nMono ou binucleada\nMitocôndrias e REL\nIV\nMono ou binucleada\nMitocôndrias e FA\nV\nMultinucleada\nREL e FA\nREG (retículo endoplasmático granular/rugoso);\nREL (retículo endoplasmático liso); FA (filamentos de actina).\nCom qual fator de diferenciação o pesquisador deverá prosseguir\nem seu estudo?",
+      "options": [
+        {
+          "label": "A",
+          "content": "I"
+        },
+        {
+          "label": "B",
+          "content": "II"
+        },
+        {
+          "label": "C",
+          "content": "III"
+        },
+        {
+          "label": "D",
+          "content": "IV"
+        },
+        {
+          "label": "E",
+          "content": "V"
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 3,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q099-p003-01-vector.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 99, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 3,
+          "sourceCrop": {
+            "x": 287.53,
+            "y": 487.72,
+            "width": 248.03,
+            "height": 40
+          },
+          "sourceHash": "3b6ea5c32e0a03afbbf97a6df79f9834d070af872677cd5c64ce0a5cf834691c"
+        }
+      ]
+    },
+    {
+      "number": 100,
+      "area": "Ciências da Natureza",
+      "statement": "A identificação e/ou quantificação de moléculas em amostras é de extrema relevância durante um trabalho de perícia criminal.\nUma maneira simples e muito útil de se fazer essa análise é reconhecer a região do espectro eletromagnético em que essas\nmoléculas absorvem radiação. A região da luz visível vai de 400 nm a 700 nm, sendo o infravermelho a região acima de 700 nm.\nUma maior concentração das substâncias está relacionada com uma maior quantidade de radiação absorvida. Dependendo da\nnatureza da molécula e do meio onde ela se encontra, essa absorção de radiação ocorre em diferentes comprimentos de onda e\ncom diferentes absorbâncias. Um perito avaliou três amostras de mesma concentração de uma substância em diferentes valores\nde pH e obteve as curvas seguintes.\nDe acordo com o gráfico, pode-se concluir que a elevação do pH aumenta a",
+      "options": [
+        {
+          "label": "A",
+          "content": "reatividade da substância."
+        },
+        {
+          "label": "B",
+          "content": "quantidade de energia absorvida."
+        },
+        {
+          "label": "C",
+          "content": "concentração de íons H3O+ no sistema."
+        },
+        {
+          "label": "D",
+          "content": "absorbância na região do infravermelho."
+        },
+        {
+          "label": "E",
+          "content": "quantidade de moléculas da substância no meio."
+        }
+      ],
+      "correctOptionLabel": "B",
+      "sourcePage": 4,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q100-p004-01.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 100, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 4,
+          "sourceCrop": {
+            "x": 118.17,
+            "y": 194.75,
+            "width": 337.68,
+            "height": 281.28
+          },
+          "sourceHash": "cc8c6d5a6d0146a3f30d5e946e45217f655034a19206330062f8647bd2cb20d0"
+        }
+      ]
+    },
+    {
+      "number": 101,
+      "area": "Ciências da Natureza",
+      "statement": "Em 2006, o Prêmio Nobel de medicina ou fisiologia foi dado pela descrição do mecanismo de interferência de RNA, ou\nsimplesmente RNAi. O mecanismo RNAi é um processo biológico no qual pequenas moléculas de RNA interferem na expressão\ngênica, tipicamente pela destruição do RNA mensageiro de um gene específico no citoplasma.\nESTEVES, B. Interferência de RNA dá prêmio a norte-americanos. Disponível em: http://cienciahoje.uol.br. Acesso em: 13 jul. 2015 (adaptado).\nNesse mecanismo, a regulação da expressão gênica ocorre pela inibição da",
+      "options": [
+        {
+          "label": "A",
+          "content": "síntese do RNA mensageiro."
+        },
+        {
+          "label": "B",
+          "content": "saída do RNA mensageiro do núcleo."
+        },
+        {
+          "label": "C",
+          "content": "tradução do RNA mensageiro em proteína."
+        },
+        {
+          "label": "D",
+          "content": "síntese do ribossomo pelo RNA mensageiro."
+        },
+        {
+          "label": "E",
+          "content": "captura de aminoácidos pelo RNA mensageiro."
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 4,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 102,
+      "area": "Ciências da Natureza",
+      "statement": "Uma pessoa pretende avaliar qual é a potência real de uma placa fotovoltaica nas condições operacionais de instalação.\nEla constata que a máxima temperatura atingida pela placa é de 65 °C. O manual de instruções desse modelo de placa informa que,\na 25 °C, sua potência nominal é de 250 W. Já a potência real muda com a variação da temperatura da placa, a uma taxa de −0,4% da\npotência nominal a cada grau Celsius.\nA menor potência real gerada, em watt, é",
+      "options": [
+        {
+          "label": "A",
+          "content": "230 W."
+        },
+        {
+          "label": "B",
+          "content": "210 W."
+        },
+        {
+          "label": "C",
+          "content": "190 W."
+        },
+        {
+          "label": "D",
+          "content": "150 W."
+        },
+        {
+          "label": "E",
+          "content": "100 W."
+        }
+      ],
+      "correctOptionLabel": "B",
+      "sourcePage": 5,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 103,
+      "area": "Ciências da Natureza",
+      "statement": "Há um grande esforço científico no desenvolvimento de novos processos para o aproveitamento de resíduos lignocelulósicos,\ncomo o bagaço de cana-de-açúcar, para produção de etanol de segunda geração (2G). Apesar de já existirem tecnologias\ndisponíveis, a maioria apresenta limitações técnicas ou econômicas. Nesse sentido, um dos principais desafios que envolvem a\nprodução de etanol celulósico é disponibilizar monossacarídeos fermentáveis das moléculas poliméricas, conforme a ilustração.\nSANTOS, F. A. et al. Potencial da palha de cana-de-açúcar para produção de etanol. Química Nova, n. 5, 2012 (adaptado).\nUm pesquisador, para tentar otimizar a produção, poderia acrescentar ao processo de hidrólise enzimas extraídas de",
+      "options": [
+        {
+          "label": "A",
+          "content": "células entéricas de gaviões."
+        },
+        {
+          "label": "B",
+          "content": "suco pancreático de humanos."
+        },
+        {
+          "label": "C",
+          "content": "bactérias do rúmen de bovinos."
+        },
+        {
+          "label": "D",
+          "content": "glândulas salivares de roedores."
+        },
+        {
+          "label": "E",
+          "content": "macerado do estômago de macacos."
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 5,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q103-p005-01.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 103, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 5,
+          "sourceCrop": {
+            "x": 24.68,
+            "y": 307.59,
+            "width": 510.48,
+            "height": 110.76
+          },
+          "sourceHash": "0dcedf171fafa41a10870778503fef85c3c34a810cd43f9ceaf9cf0d7df9b645"
+        }
+      ]
+    },
+    {
+      "number": 104,
+      "area": "Ciências da Natureza",
+      "statement": "A industrialização, o crescimento populacional e a demanda por mais alimentos, bem como o aumento da frota veicular,\nentre outros, geram resíduos poluentes classificados como primários ou secundários. Os primários são aqueles lançados\ndiretamente no ar, e muitos deles reagem com alguns componentes existentes na atmosfera (oxigênio, vapor de água, entre\noutros) originando os poluentes secundários.\nDisponível em: https://essentiaeditora.iff.edu.br. Acesso em: 9 dez. 2021 (adaptado).\nQual poluente primário, em contato com o ar, origina um poluente secundário altamente corrosivo?",
+      "options": [
+        {
+          "label": "A",
+          "content": "Metano."
+        },
+        {
+          "label": "B",
+          "content": "Clorofluorcarbono."
+        },
+        {
+          "label": "C",
+          "content": "Dióxido de enxofre."
+        },
+        {
+          "label": "D",
+          "content": "Dióxido de carbono."
+        },
+        {
+          "label": "E",
+          "content": "Monóxido de carbono."
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 5,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 105,
+      "area": "Ciências da Natureza",
+      "statement": "O estudo da relação entre a estrutura e a atividade biológica de substâncias é de fundamental importância no desenvolvimento\nde drogas para o combate a doenças. Pesquisadores avaliaram o potencial antiviral de algumas moléculas frente ao vírus\nSARS-CoV-2, considerando a capacidade de inibição das enzimas responsáveis pela síntese de proteínas no vírus. A interação\nentre o composto e o sítio ativo da enzima depende de fatores eletrônicos e estéricos, permitindo estabelecer uma relação\nentre a estrutura e a atividade antiviral. A maior atividade foi correlacionada a substituintes pouco volumosos e moderadamente\neletronegativos presentes no anel aromático da molécula do antiviral. Nesse estudo, foram modelados os cinco compostos\nhipotéticos apresentados a seguir.\nKNELLER, D. W. et al. Structural, Electronic and Electrostatic Determinants for lnhibitor Binding to Subsites S1 and S2 in SARS-CoV-2 Main Protease.\nDisponível em: https://doi.org/10.1021/acs.jmedchem.1c01475. Acesso em: 2 dez. 2021 (adaptado).\nDentre os compostos modelados, qual deve apresentar a maior atividade antiviral?",
+      "options": [
+        {
+          "label": "A",
+          "content": "I"
+        },
+        {
+          "label": "B",
+          "content": "II"
+        },
+        {
+          "label": "C",
+          "content": "III"
+        },
+        {
+          "label": "D",
+          "content": "IV"
+        },
+        {
+          "label": "E",
+          "content": "V"
+        }
+      ],
+      "correctOptionLabel": "B",
+      "sourcePage": 6,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q105-p006-01.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 105, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 6,
+          "sourceCrop": {
+            "x": 47.85,
+            "y": 190.56,
+            "width": 478.32,
+            "height": 426.96
+          },
+          "sourceHash": "58e54a01d7aad1d7280607245c99d22de5cef696c3bcc6f1146f82ffacf77f24"
+        }
+      ]
+    },
+    {
+      "number": 106,
+      "area": "Ciências da Natureza",
+      "statement": "Em experimento realizado com células de raízes de cebola\ncomum (Allium cepa), após tratamento com águas de esgoto,\nfoi encontrada uma frequência elevada de cromossomos\nmetafásicos característicos, não alinhados, no plano equatorial\ndas células. Pela análise dos dados, verificou-se que essas águas\npodem provocar alterações celulares, com implicações para a\nsobrevivência dos diversos organismos expostos a elas.\nEm um ciclo celular normal, as alterações observadas demonstram\nque essas águas interferiram na",
+      "options": [
+        {
+          "label": "A",
+          "content": "replicação do DNA."
+        },
+        {
+          "label": "B",
+          "content": "ocorrência da citocinese."
+        },
+        {
+          "label": "C",
+          "content": "atividade do fuso mitótico."
+        },
+        {
+          "label": "D",
+          "content": "condensação cromossômica."
+        },
+        {
+          "label": "E",
+          "content": "fragmentação do envoltório nuclear."
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 7,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 107,
+      "area": "Ciências da Natureza",
+      "statement": "Um tanque industrial contendo ácido clorídrico se rompeu\ne dele vazaram 365 kg dessa substância. A equipe de contenção\nde acidentes foi mobilizada e utilizou, para neutralizar o ácido,\ncal hidratada. Para não deixar resíduos do ácido, como margem\nde segurança, aplicou-se 50% a mais dessa base. A equação da\nreação de neutralização está representada a seguir:\n2 HCl (aq) + Ca(OH)2 (s) → CaCl2 (aq) + 2 H2O (l)\nAs massas molares do HCl e do Ca(OH)2 são, respectivamente,\niguais a 36,5 g/mol e 74 g/mol.\nConsiderando a cal hidratada 100% pura, a massa de\nCa(OH)2 utilizada na neutralização do ácido foi",
+      "options": [
+        {
+          "label": "A",
+          "content": "370 kg."
+        },
+        {
+          "label": "B",
+          "content": "555 kg."
+        },
+        {
+          "label": "C",
+          "content": "740 kg."
+        },
+        {
+          "label": "D",
+          "content": "1 110 kg."
+        },
+        {
+          "label": "E",
+          "content": "1 480 kg."
+        }
+      ],
+      "correctOptionLabel": "B",
+      "sourcePage": 7,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 108,
+      "area": "Ciências da Natureza",
+      "statement": "Descobriu-se a provável causa da alteração de cores do\nquadro Flores em um vaso azul, do pintor Van Gogh, de 1887.\nQuando usado em pinturas, o amarelo cádmio (sulfeto de\ncádmio) reage com o ar formando sulfato de cádmio (CdSO4),\nque é um sólido esbranquiçado e solúvel em água, o que faz com\nque os pigmentos percam cor e luminosidade. Para interromper\nesse processo, foi utilizado um verniz. Contudo, após o uso do\nverniz, contendo íons de chumbo (Pb2+), formou-se uma camada\nacinzentada no quadro.\nDisponível em: http://revistapesquisa.fapesp.br.\nAcesso em: 2 out. 2015 (adaptado).\nA equação química que representa o processo de formação da\ncamada acinzentada no quadro é:",
+      "options": [
+        {
+          "label": "A",
+          "content": "CdSO4 (sólido) + Pb (sólido) → PbSO4 (sólido) + Cd (sólido)"
+        },
+        {
+          "label": "B",
+          "content": "CdSO4 (sólido) + Pb2+ (solução) → PbSO4 (sólido) + Cd (sólido)"
+        },
+        {
+          "label": "C",
+          "content": "CdSO4 (sólido) + Pb2+ (solução) → PbSO4 (sólido) + Cd2+ (solução)"
+        },
+        {
+          "label": "D",
+          "content": "PbSO4 (solução) + Cd2+ (solução) → CdSO4 (sólido) + Pb (sólido)"
+        },
+        {
+          "label": "E",
+          "content": "PbSO4 (sólido) + Cd2+ (solução) → CdSO4 (sólido) + Pb2+ (solução)"
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 7,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 109,
+      "area": "Ciências da Natureza",
+      "statement": "Para melhorar seu condicionamento físico, um atleta amarra\nem sua cintura uma fita elástica presa a um pneu. Isso faz com\nque ele precise realizar um esforço muito maior para conseguir\nse deslocar. Durante o treinamento, o atleta pode estar nas\nseguintes situações:\n1. em repouso;\n2. movendo-se com velocidade constante;\n3. acelerado.\nCom relação às forças que atuam no atleta na situação 3,\na força de atrito é",
+      "options": [
+        {
+          "label": "A",
+          "content": "igual à força elástica."
+        },
+        {
+          "label": "B",
+          "content": "a reação à força normal."
+        },
+        {
+          "label": "C",
+          "content": "igual à força peso do pneu."
+        },
+        {
+          "label": "D",
+          "content": "a reação à força elástica realizada pela fita sobre o atleta."
+        },
+        {
+          "label": "E",
+          "content": "a reação à força para trás realizada pelos pés do atleta sobre o solo."
+        }
+      ],
+      "correctOptionLabel": "E",
+      "sourcePage": 7,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 110,
+      "area": "Ciências da Natureza",
+      "statement": "O conteúdo de um cilindro de gás natural veicular explodiu,\nliberando um volume de 15 m3 de gás, que entrou em combustão.\nApesar do risco de explosão, o gás natural veicular (GNV) é\num combustível bastante eficiente em termos econômicos.\nApresenta densidade de 0,8 kg/m3 e seu componente principal\né o metano (CH4), de massa molar igual a 16 g/mol, numa\nconcentração de 90%. É possível avaliar a energia liberada na\nexplosão a partir das energias de ligação dos átomos envolvidos,\ndescritas no quadro.\nLigação\nenergia de ligação (kJ/mol)\nC - H\n414\nO = O\n498\nC = O\n799\nH - O\n460\nCHANG, R. Chemistry. Nova York: McGraw-Hill, 2010 (adaptado).\nA energia, em quilojoule, gerada no momento da explosão é\nmais próxima de",
+      "options": [
+        {
+          "label": "A",
+          "content": "2,5 × 105 kJ."
+        },
+        {
+          "label": "B",
+          "content": "2,7 × 105 kJ."
+        },
+        {
+          "label": "C",
+          "content": "3,1 × 105 kJ."
+        },
+        {
+          "label": "D",
+          "content": "5,3 × 105 kJ."
+        },
+        {
+          "label": "E",
+          "content": "5,9 × 105 kJ."
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 8,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 111,
+      "area": "Ciências da Natureza",
+      "statement": "O Brasil é um dos maiores produtores mundiais de manganês\n(massa molar = 55 g ⋅ mol-1), um metal essencial na fabricação\nde aço e ligas de ferro. Esse metal é obtido a partir do minério\npirolusita, que contém 40% de MnO2 (massa molar = 87 g ⋅ mol-1).\nA reação que ocorre nesse processo apresenta rendimento de\n80% e está descrita a seguir:\n2 MnO2 (s) + 2 Fe2O3 (s) + 5 C (s) → 2 Mn (s) + 4 Fe (s) + 5 CO2 (g)\nUma indústria processa 18 t (toneladas) de minério\npirolusita por dia.\nA massa de manganês, em tonelada, que essa indústria produz\ndiariamente é mais próxima de",
+      "options": [
+        {
+          "label": "A",
+          "content": "3,6 t."
+        },
+        {
+          "label": "B",
+          "content": "4,6 t."
+        },
+        {
+          "label": "C",
+          "content": "5,7 t."
+        },
+        {
+          "label": "D",
+          "content": "9,1 t."
+        },
+        {
+          "label": "E",
+          "content": "11,4 t."
+        }
+      ],
+      "correctOptionLabel": "A",
+      "sourcePage": 8,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 112,
+      "area": "Ciências da Natureza",
+      "statement": "A absorção de grandes quantidades de gás carbônico\nda atmosfera é conhecida como sequestro de carbono.\nAs florestas desempenham um papel importante, já que cada\nhectare de floresta em desenvolvimento absorve cerca de\n150 a 200 toneladas de carbono, auxiliando na diminuição\ndesse gás na atmosfera.\nTONON, R. Disponível em: http://super.abril.com.br.\nAcesso em: 14 jan. 2014 (adaptado).\nA maior parte do carbono resultante desse processo encontra-se",
+      "options": [
+        {
+          "label": "A",
+          "content": "nas flores, como antocianinas."
+        },
+        {
+          "label": "B",
+          "content": "nos frutos, como taninos e pectinas."
+        },
+        {
+          "label": "C",
+          "content": "nas sementes, como substâncias de reserva na forma de lipídios."
+        },
+        {
+          "label": "D",
+          "content": "nas folhas, nas membranas plasmáticas das células parenquimáticas."
+        },
+        {
+          "label": "E",
+          "content": "no caule, nas paredes celulares dos elementos do xilema secundário."
+        }
+      ],
+      "correctOptionLabel": "E",
+      "sourcePage": 8,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 113,
+      "area": "Ciências da Natureza",
+      "statement": "As mulheres tendem a sofrer alterações periódicas nos níveis\nde hormônios sexuais. Uma exceção é o período da gravidez,\népoca em que ocorrem menores variações hormonais.\nIsso se deve à manutenção de níveis elevados do hormônio\nplacentário:",
+      "options": [
+        {
+          "label": "A",
+          "content": "Progesterona, que reduz os níveis dos hormônios ovarianos."
+        },
+        {
+          "label": "B",
+          "content": "Estrógeno, que estimula a produção dos hormônios hipofisários."
+        },
+        {
+          "label": "C",
+          "content": "Luteinizante, que diminui os níveis das gonadotrofinas hipofisárias."
+        },
+        {
+          "label": "D",
+          "content": "Gonadotrofina coriônica, que diminui os níveis dos hormônios hipofisários."
+        },
+        {
+          "label": "E",
+          "content": "Folículo estimulante, que aumenta a concentração dos hormônios ovarianos."
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 8,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 114,
+      "area": "Ciências da Natureza",
+      "statement": "Um grupo de cientistas desenvolveu um conjunto de\npartículas sólidas utilizadas para ativar o sistema de defesa\ndo nosso organismo. Durante a execução dos experimentos,\nobservou-se que essas partículas eram englobadas para o interior\ndas células através de projeções da membrana plasmática.\nQual processo de transporte está envolvido nesses experimentos?",
+      "options": [
+        {
+          "label": "A",
+          "content": "Clasmocitose."
+        },
+        {
+          "label": "B",
+          "content": "Fagocitose."
+        },
+        {
+          "label": "C",
+          "content": "Pinocitose."
+        },
+        {
+          "label": "D",
+          "content": "Exocitose."
+        },
+        {
+          "label": "E",
+          "content": "Apoptose."
+        }
+      ],
+      "correctOptionLabel": "B",
+      "sourcePage": 8,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 115,
+      "area": "Ciências da Natureza",
+      "statement": "Os aldeídos fazem parte de importantes famílias olfativas\nencontradas em muitos alimentos. O 3-metil-butanal, por\nexemplo, está presente na mistura de compostos voláteis\nliberados na etapa de torrefação do café.\nMOREIRA, R. F. A.; TRUGO, L. C.; DE MARIA, C. A. B. Componentes voláteis do\ncafé torrado. Química Nova, n. 2, 2000 (adaptado).\nUma das formas de se obter essa substância em laboratório é\noxidar a molécula de",
+      "options": [
+        {
+          "label": "A",
+          "content": "ácido 3-metil-butanoico."
+        },
+        {
+          "label": "B",
+          "content": "3-metil-but-2-en-2-ol."
+        },
+        {
+          "label": "C",
+          "content": "3-metil-butan-1-ol."
+        },
+        {
+          "label": "D",
+          "content": "3-metil-butan-2-ol."
+        },
+        {
+          "label": "E",
+          "content": "3-metil-butanona."
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 9,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 116,
+      "area": "Ciências da Natureza",
+      "statement": "No Rio Grande do Norte, já se produz a flor de sal, cobiçado\ntempero que há algum tempo aparece nos cardápios de\nrestaurantes de alto gabarito. O processo de sua produção é\nartesanal, em que a água do mar é levada a tanques escavados\ne vai passando de um tanque para outro, ficando cada vez mais\nconcentrada. Em determinado nível de saturação da água, o sal\ncomum começa a se cristalizar e se precipitar no fundo. E com\no sol intenso, clima seco e vento constante, a flor de sal se\nforma como uma fina rede cristalina na superfície da solução\nconcentrada.\nORENSTEIN, J. Disponível em: http://blog.estadao.com.br.\nAcesso em: 15 out. 2015 (adaptado).\nO método utilizado para a obtenção desse tempero é a",
+      "options": [
+        {
+          "label": "A",
+          "content": "filtração."
+        },
+        {
+          "label": "B",
+          "content": "destilação."
+        },
+        {
+          "label": "C",
+          "content": "decantação."
+        },
+        {
+          "label": "D",
+          "content": "evaporação."
+        },
+        {
+          "label": "E",
+          "content": "sublimação."
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 9,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 117,
+      "area": "Ciências da Natureza",
+      "statement": "Os dejetos de suínos têm alto poder poluidor devido à\nsua elevada carga orgânica e, muitas vezes, são lançados em\ncursos hídricos sem o tratamento adequado. Um biorreator\naeróbico de biogrânulos foi desenvolvido para o tratamento\ndesses dejetos em meio líquido. Os biogrânulos são estruturas\nesféricas compostas por aglomerados de diversas espécies de\nmicrorganismos do solo. Em um experimento, foram adicionados\ndejetos de suínos e monitoradas as formas de nitrogênio no\nefluente líquido do biorreator durante 40 horas. A tabela\napresenta os resultados desse experimento.\nComposição de nitrogênio total no efluente líquido\nForma de\nnitrogênio\nTempo\n0 h\n10 h\n20 h\n30 h\n40 h\nN-orgânico\n80%\n60%\n48%\n23%\n15%\nNH3\n20%\n30%\n32%\n35%\n37%\nNO2\n−\n0%\n6%\n12%\n20%\n23%\nNO3\n−\n0%\n4%\n8%\n22%\n25%\nN2\n0%\n0%\n0%\n0%\n0%\nNesse biorreator, a formação de amônia no efluente a partir\ndos dejetos suínos ocorre por",
+      "options": [
+        {
+          "label": "A",
+          "content": "fixação."
+        },
+        {
+          "label": "B",
+          "content": "nitratação."
+        },
+        {
+          "label": "C",
+          "content": "nitrosação."
+        },
+        {
+          "label": "D",
+          "content": "desnitrificação."
+        },
+        {
+          "label": "E",
+          "content": "decomposição."
+        }
+      ],
+      "correctOptionLabel": "E",
+      "sourcePage": 9,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q117-p009-01-vector.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 117, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 9,
+          "sourceCrop": {
+            "x": 287.63,
+            "y": 236.49,
+            "width": 247.83,
+            "height": 32.01
+          },
+          "sourceHash": "895d7fc4d4cb3ed74a1d872d93898b0a750c1a8e62d8537a184f846e8470bde3"
+        },
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q117-p009-02-vector.png",
+          "placement": "after_statement",
+          "displayOrder": 1,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 117, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 9,
+          "sourceCrop": {
+            "x": 287.63,
+            "y": 252.49,
+            "width": 247.83,
+            "height": 96.02
+          },
+          "sourceHash": "1caa58431a84678cbbd088c7652a66b903f26df82398ac3fce3323773b5db7e3"
+        }
+      ]
+    },
+    {
+      "number": 118,
+      "area": "Ciências da Natureza",
+      "statement": "Em um reservatório industrial contendo 5 000 L de água,\nfoi constatada a presença de íons cromo(III) dissolvidos.\nPara remover esses íons da água, inicialmente foi realizada\na quantificação em uma alíquota de 1,0 L, por meio de\nalcalinização, para provocar a total precipitação do cromo(III)\nna forma de hidróxido insolúvel, que foi separado por filtração,\nseco e aquecido até a formação de 3,8 g de Cr2O3.\nDados: massas molares (g ⋅ mol−1): Cr2O3 = 152; Cr = 52.\nA quantidade, em quilograma, de íons cromo(III) contida nesse\nreservatório é mais próxima de",
+      "options": [
+        {
+          "label": "A",
+          "content": "6,5 kg."
+        },
+        {
+          "label": "B",
+          "content": "9,0 kg."
+        },
+        {
+          "label": "C",
+          "content": "13,0 kg."
+        },
+        {
+          "label": "D",
+          "content": "19,0 kg."
+        },
+        {
+          "label": "E",
+          "content": "38,0 kg."
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 9,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 119,
+      "area": "Ciências da Natureza",
+      "statement": "O manual técnico de instalação de telhas de PVC indica a inclinação mínima que deve ter uma cobertura. Seguindo essa\norientação, foi construída uma edificação conforme a figura.\nPara coletar as águas das chuvas, é utilizada uma calha, que está no solo a uma distância horizontal D da base do telhado.\nO telhado apresenta inclinação de 30°. Como sua base se encontra a uma altura de 3 metros em relação ao solo, o tempo de\nqueda das águas é de 0,6 segundo. Com isso, somente as águas das chuvas mais fortes, que escoam pelo telhado a uma velocidade\nde módulo V = 4 m/s, são coletadas diretamente pela calha. Considere g = 10 m/s2, sen 30° = 0,50 e cos 30° = 0,87.\nA distância horizontal D da calha à base do telhado é mais próxima de",
+      "options": [
+        {
+          "label": "A",
+          "content": "0,8 m."
+        },
+        {
+          "label": "B",
+          "content": "1,2 m."
+        },
+        {
+          "label": "C",
+          "content": "1,8 m."
+        },
+        {
+          "label": "D",
+          "content": "2,1 m."
+        },
+        {
+          "label": "E",
+          "content": "2,4 m."
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 10,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q119-p010-01.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 119, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 10,
+          "sourceCrop": {
+            "x": 97.53,
+            "y": 119.12,
+            "width": 378.96,
+            "height": 263.4
+          },
+          "sourceHash": "a041de6c2a1cd6e9b04343d53a7b43d9170d232340ef360132a2dad479eb8833"
+        }
+      ]
+    },
+    {
+      "number": 120,
+      "area": "Ciências da Natureza",
+      "statement": "Os satélites artificiais e as sondas para exploração espacial são algumas das grandes realizações humanas desenvolvidas\nno último século. Para coletar e armazenar informações ao longo de anos, esses equipamentos precisam de energia.\nComo forma de fornecer energia limpa ao satélite, são acoplados diversos painéis de células solares, que, em fotografias, muitas\nvezes são confundidos com “asas”.\nUm satélite geoestacionário precisa armazenar a energia obtida pelos seus painéis solares em suas baterias. Como forma\nde otimizar o processo de absorção da energia solar, o ideal é que a superfície dos painéis mantenha-se perpendicular aos raios\nsolares incidentes. Para isso, foi adaptado um sistema que rotaciona os painéis solares com velocidade angular constante.\nQual é a velocidade de rotação dos painéis em comparação à velocidade de rotação da Terra (RT)?",
+      "options": [
+        {
+          "label": "A",
+          "content": "0,25 RT"
+        },
+        {
+          "label": "B",
+          "content": "0,5 RT"
+        },
+        {
+          "label": "C",
+          "content": "RT"
+        },
+        {
+          "label": "D",
+          "content": "2 RT"
+        },
+        {
+          "label": "E",
+          "content": "4 RT"
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 10,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 121,
+      "area": "Ciências da Natureza",
+      "statement": "O plantio do feijão requer solos que apresentem fertilidade de média a alta, pH entre 5,8 e 6,2, altos teores de cálcio,\nmagnésio, nitrogênio, fósforo e enxofre e baixa concentração de alumínio e manganês. Um agricultor necessita iniciar a plantação\nde feijão em sua lavoura, que se encontra com a superfície clara e esbranquiçada, característica de solos alcalinos. Para obter\num produto que possa ser aplicado diretamente ao solo, o agricultor procurou uma loja especializada, deparando-se com os\nseguintes produtos:\nIdentificação\ndo produto\nComponente\nDados complementares\nI\nAl2(SO4)3\nSólido útil para correção rápida do pH de solos e tratamento de água.\nII\n(NH4)2SO4\nSal inorgânico que pode ser utilizado como fertilizante.\nIII\nHNO3\nSolução aquosa a 63,5% (m/m) útil na produção de fertilizantes.\nIV\nCaCO3\nCalcário é amplamente utilizado na calagem do solo.\nV\nNaNO3\nSalitre do Chile é um fertilizante amplamente utilizado.\nQual é o produto indicado para corrigir o pH do solo, possibilitando o plantio do feijão?",
+      "options": [
+        {
+          "label": "A",
+          "content": "I"
+        },
+        {
+          "label": "B",
+          "content": "II"
+        },
+        {
+          "label": "C",
+          "content": "III"
+        },
+        {
+          "label": "D",
+          "content": "IV"
+        },
+        {
+          "label": "E",
+          "content": "V"
+        }
+      ],
+      "correctOptionLabel": "B",
+      "sourcePage": 11,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 122,
+      "area": "Ciências da Natureza",
+      "statement": "Um circuito é utilizado para determinar a tensão da bateria, representada na figura pela letra V. Os dispositivos numerados\nde 1 a 4 apresentam resistência desprezível à passagem de corrente e, quando percorridos por uma corrente igual ou superior\nao valor limiar, passam a emitir luz. O projeto representado no diagrama pode ser usado para avaliar a tensão, verificando-se\nquantos dispositivos acendem. Nele, todos os dispositivos são idênticos, e a corrente limiar é de 25 mA.\nUm estudante utilizou inicialmente uma bateria de 9 V no circuito (situação A) e depois a substituiu por uma bateria\nde 12 V (situação B).\nManual de operação e instalação. Disponível em: www.renesola.com.br. Acesso em: 30 nov. 2021 (adaptado).\nEm cada situação, quais dispositivos acenderam?",
+      "options": [
+        {
+          "label": "A",
+          "content": "1 e 2 nas duas situações."
+        },
+        {
+          "label": "B",
+          "content": "3 e 4 nas duas situações."
+        },
+        {
+          "label": "C",
+          "content": "1, 2, 3 e 4 nas duas situações."
+        },
+        {
+          "label": "D",
+          "content": "1 e 2 na situação A; e 1, 2 e 3 na situação B."
+        },
+        {
+          "label": "E",
+          "content": "1, 2 e 3 na situação A; e 1 e 2 na situação B."
+        }
+      ],
+      "correctOptionLabel": "A",
+      "sourcePage": 11,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q122-p011-01.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 122, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 11,
+          "sourceCrop": {
+            "x": 118.64,
+            "y": 465.26,
+            "width": 322.56,
+            "height": 134.64
+          },
+          "sourceHash": "7184d5761ea690f4fff0cdc65d0df6a6f2da05cee413b893f74fbfbd36368ec2"
+        }
+      ]
+    },
+    {
+      "number": 123,
+      "area": "Ciências da Natureza",
+      "statement": "Um empresário sul-africano definiu o Hyperloop como a única opção para a viagem ultrarrápida. O Hyperloop é uma espécie\nde trem que se locomove sem atrito, levitando magneticamente sobre trilhos, em túneis com pressão reduzida. Durante o\npercurso, o ar vai sendo extraído do túnel, e a diferença de pressão gerada entre a parte traseira e a frontal faz com que a cápsula\ncom passageiros seja colocada em movimento e siga deslocando-se praticamente sem atrito e sem resistência do ar. Em vez de\ntrilhos convencionais, ela é levitada e guiada por campos eletromagnéticos.\nDisponível em: https://veja.abril.com.br. Acesso em: 21 nov. 2021 (adaptado).\nO Hyperloop se desloca de acordo com o mesmo princípio físico que explica o movimento de um",
+      "options": [
+        {
+          "label": "A",
+          "content": "foguete subindo enquanto ejeta gases para baixo."
+        },
+        {
+          "label": "B",
+          "content": "líquido sendo sugado pelo canudo do copo até a boca."
+        },
+        {
+          "label": "C",
+          "content": "elétron abandonado entre as placas de um capacitor plano."
+        },
+        {
+          "label": "D",
+          "content": "próton ganhando velocidade dentro de um acelerador de partículas."
+        },
+        {
+          "label": "E",
+          "content": "submarino emergindo conforme a água é extraída de seus tubos de lastro."
+        }
+      ],
+      "correctOptionLabel": "B",
+      "sourcePage": 12,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 124,
+      "area": "Ciências da Natureza",
+      "statement": "A seleção natural pode alterar a distribuição da frequência de caracteres herdáveis de várias maneiras. Essa alteração\nacontece a partir dos fenótipos e, consequentemente, genótipos, que devem ser favorecidos em uma dada população. Entre os\ntipos de seleção, há um tipo cujos critérios ambientais levam à redução dos organismos que apresentam os fenótipos extremos,\npreservando os fenótipos intermediários em casos de herança por dominância completa.\nO efeito dessa seleção nessa população implicará o(a)",
+      "options": [
+        {
+          "label": "A",
+          "content": "permanência de fenótipos recessivos."
+        },
+        {
+          "label": "B",
+          "content": "escolha de fenótipos aleatoriamente."
+        },
+        {
+          "label": "C",
+          "content": "predominância de genótipos heterozigotos."
+        },
+        {
+          "label": "D",
+          "content": "aumento de indivíduos com genótipos homozigotos dominantes."
+        },
+        {
+          "label": "E",
+          "content": "crescimento da frequência de genótipos homozigotos recessivos."
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 12,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 125,
+      "area": "Ciências da Natureza",
+      "statement": "Para a produção de insulina recombinante, é necessária a transformação do microrganismo com a inserção do gene\nda insulina. No processo de síntese da insulina, várias moléculas com função predefinida se orquestram para a produção da\nproteína completa e ativa. Erros nesse processo podem ocorrer, por exemplo, um RNAt que deveria estar ligado ao aminoácido\nserina pode se ligar erroneamente ao aminoácido valina.\nNo caso do erro descrito, na produção da insulina ocorrerá a incorporação da",
+      "options": [
+        {
+          "label": "A",
+          "content": "serina, em resposta a qualquer códon do RNAm."
+        },
+        {
+          "label": "B",
+          "content": "valina, em resposta a qualquer códon do RNAm."
+        },
+        {
+          "label": "C",
+          "content": "valina, somente em resposta ao códon de serina do RNAm."
+        },
+        {
+          "label": "D",
+          "content": "valina, em resposta aos códons de serina e valina do RNAm."
+        },
+        {
+          "label": "E",
+          "content": "serina, em resposta aos códons de serina e valina do RNAm."
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 12,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 126,
+      "area": "Ciências da Natureza",
+      "statement": "Um dos procedimentos mais rotineiros em análises químicas é a extração por solvente de materiais sólidos ou líquidos.\nNo entanto, em pesquisas prospectivas, nas quais se pretende investigar a natureza química de determinado material, procede-se\nà extração por solventes em sequência, em ordem crescente de polaridade, conhecida como ordem eluotrópica. Em um processo\nde extração, foram utilizados os seguintes solventes:\nA sequência eluotrópica dos solventes utilizados é",
+      "options": [
+        {
+          "label": "A",
+          "content": "água, etanol, metanol, n-hexano e clorofórmio."
+        },
+        {
+          "label": "B",
+          "content": "etanol, metanol, água, clorofórmio e n-hexano."
+        },
+        {
+          "label": "C",
+          "content": "clorofórmio, n-hexano, metanol, etanol e água."
+        },
+        {
+          "label": "D",
+          "content": "n-hexano, clorofórmio, etanol, metanol e água."
+        },
+        {
+          "label": "E",
+          "content": "n-hexano, metanol, etanol, água e clorofórmio."
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 13,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q126-p013-01.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 126, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 13,
+          "sourceCrop": {
+            "x": 39.68,
+            "y": 143.29,
+            "width": 473.52,
+            "height": 77.28
+          },
+          "sourceHash": "c498078d88fcad1b975efebd6a1f42bd8f8ed5ba7ae73ab8cbfb3cc2c6a771bd"
+        }
+      ]
+    },
+    {
+      "number": 127,
+      "area": "Ciências da Natureza",
+      "statement": "A luz que atinge a retina desencadeia a formação de impulsos nervosos que são transmitidos para diferentes áreas do\nencéfalo, como representado no esquema. Para que uma pessoa possa enxergar, a informação tem que atingir o córtex visual.\nQuando alguma parte da via que conduz a informação até lá é lesada, ocorre perda da visão. Por outro lado, a informação que\nchega ao hipotálamo não participa da formação da imagem, mas influencia a secreção do hormônio melatonina pela glândula\npineal. Quando há entrada de luz na retina, a secreção de melatonina é inibida.\nUm médico avaliou a secreção de melatonina após iluminar a retina em dois pacientes com perda visual. No primeiro\npaciente (1), houve inibição da secreção de melatonina; enquanto no segundo (2), a inibição não aconteceu.\nOs pacientes 1 e 2 tiveram perda visual, pois apresentavam problemas, respectivamente, no(a)",
+      "options": [
+        {
+          "label": "A",
+          "content": "retina e nervo óptico."
+        },
+        {
+          "label": "B",
+          "content": "córtex visual e retina."
+        },
+        {
+          "label": "C",
+          "content": "nervo óptico e tálamo."
+        },
+        {
+          "label": "D",
+          "content": "tálamo e córtex visual."
+        },
+        {
+          "label": "E",
+          "content": "hipotálamo e glândula pineal."
+        }
+      ],
+      "correctOptionLabel": "B",
+      "sourcePage": 13,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q127-p013-02.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 127, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 13,
+          "sourceCrop": {
+            "x": 77.66,
+            "y": 404.62,
+            "width": 404.52,
+            "height": 85.56
+          },
+          "sourceHash": "699950bdcb1c6838d5c24fac10e5eb9f613c43b354a7ccf50462c0ffb79112e3"
+        }
+      ]
+    },
+    {
+      "number": 128,
+      "area": "Ciências da Natureza",
+      "statement": "Um óxido é usado como inibidor do crescimento de fungos\nem pinturas e em pomadas antissépticas. Esse óxido tem a\npropriedade de manter o pH da água inalterado. No quadro,\nestão apresentados os comportamentos de alguns óxidos em\nmeio aquoso e a sua toxicidade.\nÓxido\nComportamento\ndo óxido em relação\nà água\nToxicidade do\nelemento ou íon\nligado ao oxigênio\nPbO\nNão reage\nTóxico\nCr2O3\nNão reage\nTóxico\nZnO\nNão reage\nNão tóxico\nP4O10\nReage como ácido\nNão tóxico\nMgO\nReage como base\nNão tóxico\nO óxido adequado para essas aplicações é:",
+      "options": [
+        {
+          "label": "A",
+          "content": "PbO"
+        },
+        {
+          "label": "B",
+          "content": "Cr2O3"
+        },
+        {
+          "label": "C",
+          "content": "ZnO"
+        },
+        {
+          "label": "D",
+          "content": "P4O10"
+        },
+        {
+          "label": "E",
+          "content": "MgO"
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 14,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q128-p014-01-vector.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 128, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 14,
+          "sourceCrop": {
+            "x": 31.35,
+            "y": 160.3,
+            "width": 248.06,
+            "height": 40
+          },
+          "sourceHash": "8a9381bd60a9e2ca70e3732798d034b55784350896e31d47a6bdba796e207178"
+        }
+      ]
+    },
+    {
+      "number": 129,
+      "area": "Ciências da Natureza",
+      "statement": "Carros elétricos põem fim ao longo reinado da rádio AM\nAs montadoras de automóveis estão em uma corrida\nrumo a um futuro eletrificado, e rádios AM estão ficando pelo\ncaminho. O problema, dizem os especialistas, é que os motores\ndos veículos elétricos geram frequências eletromagnéticas do\nmesmo comprimento de onda que os sinais das rádios AM.\n“Você tem dois sinais que colidem um com o outro e se\ncancelam”, disse o diretor de inovação de motores e tecnologia\nde uma fabricante de autopeças.\nDisponível em: www1.folha.uol.com.br. Acesso em: 20 nov. 2018 (adaptado).\nO problema mencionado refere-se a qual fenômeno ondulatório?",
+      "options": [
+        {
+          "label": "A",
+          "content": "Difração."
+        },
+        {
+          "label": "B",
+          "content": "Reflexão."
+        },
+        {
+          "label": "C",
+          "content": "Refração."
+        },
+        {
+          "label": "D",
+          "content": "Ressonância."
+        },
+        {
+          "label": "E",
+          "content": "Interferência."
+        }
+      ],
+      "correctOptionLabel": "E",
+      "sourcePage": 14,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 130,
+      "area": "Ciências da Natureza",
+      "statement": "Por suas belezas naturais, a região de Bonito, no Mato\nGrosso do Sul, é um dos destinos ecoturísticos mais procurados\ndo Brasil. Muitas das atrações ecoturísticas que movimentam\na economia local estão situadas dentro de fazendas.\nPor isso, diversos donos dessas propriedades decidiram criar\nReservas Particulares do Patrimônio Natural (RPPNs).\nNesses locais, estão recompondo aos poucos as matas ciliares\ne adotando outras medidas pontuais, como a instalação de\nninhos artificiais para as araras nativas.\nGUIMARÃES, J. R. D. Bonito ou Lindo? Disponível em: http://cienciahoje.org.br.\nAcesso em: 28 nov. 2018 (adaptado).\nNesse contexto, as RPPNs foram criadas porque",
+      "options": [
+        {
+          "label": "A",
+          "content": "evitam a entrada de turistas."
+        },
+        {
+          "label": "B",
+          "content": "reduzem as espécies endêmicas."
+        },
+        {
+          "label": "C",
+          "content": "favorecem o desenvolvimento sustentável."
+        },
+        {
+          "label": "D",
+          "content": "possibilitam a introdução de espécies exóticas."
+        },
+        {
+          "label": "E",
+          "content": "aumentam as áreas para extração de madeira."
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 14,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 131,
+      "area": "Ciências da Natureza",
+      "statement": "A primeira calça jeans foi feita por Levi Strauss e Jacob\nDavis para mineradores da Califórnia em 1873. Um brim mais\nmaleável, stone-washed (lavado com pedra), foi introduzido\nem 1980, seguido por acid-washed (lavado com ácido).\nTécnicas de amaciamento envolvendo procedimentos de\nnatureza físico-química vêm sendo substituídas por métodos\nbiotecnológicos. Um exemplo é a utilização de celulases,\nproduzidas por fungos do gênero Trichoderma, para digestão\nenzimática de parte da celulose do algodão.\nTORTORA, G. J.; FUNKE, B. R.; CASE, C. L. Microbiologia.\nPorto Alegre: Artmed, 2016 (adaptado).\nEsse método biotecnológico é considerado ambientalmente\nseguro porque",
+      "options": [
+        {
+          "label": "A",
+          "content": "utiliza catalisador inorgânico."
+        },
+        {
+          "label": "B",
+          "content": "torna a celulose mais resistente."
+        },
+        {
+          "label": "C",
+          "content": "ocorre em diferentes temperaturas."
+        },
+        {
+          "label": "D",
+          "content": "é usado em diferentes valores de pH."
+        },
+        {
+          "label": "E",
+          "content": "minimiza a produção de resíduos tóxicos."
+        }
+      ],
+      "correctOptionLabel": "E",
+      "sourcePage": 14,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 132,
+      "area": "Ciências da Natureza",
+      "statement": "“Rolou uma química entre nós!”. Essa expressão popular não\né apenas figurativa, mas tem fundamentação científica, já que\na afetividade está particularmente relacionada a um grupo de\nsubstâncias que são produzidas, circulam pelo sangue e atuam\nno corpo humano provocando reações e emoções.\nEssas substâncias são denominadas",
+      "options": [
+        {
+          "label": "A",
+          "content": "vitaminas."
+        },
+        {
+          "label": "B",
+          "content": "hormônios."
+        },
+        {
+          "label": "C",
+          "content": "catalisadores."
+        },
+        {
+          "label": "D",
+          "content": "ácidos nucleicos."
+        },
+        {
+          "label": "E",
+          "content": "fluidos corporais."
+        }
+      ],
+      "correctOptionLabel": "B",
+      "sourcePage": 14,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 133,
+      "area": "Ciências da Natureza",
+      "statement": "Um termostato é um dispositivo sensível a variações de temperatura utilizado para evitar o superaquecimento de alguns\nferros de passar roupas. Um desses dispositivos é constituído por uma lâmina bimetálica de aço e latão que faz um contato\nelétrico. Quando a lâmina atinge uma determinada temperatura, sofre deflexão e esse contato é aberto, conforme a figura.\nA deflexão dessa lâmina ocorre porque o latão, em relação ao aço, apresenta",
+      "options": [
+        {
+          "label": "A",
+          "content": "menor coeficiente de dilatação térmica."
+        },
+        {
+          "label": "B",
+          "content": "maior coeficiente de dilatação térmica."
+        },
+        {
+          "label": "C",
+          "content": "menor condutividade térmica."
+        },
+        {
+          "label": "D",
+          "content": "maior condutividade térmica."
+        },
+        {
+          "label": "E",
+          "content": "menor calor específico."
+        }
+      ],
+      "correctOptionLabel": "B",
+      "sourcePage": 15,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q133-p015-01.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 133, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 15,
+          "sourceCrop": {
+            "x": 37.64,
+            "y": 135.54,
+            "width": 484.56,
+            "height": 113.52
+          },
+          "sourceHash": "406fd08184a28274389b54c15a459b853e6a80f1a9694d9d221535de833e6f7a"
+        }
+      ]
+    },
+    {
+      "number": 134,
+      "area": "Ciências da Natureza",
+      "statement": "O tipo predominante de excreta que um grupo animal produz está relacionado com o ambiente onde ele vive. Nesse contexto,\nos animais podem ser classificados em amoniotélicos, ureotélicos e uricotélicos, de acordo com o principal resíduo nitrogenado\nque produzem.\nQual é o fator ambiental que determina o tipo de resíduo a ser eliminado?",
+      "options": [
+        {
+          "label": "A",
+          "content": "Temperatura."
+        },
+        {
+          "label": "B",
+          "content": "Fonte energética."
+        },
+        {
+          "label": "C",
+          "content": "Quantidade de oxigênio."
+        },
+        {
+          "label": "D",
+          "content": "Abundância de alimento."
+        },
+        {
+          "label": "E",
+          "content": "Disponibilidade de água."
+        }
+      ],
+      "correctOptionLabel": "E",
+      "sourcePage": 15,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 135,
+      "area": "Ciências da Natureza",
+      "statement": "Alguns aparelhos do nosso cotidiano, como TVs e drones, são operados a distância por controle remoto. A diferença no\nsistema de controle desses aparelhos se dá em relação à radiação emitida, pois, nas TVs, o acionamento do controle remoto\ndeve ser realizado a uma curta distância e o sistema receptor de sinal não pode estar obstruído. Por outro lado, nos drones,\no sistema de controle funciona a distâncias relativamente grandes, da ordem de alguns quilômetros.\nO acionamento dos equipamentos citados corresponde à emissão de ondas, respectivamente, nas regiões",
+      "options": [
+        {
+          "label": "A",
+          "content": "visível e raios X."
+        },
+        {
+          "label": "B",
+          "content": "rádio e ultravioleta."
+        },
+        {
+          "label": "C",
+          "content": "ultravioleta e visível."
+        },
+        {
+          "label": "D",
+          "content": "infravermelho e rádio."
+        },
+        {
+          "label": "E",
+          "content": "raios X e infravermelho."
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 15,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 136,
+      "area": "Matemática",
+      "statement": "Uma pessoa necessita armazenar uma quantidade V de\nlíquido e possui um recipiente no formato de cilindro circular reto,\ncom raio da base medindo r, o qual comporta apenas 4\n9 dessa\nquantidade. Essa pessoa comprou, então, um novo recipiente\nno mesmo formato, com raio da base medindo R, mantendo\na mesma medida da área lateral do primeiro recipiente, e que\ncomporta exatamente a quantidade V de líquido.\nA razão R\nr entre os raios dos dois recipientes é",
+      "options": [
+        {
+          "label": "A",
+          "content": "4 9"
+        },
+        {
+          "label": "B",
+          "content": "5 9"
+        },
+        {
+          "label": "C",
+          "content": "5 4"
+        },
+        {
+          "label": "D",
+          "content": "3 2"
+        },
+        {
+          "label": "E",
+          "content": "9 4"
+        }
+      ],
+      "correctOptionLabel": "E",
+      "sourcePage": 16,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 137,
+      "area": "Matemática",
+      "statement": "Um matemático brasileiro recebeu, em 2014, a Medalha\nFields, premiação popularmente conhecida como o “Nobel da\nMatemática”. Ele é o primeiro ganhador da América Latina.\nComo parte da premiação, ele ainda recebeu cerca de R$ 31,3 mil\npela conquista.\nDisponível em: www1.folha.uol.com.br. Acesso em: 5 nov. 2014 (adaptado).\nQual é o valor, em real, representado pelo algarismo 1 no valor\nda premiação recebida pelo matemático brasileiro?",
+      "options": [
+        {
+          "label": "A",
+          "content": "1"
+        },
+        {
+          "label": "B",
+          "content": "10"
+        },
+        {
+          "label": "C",
+          "content": "100"
+        },
+        {
+          "label": "D",
+          "content": "1 000"
+        },
+        {
+          "label": "E",
+          "content": "10 000"
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 16,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 138,
+      "area": "Matemática",
+      "statement": "A figura é um mosaico desenhado sobre uma malha\nquadriculada, obtido pela justaposição de um quadrilátero,\nquatro triângulos e quatro hexágonos. O quadrilátero de cor\namarela é um quadrado.\nQuantos polígonos regulares contornados por linhas contínuas\npodem ser identificados nesse desenho?",
+      "options": [
+        {
+          "label": "A",
+          "content": "2"
+        },
+        {
+          "label": "B",
+          "content": "3"
+        },
+        {
+          "label": "C",
+          "content": "4"
+        },
+        {
+          "label": "D",
+          "content": "6"
+        },
+        {
+          "label": "E",
+          "content": "7"
+        }
+      ],
+      "correctOptionLabel": "A",
+      "sourcePage": 16,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q138-p016-01.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 138, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 16,
+          "sourceCrop": {
+            "x": 323.29,
+            "y": 147.54,
+            "width": 190.68,
+            "height": 190.56
+          },
+          "sourceHash": "beeb571ae0f5fe918239393a4a5e0cf77d870453ec25fd00c323e9eed7eb7e2f"
+        }
+      ]
+    },
+    {
+      "number": 139,
+      "area": "Matemática",
+      "statement": "A imagem apresenta uma tirinha com os personagens Caco e Tuca. Na tirinha, o macaco Caco e o tucano Tuca estão utilizando\num mapa para procurar um tesouro.\nDisponível em: www.humorcomciencia.com. Acesso em: 22 out. 2019.\nCansado de escavar à procura do tesouro, Tuca percebeu que, mesmo que o mapa levasse a algum tesouro, eles encontrariam\nproblemas nessa busca, pois a unidade de medida indicada no mapa é o passo, uma unidade não convencional, logo, não presente\nno Sistema Internacional de Unidades (SI), que é um conjunto padronizado de definições para unidades de medida utilizado em\nquase todo o mundo.\nCom relação à grandeza expressa em passo na tirinha, no SI, sua unidade padrão é",
+      "options": [
+        {
+          "label": "A",
+          "content": "metro."
+        },
+        {
+          "label": "B",
+          "content": "grama."
+        },
+        {
+          "label": "C",
+          "content": "segundo."
+        },
+        {
+          "label": "D",
+          "content": "metro cúbico."
+        },
+        {
+          "label": "E",
+          "content": "metro por segundo."
+        }
+      ],
+      "correctOptionLabel": "A",
+      "sourcePage": 17,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q139-p017-01.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 139, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 17,
+          "sourceCrop": {
+            "x": 24.86,
+            "y": 123.54,
+            "width": 510.12,
+            "height": 293.69
+          },
+          "sourceHash": "0f096a91be14b3384f0e2f6e4dac8f38f4bd82c8afec95161d3bb6c6af6823cc"
+        }
+      ]
+    },
+    {
+      "number": 140,
+      "area": "Matemática",
+      "statement": "Para as olimpíadas internas de um colégio, foram formadas\n16 equipes, cada uma identificada por um escudo. Cada escudo\nserá dividido em 4 regiões distintas, conforme a Figura 1.\nFigura 1\nForam escolhidas três cores para colorir as regiões de\ntodos os escudos. Em cada região, será utilizada uma única cor,\ne o escudo de cada equipe será colorido com até três dessas\ncores. Regiões com lado em comum não podem ter a mesma cor.\nNão pode haver duas equipes com uma mesma configuração de\ncores no escudo. A Figura 2 apresenta dois escudos possíveis.\nFigura 2\nCinco responsáveis pelas olimpíadas analisaram a viabilidade\nde se confeccionarem os escudos, e cada um formulou um\nargumento:\nI.\né viável, pois há 18 escudos possíveis;\nII. é viável, pois há 72 escudos possíveis;\nIII. é viável, pois há 81 escudos possíveis;\nIV. não é viável, pois há apenas 6 escudos possíveis;\nV. não é viável, pois há apenas 12 escudos possíveis.\nO argumento correto foi o",
+      "options": [
+        {
+          "label": "A",
+          "content": "I."
+        },
+        {
+          "label": "B",
+          "content": "II."
+        },
+        {
+          "label": "C",
+          "content": "III."
+        },
+        {
+          "label": "D",
+          "content": "IV."
+        },
+        {
+          "label": "E",
+          "content": "V."
+        }
+      ],
+      "correctOptionLabel": "A",
+      "sourcePage": 18,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q140-p018-01.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 140, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 18,
+          "sourceCrop": {
+            "x": 123.22,
+            "y": 135.54,
+            "width": 64.32,
+            "height": 71.16
+          },
+          "sourceHash": "04e6423e373d0df588edd3c4009e21fb156a8413db77a85946ba25b006f05156"
+        },
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q140-p018-02.png",
+          "placement": "after_statement",
+          "displayOrder": 1,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 140, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 18,
+          "sourceCrop": {
+            "x": 84.22,
+            "y": 301.42,
+            "width": 142.32,
+            "height": 71.16
+          },
+          "sourceHash": "b7eda67fa2418c99a5c15ab2e449f11f70724ca9c72aa06f396fffa21b3cbedc"
+        }
+      ]
+    },
+    {
+      "number": 141,
+      "area": "Matemática",
+      "statement": "Um vendedor de balões para festas comprou um recipiente\ncheio de gás hélio, no formato de cilindro circular reto com 40 cm\nde diâmetro interno da base e 1 m de altura. Ele vai adquirir\nbalões em uma loja que só os vende em pacotes fechados, cada\num com 5 balões esféricos que, após enchidos com gás hélio,\ntêm 30 cm de diâmetro.\nO volume adquirido desse gás, em condições normais de\npressão, é igual a 12 vezes o volume do recipiente comprado.\nNo caso dos balões esféricos, o volume de gás hélio no seu\ninterior é igual à capacidade volumétrica desses balões quando\ncheios. O vendedor pretende encher o maior número possível\nde balões com o gás comprado.\nO número mínimo de pacotes de balões que o vendedor deve\ncomprar de forma a utilizar todo o volume de gás hélio adquirido é",
+      "options": [
+        {
+          "label": "A",
+          "content": "11."
+        },
+        {
+          "label": "B",
+          "content": "12."
+        },
+        {
+          "label": "C",
+          "content": "22."
+        },
+        {
+          "label": "D",
+          "content": "24."
+        },
+        {
+          "label": "E",
+          "content": "25."
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 18,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 142,
+      "area": "Matemática",
+      "statement": "Um rapaz decidiu comprar um automóvel, esperando\nrevendê-lo em um ano. Baseou sua decisão de compra na\ndespesa que teria com o automóvel nesse período, em custos\ntanto com manutenção quanto com combustível, prevendo que\nrodaria 60 000 km com o automóvel em um ano e considerando\nque a média do preço do litro da gasolina nesse período seria\nde R$ 5,00. Pesquisou em diversas revendedoras e restringiu\nsua escolha a cinco dos automóveis que havia visto. Optou por\ncomprar o que lhe desse a menor despesa, de acordo com os\ndados que obteve, apresentados no quadro.\nAutomóvel\nMédia de\nrendimento (km/L)\nPrevisão do custo anual\ncom manutenção (R$)\nI\n10\n22 000,00\nII\n12\n16 000,00\nIII\n15\n18 000,00\nIV\n15\n19 000,00\nV\n20\n24 500,00\nO rapaz comprou o automóvel",
+      "options": [
+        {
+          "label": "A",
+          "content": "I."
+        },
+        {
+          "label": "B",
+          "content": "II."
+        },
+        {
+          "label": "C",
+          "content": "III."
+        },
+        {
+          "label": "D",
+          "content": "IV."
+        },
+        {
+          "label": "E",
+          "content": "V."
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 18,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 143,
+      "area": "Matemática",
+      "statement": "Um jogador de videogame tem quatro personagens com\ndiferentes habilidades para avançar no jogo. Para uma missão,\né apresentado um quadro que descreve os níveis de cada\npersonagem em suas diferentes habilidades, no qual 10 é o\nmaior nível de qualquer habilidade. O jogador sabe que, para\navançar nessa missão, deve escolher um personagem cuja\nmédia entre os níveis de suas diferentes habilidades seja igual\nou superior a 6.\nPersonagem\nHabilidades\nForça\nAgilidade\nPoder\nMagia\nSabedoria\nI\n10\n8\n7\n3\n4\nII\n3\n6\n10\n6\n4\nIII\n5\n5\n5\n6\n9\nIV\n7\n7\n7\n7\n1\nDe acordo com as informações apresentadas, os possíveis\npersonagens para avançar nessa missão são",
+      "options": [
+        {
+          "label": "A",
+          "content": "I e II."
+        },
+        {
+          "label": "B",
+          "content": "I e III."
+        },
+        {
+          "label": "C",
+          "content": "I e IV."
+        },
+        {
+          "label": "D",
+          "content": "I, II e IV."
+        },
+        {
+          "label": "E",
+          "content": "I, II, III e IV."
+        }
+      ],
+      "correctOptionLabel": "B",
+      "sourcePage": 19,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q143-p019-02-vector.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 143, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 19,
+          "sourceCrop": {
+            "x": 24.38,
+            "y": 196.24,
+            "width": 247.83,
+            "height": 32.01
+          },
+          "sourceHash": "da21347890d5fe3eb33ed5eb503cd901740548b8d88da347f08c4046786a4dc1"
+        }
+      ]
+    },
+    {
+      "number": 144,
+      "area": "Matemática",
+      "statement": "A prefeitura de um município, dependendo do consumo\nmensal C de água, em litro, concederá ao consumidor um dos\ncinco tipos de desconto:\n• tipo I, se 29 000 ≤ C ≤ 30 000;\n• tipo II, se 27 500 ≤ C < 29 000;\n• tipo III, se 26 000 ≤ C < 27 500;\n• tipo IV, se 24 000 ≤ C < 26 000;\n• tipo V, se C < 24 000.\nO desconto será aplicado no valor da conta a ser paga,\ne não será concedido desconto para contas com consumo\nsuperior a 30 000 L.\nUm consumidor, no primeiro mês, não obteve desconto.\nSe consumisse 40% a menos de água, alcançaria o consumo\nmáximo estabelecido para conseguir o desconto do tipo I.\nNo segundo mês, seu consumo de água reduziu 20% em relação\nao consumo do primeiro mês; e no terceiro mês, seu consumo\nde água reduziu 30% em relação ao consumo do segundo mês.\nAssim, no terceiro mês, esse consumidor receberá desconto\ndo tipo",
+      "options": [
+        {
+          "label": "A",
+          "content": "I."
+        },
+        {
+          "label": "B",
+          "content": "II."
+        },
+        {
+          "label": "C",
+          "content": "III."
+        },
+        {
+          "label": "D",
+          "content": "IV."
+        },
+        {
+          "label": "E",
+          "content": "V."
+        }
+      ],
+      "correctOptionLabel": "B",
+      "sourcePage": 19,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 145,
+      "area": "Matemática",
+      "statement": "De acordo com pesquisas realizadas pela Inserção de\nImigrantes no Mercado de Trabalho Brasileiro (IIMTB), o número\nde estrangeiros trabalhando com carteira assinada no Brasil\ncresceu entre os anos de 2011 e 2012, passando de 80 000 para\n96 000, e também cresceu entre os anos de 2012 e 2013, quando\npassou de 96 000 para 120 000.\nDisponível em: www.redebrasilatual.com.br.\nAcesso em: 10 abr. 2015 (adaptado).\nÀ época, os pesquisadores da IIMTB estimaram que\no aumento percentual desse número, tanto de 2013 para\n2014 quanto de 2014 para 2015, seria igual à média dos\npercentuais anuais de aumento observados nos períodos de\n2011 a 2012 e de 2012 a 2013. Considere que essa estimativa\ntenha se concretizado.\nA quantidade de estrangeiros trabalhando com carteira assinada\nno Brasil em 2015 foi de",
+      "options": [
+        {
+          "label": "A",
+          "content": "147 000."
+        },
+        {
+          "label": "B",
+          "content": "174 000."
+        },
+        {
+          "label": "C",
+          "content": "180 000."
+        },
+        {
+          "label": "D",
+          "content": "180 075."
+        },
+        {
+          "label": "E",
+          "content": "228 000."
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 19,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 146,
+      "area": "Matemática",
+      "statement": "Um ciclista, durante seu treinamento, percorreu duas voltas\ncompletas na pista de automobilismo. Essa pista é formada por\ntrês trechos retilíneos e cinco trechos curvilíneos, que são arcos\nde circunferências, conforme ilustrado na figura.\nUm dos arcos é subtendido por um ângulo reto, e a medida\nde seu raio é 90 m. A medida do raio dos demais arcos é 260 m,\ne as medidas de seus ângulos centrais estão indicadas na figura.\nUtilize 3 como valor aproximado para π.\nQual foi a distância, em metro, percorrida pelo ciclista?",
+      "options": [
+        {
+          "label": "A",
+          "content": "7 620"
+        },
+        {
+          "label": "B",
+          "content": "7 110"
+        },
+        {
+          "label": "C",
+          "content": "5 540"
+        },
+        {
+          "label": "D",
+          "content": "5 285"
+        },
+        {
+          "label": "E",
+          "content": "4 900"
+        }
+      ],
+      "correctOptionLabel": "B",
+      "sourcePage": 19,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q146-p019-01.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 146, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 19,
+          "sourceCrop": {
+            "x": 291.54,
+            "y": 423.38,
+            "width": 240,
+            "height": 182.76
+          },
+          "sourceHash": "e727d34879829ece2ee857f6cca9902654cb1667266363229bb18e7de290db2f"
+        }
+      ]
+    },
+    {
+      "number": 147,
+      "area": "Matemática",
+      "statement": "Um site publicou este gráfico, que apresenta a evolução dos preços de dois produtos, em alguns dias de janeiro a julho de\n2021. Por exemplo, o Produto 1 atingiu o valor recorde de 304 reais em 16 de maio, e atingiu 153 reais em 4 de julho.\nEm qual(is) período(s) os preços de ambos os produtos tiveram aumento ao mesmo tempo?",
+      "options": [
+        {
+          "label": "A",
+          "content": "De 17 de janeiro a 2 de maio."
+        },
+        {
+          "label": "B",
+          "content": "De 17 de janeiro a 16 de maio."
+        },
+        {
+          "label": "C",
+          "content": "De 17 de janeiro a 4 de julho."
+        },
+        {
+          "label": "D",
+          "content": "De 17 de janeiro a 2 de fevereiro e de 14 de fevereiro a 2 de maio."
+        },
+        {
+          "label": "E",
+          "content": "De 17 de janeiro a 2 de fevereiro e de 14 de fevereiro a 16 de maio."
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 20,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q147-p020-01.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 147, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 20,
+          "sourceCrop": {
+            "x": 35.97,
+            "y": 119.42,
+            "width": 502.08,
+            "height": 262.68
+          },
+          "sourceHash": "6d7a85b51c268f2d111ad606013bf43674c1e01fecbe25afebfe345654d92132"
+        }
+      ]
+    },
+    {
+      "number": 148,
+      "area": "Matemática",
+      "statement": "A figura representa uma bola de basquete dentro de uma caixa no formato de paralelepípedo reto de base quadrada,\ncuja altura mede 27 cm. A bola, quando cheia, tem o formato de uma esfera de 30 cm de diâmetro, que tangencia as faces laterais e\na base inferior da caixa, e parte dela fica no exterior da caixa. A tampa tem uma abertura circular que se ajusta perfeitamente à bola.\nQual é a medida da área da tampa da caixa, em centímetro quadrado?",
+      "options": [
+        {
+          "label": "A",
+          "content": "π ⋅ 92"
+        },
+        {
+          "label": "B",
+          "content": "π ⋅ 152"
+        },
+        {
+          "label": "C",
+          "content": "302 - π ⋅ 32"
+        },
+        {
+          "label": "D",
+          "content": "302 - π ⋅ 92"
+        },
+        {
+          "label": "E",
+          "content": "302 - π ⋅ 152"
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 20,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q148-p020-02.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 148, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 20,
+          "sourceCrop": {
+            "x": 204.75,
+            "y": 527.45,
+            "width": 164.52,
+            "height": 128.52
+          },
+          "sourceHash": "57c47bbc92627480da828238761128762a0da8d7dffa2ad759bb7a67675c3af5"
+        }
+      ]
+    },
+    {
+      "number": 149,
+      "area": "Matemática",
+      "statement": "Uma citação presente no livro dos recordes destaca que o maior pneu do mundo é produzido para um tipo de caminhão\nutilizado em mineração. A largura de cada pneu desse tipo de caminhão mede 148 cm e seu diâmetro externo mede 403 cm.\nDisponível em: https://dinamicarpneus.com.br. Acesso em: 2 dez. 2018 (adaptado).\nUma loja de pneus pretende distribuir aos seus clientes uma miniatura desse tipo de caminhão, confeccionada com dimensões\nproporcionais às medidas reais. Após receber as miniaturas confeccionadas, foi verificado que a largura de cada pneu dessa\nminiatura mede 7,4 cm.\nO diâmetro externo de cada pneu dessa miniatura, em centímetro, mede",
+      "options": [
+        {
+          "label": "A",
+          "content": "2,72."
+        },
+        {
+          "label": "B",
+          "content": "4,29."
+        },
+        {
+          "label": "C",
+          "content": "12,75."
+        },
+        {
+          "label": "D",
+          "content": "20,15."
+        },
+        {
+          "label": "E",
+          "content": "27,55."
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 21,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 150,
+      "area": "Matemática",
+      "statement": "Em uma cidade, existem cinco caminhos ligando dois pontos turísticos. Um turista, dispondo de um carro para ir de um desses\npontos turísticos ao outro, buscou informações sobre essas opções de caminhos e obteve as que estão apresentadas no esquema.\nO turista escolheu o caminho que lhe permite chegar a seu destino no menor tempo possível, trafegando nas velocidades\nmáximas permitidas em cada trecho.\nO caminho escolhido foi o",
+      "options": [
+        {
+          "label": "A",
+          "content": "I."
+        },
+        {
+          "label": "B",
+          "content": "II."
+        },
+        {
+          "label": "C",
+          "content": "III."
+        },
+        {
+          "label": "D",
+          "content": "IV."
+        },
+        {
+          "label": "E",
+          "content": "V."
+        }
+      ],
+      "correctOptionLabel": "A",
+      "sourcePage": 21,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q150-p021-01.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 150, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 21,
+          "sourceCrop": {
+            "x": 73.04,
+            "y": 316.61,
+            "width": 413.76,
+            "height": 244.8
+          },
+          "sourceHash": "9d7a6fe556a023e55d62558a48fd8ab59a6fddae0c269a660fd9e5ea4133b807"
+        }
+      ]
+    },
+    {
+      "number": 151,
+      "area": "Matemática",
+      "statement": "Um estudante posicionou uma haste entre uma parede e uma\nvela. A haste, com 20 cm de comprimento, foi colocada paralela\nà parede, na qual projetava uma sombra de comprimento H.\nO estudante mediu a distância entre a chama da vela e a parede,\nencontrando 140 cm, e elaborou um esquema para ilustrar a\nsituação, como na figura, em que X representa a distância entre\na haste e a chama da vela.\nQual é a relação entre H e X nesse experimento?",
+      "options": [
+        {
+          "label": "A",
+          "content": "H X = 1 7"
+        },
+        {
+          "label": "B",
+          "content": "H X = 7"
+        },
+        {
+          "label": "C",
+          "content": "H ⋅ X = 700"
+        },
+        {
+          "label": "D",
+          "content": "H ⋅ X = 1 400"
+        },
+        {
+          "label": "E",
+          "content": "H ⋅ X = 2 800"
+        }
+      ],
+      "correctOptionLabel": "E",
+      "sourcePage": 22,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q151-p022-01.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 151, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 22,
+          "sourceCrop": {
+            "x": 34.42,
+            "y": 205.52,
+            "width": 241.92,
+            "height": 214.32
+          },
+          "sourceHash": "b6838f3d8710f33e31d67f2152e5e77dadbfcebe7a30edba13def7359b448228"
+        }
+      ]
+    },
+    {
+      "number": 152,
+      "area": "Matemática",
+      "sourcePage": 22,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "statement": "O mapa de cobertura e uso da terra no Brasil do IBGE aponta que, entre 2000 e 2014, a área agrícola aumentou de 39 877 600 ha para 55 854 900 ha, enquanto a área florestal diminuiu de 351 394 800 ha para 317 559 700 ha. Considere que, nesse período, a taxa de variação entre as áreas agrícola e florestal seja constante ao longo dos anos. O gráfico que melhor representa a relação entre as áreas agrícola e florestal, no período de 2000 a 2014, é",
+      "options": [
+        {
+          "label": "A",
+          "content": "Gráfico A."
+        },
+        {
+          "label": "B",
+          "content": "Gráfico B."
+        },
+        {
+          "label": "C",
+          "content": "Gráfico C."
+        },
+        {
+          "label": "D",
+          "content": "Gráfico D."
+        },
+        {
+          "label": "E",
+          "content": "Gráfico E."
+        }
+      ],
+      "correctOptionLabel": "A",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q152-A.png",
+          "placement": "option",
+          "optionLabel": "A",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Gráfico da alternativa A da questão 152.",
+          "sourcePage": 22,
+          "sourceHash": "fb70c06d223f588ae6b3976facdd5a9ee3e6963314d87b4ed0fdabb974a68a5a"
+        },
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q152-B.png",
+          "placement": "option",
+          "optionLabel": "B",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Gráfico da alternativa B da questão 152.",
+          "sourcePage": 22,
+          "sourceHash": "ee745b3c1e2a078c5f594e2e4f31bd95a7530e1c8393173bf0eddcad58185461"
+        },
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q152-C.png",
+          "placement": "option",
+          "optionLabel": "C",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Gráfico da alternativa C da questão 152.",
+          "sourcePage": 22,
+          "sourceHash": "74650d64dc3e5daf687f0b7d4d3bb62d45b91edea75ac20ce249da5e22b03fb8"
+        },
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q152-D.png",
+          "placement": "option",
+          "optionLabel": "D",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Gráfico da alternativa D da questão 152.",
+          "sourcePage": 22,
+          "sourceHash": "a89f64c7e1ee7f43e9a7601af6e9a392f650cd0a6b1a812d44da33aa2b8db3ce"
+        },
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q152-E.png",
+          "placement": "option",
+          "optionLabel": "E",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Gráfico da alternativa E da questão 152.",
+          "sourcePage": 22,
+          "sourceHash": "f453e1f2da34737389060209a15ab1af251517336d3d6f3665b806392c04aefd"
+        }
+      ]
+    },
+    {
+      "number": 153,
+      "area": "Matemática",
+      "statement": "Um engenheiro foi contratado para determinar o tipo de\nmaterial usado na construção das paredes de uma sala. Com base\nem um estudo do fluxo de calor através da parede, é possível\ndeduzir qual é o tipo de material. Sabe-se que o fluxo de calor\nq é igual ao produto das grandezas: constante k (condutividade\ntérmica), área da parede A (na qual o calor flui por condução),\nvariação de temperatura ∆T (variação entre temperatura externa\ne interna) e o inverso do comprimento ℓ (da espessura da parede).\nEsse engenheiro fez uma medição e obteve os seguintes\ndados:\n• fluxo de calor q = 400 kcal/h;\n• área da parede A = 10 m2;\n• espessura da parede ℓ = 0,2 m;\n• variação da temperatura ∆T = 10 °C.\nCom esses valores, determinou a condutividade térmica k\ndesse material, em kcal/(h⋅m⋅°C).\nO quadro apresenta cinco tipos de materiais existentes,\ncom suas respectivas condutividades.\nTipo de material\nk\nI\n0,25\nII\n0,80\nIII\n1,25\nIV\n2,00\nV\n4,00\nO material determinado pelo engenheiro para ser utilizado nas\nparedes foi o do tipo",
+      "options": [
+        {
+          "label": "A",
+          "content": "I."
+        },
+        {
+          "label": "B",
+          "content": "II."
+        },
+        {
+          "label": "C",
+          "content": "III."
+        },
+        {
+          "label": "D",
+          "content": "IV."
+        },
+        {
+          "label": "E",
+          "content": "V."
+        }
+      ],
+      "correctOptionLabel": "B",
+      "sourcePage": 23,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 154,
+      "area": "Matemática",
+      "statement": "Em uma empresa trabalham 50 funcionários, dos quais,\ninicialmente, 40 tomam café diariamente. Essa empresa tem\numa máquina que produz, diariamente, 12 000 mililitros de café.\nA máquina está programada para liberar uma quantidade de\nmililitros de café a cada acionamento. Os 12 000 mL de café são\nsuficientes, sem sobra, para que cada um desses 40 funcionários\npossa utilizar essa máquina 5 vezes por dia. Pretende-se\nreprogramar a máquina para que essa quantidade de café\nproduzida seja suficiente para que cada um dos 50 funcionários\npossa utilizar essa máquina 3 vezes por dia.\nNa reprogramação, a quantidade de café, em mililitro, que deverá\nser liberada a cada uso é",
+      "options": [
+        {
+          "label": "A",
+          "content": "48."
+        },
+        {
+          "label": "B",
+          "content": "80."
+        },
+        {
+          "label": "C",
+          "content": "100."
+        },
+        {
+          "label": "D",
+          "content": "150."
+        },
+        {
+          "label": "E",
+          "content": "240."
+        }
+      ],
+      "correctOptionLabel": "B",
+      "sourcePage": 23,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 155,
+      "area": "Matemática",
+      "statement": "Na produção de uma unidade de um produto, uma empresa\ngastava R$ 40,00 na compra de matéria-prima e mais R$ 40,00\nem custos diversos. Essa empresa vendia esse produto por\nR$ 120,00 a unidade.\nEm decorrência de mudanças no mercado consumidor,\nos custos diversos aumentaram em 50%, embora o custo com\nmatéria-prima tenha permanecido o mesmo. Assim, a empresa\nreajustará o preço de venda desse produto de forma que,\nao conceder um desconto de 20%, o lucro, em real, por unidade\nvendida permaneça o mesmo.\nDe quanto será o reajuste, em real, no preço de venda desse\nproduto?",
+      "options": [
+        {
+          "label": "A",
+          "content": "16,00"
+        },
+        {
+          "label": "B",
+          "content": "20,00"
+        },
+        {
+          "label": "C",
+          "content": "25,00"
+        },
+        {
+          "label": "D",
+          "content": "50,00"
+        },
+        {
+          "label": "E",
+          "content": "55,00"
+        }
+      ],
+      "correctOptionLabel": "E",
+      "sourcePage": 23,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 156,
+      "area": "Matemática",
+      "statement": "O controle de temperatura em sistemas mecânicos\né fundamental para prevenir acidentes e manter o bom\nfuncionamento das máquinas. Carros, aviões e computadores\nsão exemplos de máquinas que têm sistemas de controle de\ntemperatura.\nO gerente de uma fábrica orientou seus funcionários a\nmanterem a temperatura de uma máquina abaixo do limite de\nsegurança, definido como 80% da temperatura de referência,\nque é de 50 °C. Para isso, o monitoramento dessa máquina é feito\ndiariamente em dez instantes e, sempre que sua temperatura\natingir ou ultrapassar o limite de segurança, o funcionário deverá\nacionar o sistema de resfriamento.\nO gráfico apresenta as temperaturas registradas nos dez\ninstantes de monitoramento.\nQuantas vezes, ao longo desse dia, o sistema de resfriamento\nfoi acionado?",
+      "options": [
+        {
+          "label": "A",
+          "content": "0"
+        },
+        {
+          "label": "B",
+          "content": "1"
+        },
+        {
+          "label": "C",
+          "content": "3"
+        },
+        {
+          "label": "D",
+          "content": "4"
+        },
+        {
+          "label": "E",
+          "content": "5"
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 23,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q156-p023-01.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 156, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 23,
+          "sourceCrop": {
+            "x": 287.94,
+            "y": 491.73,
+            "width": 247.2,
+            "height": 148.2
+          },
+          "sourceHash": "09cabe7c86647886241790834c6eb08f799f372cb1cdcd730084182f8218d29b"
+        }
+      ]
+    },
+    {
+      "number": 157,
+      "area": "Matemática",
+      "statement": "O ministro da Fazenda de um país anunciou que a arrecadação de impostos no ano anterior atingiu a marca de 1 138,32 milhões\nde dólares.\nEm notação científica, a arrecadação de impostos anunciada, em dólar, foi de",
+      "options": [
+        {
+          "label": "A",
+          "content": "1,13832 × 103."
+        },
+        {
+          "label": "B",
+          "content": "1,13832 × 106."
+        },
+        {
+          "label": "C",
+          "content": "1,13832 × 108."
+        },
+        {
+          "label": "D",
+          "content": "1,13832 × 109."
+        },
+        {
+          "label": "E",
+          "content": "1,13832 × 1010."
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 24,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 158,
+      "area": "Matemática",
+      "statement": "Uma fábrica de refrigerantes criou um novo tipo de bebida ao adicionar uma quantidade de um tipo de xarope a 10 litros\nde um refrigerante que já tem em sua fórmula 15% desse xarope em sua composição. Com isso, 25% da composição desse novo\ntipo de bebida é formada por esse xarope.\nQual quantidade desse xarope, em litro, foi adicionada aos 10 litros de refrigerante para se criar esse novo tipo de bebida?",
+      "options": [
+        {
+          "label": "A",
+          "content": "1"
+        },
+        {
+          "label": "B",
+          "content": "4 3"
+        },
+        {
+          "label": "C",
+          "content": "2"
+        },
+        {
+          "label": "D",
+          "content": "5 2"
+        },
+        {
+          "label": "E",
+          "content": "4"
+        }
+      ],
+      "correctOptionLabel": "B",
+      "sourcePage": 24,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 159,
+      "area": "Matemática",
+      "statement": "Em uma loja de informática, 5 dispositivos de armazenagem de dados contêm as seguintes capacidades, expressas em\ngigabytes (GB): 32, 64, 128, 256 e 512. Nessa loja, esses dispositivos têm os preços P1, P2, P3, P4 e P5, respectivamente, os quais\nsão determinados considerando-se R$ 10,00 por GB.\nQual é o termo geral da sequência desses preços?",
+      "options": [
+        {
+          "label": "A",
+          "content": "2n+4"
+        },
+        {
+          "label": "B",
+          "content": "5 ⋅ 2n+6"
+        },
+        {
+          "label": "C",
+          "content": "10 ⋅ 2n+4"
+        },
+        {
+          "label": "D",
+          "content": "10 ⋅ (2n + 4)"
+        },
+        {
+          "label": "E",
+          "content": "10 ⋅ (2n-1 + 32)"
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 25,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 160,
+      "area": "Matemática",
+      "statement": "Em uma loja, um computador é vendido por R$ 2 000,00 à vista ou, de forma financiada, mediante uma entrada e mais\n15 parcelas mensais iguais, envolvendo cobrança de juros. Inicialmente, um cliente propôs dar R$ 500,00 de entrada e, para esse\ncaso, o vendedor calculou em R$ 150,00 o valor das prestações mensais. Para facilitar a escolha do cliente, o vendedor informou\nque cada R$ 1,00 de redução no valor das prestações corresponde a um acréscimo de R$ 10,00 no valor da entrada. Com essas\ninformações, o cliente decidiu pela compra financiada, pagando prestações mensais de R$ 120,00.\nQuanto, em real, esse cliente deve acrescentar ao valor inicial de sua proposta de entrada para viabilizar as prestações no valor\nde R$ 120,00?",
+      "options": [
+        {
+          "label": "A",
+          "content": "100,00"
+        },
+        {
+          "label": "B",
+          "content": "200,00"
+        },
+        {
+          "label": "C",
+          "content": "300,00"
+        },
+        {
+          "label": "D",
+          "content": "600,00"
+        },
+        {
+          "label": "E",
+          "content": "800,00"
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 25,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 161,
+      "area": "Matemática",
+      "statement": "Na avaliação de riscos em investimentos no setor financeiro, compreender o desvio padrão das taxas de retorno ao longo\nde um período permite analisar riscos potenciais associados a um investimento. Quanto maior o desvio padrão, maior a variação\ndas taxas de retorno e, consequentemente, maior o risco associado ao investimento. Um desvio padrão mais baixo indica um\ninvestimento mais estável e previsível.\nUma classificação de risco de investimento que adota o desvio padrão (dp) como medida para avaliação é:\n• muito baixo: dp < 5%;\n• baixo: 5% ≤ dp < 10%;\n• moderado: 10% ≤ dp < 20%;\n• alto: 20% ≤ dp < 30%;\n• muito alto: dp ≥ 30%.\nUm investidor analisou, ao longo de cinco meses, as taxas de retorno de um tipo de investimento na bolsa de valores\ne identificou, respectivamente, retornos mensais de 3%, 15%, 6%, 9% e 12%. Ele pretende aplicar um capital nesse tipo de\ninvestimento e adotará o desvio padrão como medida para avaliar a classificação do risco associado.\nA classificação do risco desse tipo de investimento é",
+      "options": [
+        {
+          "label": "A",
+          "content": "muito baixo."
+        },
+        {
+          "label": "B",
+          "content": "baixo."
+        },
+        {
+          "label": "C",
+          "content": "moderado."
+        },
+        {
+          "label": "D",
+          "content": "alto."
+        },
+        {
+          "label": "E",
+          "content": "muito alto."
+        }
+      ],
+      "correctOptionLabel": "A",
+      "sourcePage": 25,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 162,
+      "area": "Matemática",
+      "statement": "O índice de massa corporal (IMC) é uma medida internacional\nusada para determinar se uma pessoa está com a massa corporal\nideal. No cálculo do IMC, são utilizadas a massa corporal da\npessoa, em quilograma, e a sua altura, em metro. O valor do\nIMC é dado pela razão entre a massa do indivíduo pelo quadrado\nde sua altura.\nA unidade de medida do IMC é",
+      "options": [
+        {
+          "label": "A",
+          "content": "kg ⋅ m-2"
+        },
+        {
+          "label": "B",
+          "content": "kg ⋅ m-1"
+        },
+        {
+          "label": "C",
+          "content": "kg ⋅ m2"
+        },
+        {
+          "label": "D",
+          "content": "m ⋅ kg-1"
+        },
+        {
+          "label": "E",
+          "content": "m2 ⋅ kg-1"
+        }
+      ],
+      "correctOptionLabel": "A",
+      "sourcePage": 26,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 163,
+      "area": "Matemática",
+      "statement": "Em 2011, um tsunami atingiu os reatores da usina nuclear\nde Fukushima, no Japão, liberando radiação para o meio\nambiente e provocando um dos maiores acidentes radioativos\nda história. Inicialmente, foi delimitada uma área de isolamento\ncorrespondente a um círculo com raio de 30 km, centrado no\nlocal do acidente radioativo.\nDisponível em: https://noticias.uol.com.br.\nAcesso em: 24 abr. 2024 (adaptado).\nConsidere que, para aumentar a margem de segurança,\no raio do círculo da área de isolamento foi ampliado para 40 km,\nmantendo-se o mesmo centro.\nUse 3 como valor aproximado para π.\nO aumento da medida da área de isolamento, em quilômetro\nquadrado, foi de",
+      "options": [
+        {
+          "label": "A",
+          "content": "300."
+        },
+        {
+          "label": "B",
+          "content": "2 100."
+        },
+        {
+          "label": "C",
+          "content": "4 800."
+        },
+        {
+          "label": "D",
+          "content": "7 500."
+        },
+        {
+          "label": "E",
+          "content": "14 700."
+        }
+      ],
+      "correctOptionLabel": "B",
+      "sourcePage": 26,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 164,
+      "area": "Matemática",
+      "statement": "O proprietário de um terreno plano, em formato de\nquadrado e com área medindo 360 000 m2, solicitou a um\ntopógrafo que representasse esse terreno em um mapa cuja\nescala é 1 : 2 500. Porém, nesse mapa, alguns detalhes do\nterreno ficaram imperceptíveis. Com isso, foi desenhado um\nnovo mapa, com escala de 1 : 1 600.\nQual é a medida, em metro, arredondada para duas casas\ndecimais, do aumento do segmento que representa o lado do\nterreno, quando se compara o mapa novo com o mapa original?",
+      "options": [
+        {
+          "label": "A",
+          "content": "0,02"
+        },
+        {
+          "label": "B",
+          "content": "0,05"
+        },
+        {
+          "label": "C",
+          "content": "0,07"
+        },
+        {
+          "label": "D",
+          "content": "0,14"
+        },
+        {
+          "label": "E",
+          "content": "0,67"
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 26,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 165,
+      "area": "Matemática",
+      "statement": "Na área da computação, bit é a unidade de medida básica\nque deu origem ao byte, formado por 8 bits. Essas unidades\nderam origem a outras duas unidades de medida de taxa de\ntransferência de informações, sendo estas o megabit por\nsegundo (Mbps) e o megabyte por segundo (MB/s), em que\n1 MB/s representa 8 Mbps. Um consumidor, sabendo que as\nempresas de acesso à internet divulgam seus serviços usando\nessas taxas, pretende contratar a empresa com maior taxa de\ntransferência de informações ao custo mais baixo, encontrando\nna sua pesquisa dois anúncios:\n• Empresa X: internet de 50 megabits (50 Mbps) por apenas\nR$ 50,00;\n• Empresa Y: internet de 50 megabytes (50 MB/s) por apenas\nR$ 100,00.\nPara o consumidor obter o que pretende, deve escolher a\nempresa",
+      "options": [
+        {
+          "label": "A",
+          "content": "X, pois a taxa de transferência de informações é 8 vezes a da empresa Y, e o custo por MB/s é 1/16 do custo da concorrente."
+        },
+        {
+          "label": "B",
+          "content": "X, pois a taxa de transferência de informações é 8 vezes a da empresa Y, e o custo por MB/s é a metade do custo da concorrente."
+        },
+        {
+          "label": "C",
+          "content": "X, pois as taxas de transferência de informações são iguais e esta empresa é a que apresenta o menor custo por Mbps."
+        },
+        {
+          "label": "D",
+          "content": "Y, pois a taxa de transferência de informações é 8 vezes a da empresa X, e o custo por Mbps é 1/4 do custo da concorrente."
+        },
+        {
+          "label": "E",
+          "content": "Y, pois a taxa de transferência de informações é 8 vezes a da empresa X, e o custo por Mbps é 1/8 do custo da concorrente."
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 26,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 166,
+      "area": "Matemática",
+      "statement": "A escassez de água em todo o planeta indica que a\npreservação desse recurso deve ser praticada e disseminada em\ntodos os países, independentemente da reserva que possuem.\nDisponível em: www.gentequeeduca.org.br. Acesso em: 9 jul. 2015.\nPensando nisso, uma empresa fornecedora de água potável\nelaborou uma nova fórmula de cobrança visando um consumo\nmais consciente. Residências com consumo mensal de até\n5 m3 de água pagarão uma taxa mínima de R$ 40,00 por mês,\ne aquelas cujo consumo mensal exceder a 5 m3 pagarão, além\ndos R$ 40,00, mais R$ 12,00 por metro cúbico de água que\nexceder a 5 m3.\nA representação algébrica que fornece o valor mensal V, em real,\ncobrado pelo consumo de x m3 de água, quando x supera 5 m3, é",
+      "options": [
+        {
+          "label": "A",
+          "content": "V = 12x - 20"
+        },
+        {
+          "label": "B",
+          "content": "V = 12x - 40"
+        },
+        {
+          "label": "C",
+          "content": "V = 12x - 60"
+        },
+        {
+          "label": "D",
+          "content": "V = 12x"
+        },
+        {
+          "label": "E",
+          "content": "V = 52x"
+        }
+      ],
+      "correctOptionLabel": "A",
+      "sourcePage": 26,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 167,
+      "area": "Matemática",
+      "statement": "Uma pesquisa divulgada pela Fundação Getúlio Vargas Social sobre o “Mapa da Nova Pobreza”, com base nos dados\ndisponibilizados pela Pesquisa Nacional por Amostra de Domicílios Contínua (PNADC), constatou que a pobreza aumentou durante\na pandemia no Brasil. De acordo com o estudo, o contingente de pessoas com renda domiciliar per capita de até R$ 497,00 mensais\natingiu 62,9 milhões de brasileiros em 2021, o que representa 29,62% da população total do país.\nTaxas percentuais da pobreza no Brasil no período de 2012 a 2021\nDisponível em: https://cps.fgv.br. Acesso em: 23 abr. 2024.\nDe acordo com os dados apresentados no gráfico, a mediana das taxas de pobreza no Brasil de 2012 a 2021 foi",
+      "options": [
+        {
+          "label": "A",
+          "content": "26,00%."
+        },
+        {
+          "label": "B",
+          "content": "26,24%."
+        },
+        {
+          "label": "C",
+          "content": "26,28%."
+        },
+        {
+          "label": "D",
+          "content": "26,65%."
+        },
+        {
+          "label": "E",
+          "content": "26,67%."
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 27,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q167-p027-01.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 167, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 27,
+          "sourceCrop": {
+            "x": 71.6,
+            "y": 163.79,
+            "width": 416.64,
+            "height": 263.76
+          },
+          "sourceHash": "ea44d72c6ef68ae90ea06bdb82d7c867b29fef941ab45d48acaa83b39e0a29cb"
+        }
+      ]
+    },
+    {
+      "number": 168,
+      "area": "Matemática",
+      "statement": "Um engenheiro é responsável por acompanhar o processo\nde controle de produção de uma fábrica de parafusos.\nEsse processo é considerado sob controle se o comprimento C\ndos parafusos satisfizer M - 3d ≤ C ≤ M + 3d sendo M a média\ndos comprimentos e d o desvio padrão dos comprimentos dos\nparafusos. Na última coleta de dados em que o processo foi\nconsiderado sob controle, foram obtidos M = 5,0 cm e d = 1,2 cm.\nCom a chegada de uma nova máquina, a variabilidade\ndos comprimentos dos parafusos foi reduzida, e o processo\nfoi considerado sob controle. A média dos comprimentos\ndos parafusos produzidos por essa nova máquina foi 5,6 cm,\ne nenhum desses parafusos teve comprimento menor que a\nmedida mínima, nem maior que a medida máxima dos parafusos\nproduzidos pela máquina anterior.\nO desvio padrão, em centímetro, para o novo intervalo deverá\nser, no máximo,",
+      "options": [
+        {
+          "label": "A",
+          "content": "0,60."
+        },
+        {
+          "label": "B",
+          "content": "1,00."
+        },
+        {
+          "label": "C",
+          "content": "1,12."
+        },
+        {
+          "label": "D",
+          "content": "1,2."
+        },
+        {
+          "label": "E",
+          "content": "1,80."
+        }
+      ],
+      "correctOptionLabel": "B",
+      "sourcePage": 28,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 169,
+      "area": "Matemática",
+      "statement": "Uma vacina foi testada em um grupo formado por\n15 mulheres e 15 homens. Em testes clínicos realizados ao\nlongo de vários anos, a vacina mostrou-se capaz de imunizar\n80% das mulheres e 60% dos homens contra uma doença.\nUm repórter, pretendendo fazer uma entrevista com uma das\npessoas desse grupo, obteve uma listagem com os 30 números\nde telefone dessas pessoas, porém sem os respectivos nomes.\nEle escolheu aleatoriamente um desses números e ligou para\nagendar a entrevista.\nA probabilidade de que a pessoa para a qual o repórter telefonou\nseja um homem ou uma pessoa que tenha adquirido imunidade\na essa doença com o uso da vacina é",
+      "options": [
+        {
+          "label": "A",
+          "content": "1 20"
+        },
+        {
+          "label": "B",
+          "content": "3 10"
+        },
+        {
+          "label": "C",
+          "content": "7 20"
+        },
+        {
+          "label": "D",
+          "content": "8 10"
+        },
+        {
+          "label": "E",
+          "content": "9 10"
+        }
+      ],
+      "correctOptionLabel": "E",
+      "sourcePage": 28,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 170,
+      "area": "Matemática",
+      "statement": "Para realizar uma brincadeira, foram utilizadas 4 caixas\nnumeradas de 1 a 4 contendo, cada uma, a mesma quantidade\nde objetos. Em cada rodada dessa brincadeira, 2 objetos da\nCaixa 1 são transferidos para a Caixa 2; 2 dessa caixa são\ntransferidos para a Caixa 3, e 2 dessa terceira caixa são transferidos\npara a Caixa 4. Após 3 dessas rodadas, a Caixa 4 continha 30 objetos.\nApós as 3 rodadas, quantos objetos havia na Caixa 1?",
+      "options": [
+        {
+          "label": "A",
+          "content": "12"
+        },
+        {
+          "label": "B",
+          "content": "18"
+        },
+        {
+          "label": "C",
+          "content": "22"
+        },
+        {
+          "label": "D",
+          "content": "24"
+        },
+        {
+          "label": "E",
+          "content": "36"
+        }
+      ],
+      "correctOptionLabel": "B",
+      "sourcePage": 28,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 171,
+      "area": "Matemática",
+      "statement": "Um engenheiro precisa fazer uma escada conforme a imagem.\nDisponível em: http://arquitetura-interiores.blogspot.com.br.\nAcesso em: 21 maio 2012 (adaptado).\nUma planta inicial foi elaborada, conforme a figura a seguir,\nusando instrumentos de medição, com as medidas de algumas\ninclinações. As semirretas que representam os pisos superior\ne inferior são paralelas.\nA medida, em grau, do ângulo x é",
+      "options": [
+        {
+          "label": "A",
+          "content": "146°30’"
+        },
+        {
+          "label": "B",
+          "content": "147°00’"
+        },
+        {
+          "label": "C",
+          "content": "147°30’"
+        },
+        {
+          "label": "D",
+          "content": "148°00’"
+        },
+        {
+          "label": "E",
+          "content": "150°00’"
+        }
+      ],
+      "correctOptionLabel": "E",
+      "sourcePage": 28,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q171-p028-01.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 171, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 28,
+          "sourceCrop": {
+            "x": 363.41,
+            "y": 286.78,
+            "width": 110.44,
+            "height": 155.61
+          },
+          "sourceHash": "6fb38559d65720108022d591771962d63cbe51230b2b89afa5ee0c582726a975"
+        },
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q171-p028-02.png",
+          "placement": "after_statement",
+          "displayOrder": 1,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 171, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 28,
+          "sourceCrop": {
+            "x": 311.89,
+            "y": 515.6,
+            "width": 213.48,
+            "height": 140.28
+          },
+          "sourceHash": "11b0ade0f725fb4f505ff8b7407753f7d62d3324244052c21825c6fd6c95196a"
+        }
+      ]
+    },
+    {
+      "number": 172,
+      "area": "Matemática",
+      "statement": "O gerente de um restaurante, para melhorar o atendimento\nem seu estabelecimento, registrou nesta semana o número de\nmesas ocupadas de segunda a sexta-feira, em cinco intervalos\nde tempo, conforme apresentado na tabela.\nHorários\nseg\nter\nQua\nQui\nsex\n11 h às 12 h\n10\n12\n12\n10\n6\n12 h às 13 h\n73\n83\n20\n48\n38\n13 h às 14 h\n124\n110\n35\n50\n56\n14 h às 15 h\n57\n39\n20\n24\n44\n15 h às 16 h\n8\n12\n24\n56\n105\nTotal\n272\n256\n111\n188\n249\nAtualmente o restaurante conta com 3 garçons, e cada um\natende, no máximo, 24 mesas por hora. O gerente pretende\ncontratar, para a próxima semana, garçons adicionais para\naqueles dias em que os 3 garçons foram insuficientes para\natender à demanda de mesas em algum dos intervalos\nconsiderados. Para isso, utilizou os dados registrados na tabela.\nA quantidade mínima de novos garçons a serem contratados será",
+      "options": [
+        {
+          "label": "A",
+          "content": "5 garçons na segunda-feira, 4 na terça-feira, 1 na quarta-feira, 2 na quinta-feira e 4 na sexta-feira."
+        },
+        {
+          "label": "B",
+          "content": "2 garçons na segunda-feira, 2 na terça-feira, 1 na quinta-feira e 2 na sexta-feira."
+        },
+        {
+          "label": "C",
+          "content": "1 garçom na segunda-feira, 1 na terça-feira e 1 na sexta-feira."
+        },
+        {
+          "label": "D",
+          "content": "2 garçons na segunda-feira, 2 na terça-feira e 2 na sexta-feira."
+        },
+        {
+          "label": "E",
+          "content": "3 garçons na segunda-feira, 2 na terça-feira e 2 na sexta-feira."
+        }
+      ],
+      "correctOptionLabel": "E",
+      "sourcePage": 29,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 173,
+      "area": "Matemática",
+      "statement": "Um relatório sobre a equipe inicial dos estudantes de uma\nescola, inscritos para uma competição esportiva, informava que a\nmédia das alturas desses estudantes era 1,66 m. Após a elaboração\ndesse relatório, houve a inclusão de dois novos estudantes na\nequipe, cujas alturas eram de 1,75 m e 1,85 m. Com isso, a média\ndas alturas dos estudantes da nova equipe passou a ser 1,67 m.\nO número de estudantes que formam a nova equipe é",
+      "options": [
+        {
+          "label": "A",
+          "content": "14."
+        },
+        {
+          "label": "B",
+          "content": "16."
+        },
+        {
+          "label": "C",
+          "content": "26."
+        },
+        {
+          "label": "D",
+          "content": "28."
+        },
+        {
+          "label": "E",
+          "content": "30."
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 29,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 174,
+      "area": "Matemática",
+      "statement": "Uma pessoa pretende comprar peças em formato de bloco\nretangular, que serão colocadas uma ao lado da outra para\nmontar um armário cujo comprimento seja exatamente 150 cm.\nEm uma pesquisa na internet, ela encontrou cinco tipos de\npeças diferentes, de mesma altura e mesma profundidade,\ncom larguras externas medindo:\n• peça I: 25 cm;\n• peça II: 35 cm;\n• peça III: 40 cm;\n• peça IV: 60 cm;\n• peça V: 75 cm.\nEssa pessoa comprará pelo menos dois tipos de peças com\nlarguras diferentes e na menor quantidade, de modo que a soma\ndas medidas das larguras corresponda a 150 cm.\nPara que seu objetivo seja alcançado, ela deverá comprar quantas\npeças?",
+      "options": [
+        {
+          "label": "A",
+          "content": "2"
+        },
+        {
+          "label": "B",
+          "content": "3"
+        },
+        {
+          "label": "C",
+          "content": "4"
+        },
+        {
+          "label": "D",
+          "content": "5"
+        },
+        {
+          "label": "E",
+          "content": "6"
+        }
+      ],
+      "correctOptionLabel": "B",
+      "sourcePage": 29,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 175,
+      "area": "Matemática",
+      "statement": "Uma piscina com capacidade total de 100 m3 precisava\nser enchida. Inicialmente, prevendo um determinado tempo\nde enchimento, um registro de vazão constante foi aberto\ne começou-se a enchê-la a partir de 0 hora. O volume V de\nágua dentro da piscina, em metro cúbico, t horas após 0 hora,\nera dado pela função V(t) = 20 + 5t. Às 10 horas, um novo registro,\ntambém de vazão constante, foi aberto e passou a funcionar\nconjuntamente com o anterior, de maneira a diminuir em 4 horas\no tempo de enchimento inicialmente previsto.\nA vazão do novo registro, em metro cúbico por hora, foi de",
+      "options": [
+        {
+          "label": "A",
+          "content": "5."
+        },
+        {
+          "label": "B",
+          "content": "9."
+        },
+        {
+          "label": "C",
+          "content": "10."
+        },
+        {
+          "label": "D",
+          "content": "15."
+        },
+        {
+          "label": "E",
+          "content": "35."
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 29,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 176,
+      "area": "Matemática",
+      "statement": "O gráfico apresenta as quantidades mensais vendidas de\num item produzido por uma indústria no primeiro semestre\ndeste ano, em milhar de unidades.\nVendas no 1º semestre\nA partir do mês de março, observa-se o crescimento das\nvendas até o mês de maio e uma queda no mês de junho, que se\nexplica pela falta de matéria-prima que ocorreu na primeira\nsemana daquele mês. Caso essa falta de matéria-prima não\ntivesse ocorrido, a estimativa feita pela gerência é de que as\nvendas mensais desse item continuariam a crescer linearmente,\nmantendo o padrão de crescimento observado no período de\nmarço a maio nos demais meses do ano.\nA estimativa feita para as vendas desse item no mês de julho,\nem milhar de unidades, antes da queda registrada no mês de\njunho, foi de",
+      "options": [
+        {
+          "label": "A",
+          "content": "500."
+        },
+        {
+          "label": "B",
+          "content": "600."
+        },
+        {
+          "label": "C",
+          "content": "700."
+        },
+        {
+          "label": "D",
+          "content": "800."
+        },
+        {
+          "label": "E",
+          "content": "900."
+        }
+      ],
+      "correctOptionLabel": "E",
+      "sourcePage": 30,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q176-p030-01.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 176, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 30,
+          "sourceCrop": {
+            "x": 30.88,
+            "y": 150.49,
+            "width": 249,
+            "height": 103.44
+          },
+          "sourceHash": "4785e4468fede12d4f3d4e163c9cc7b6af9a1dbc1d87ad12830df1aa7b9f18aa"
+        }
+      ]
+    },
+    {
+      "number": 177,
+      "area": "Matemática",
+      "statement": "O proprietário de um terreno em declive decidiu construir\ndois muros nas laterais de sua propriedade, ambos com\n40 metros de comprimento, 2 metros de altura em uma das\nextremidades e 2,5 metros na outra, conforme representado\nna figura.\nPara realizar a obra, esse proprietário consultou cinco\npedreiros, que cobram o mesmo valor por metro quadrado\nde muro construído. A medida da área total orçada por esses\npedreiros foi:\n• pedreiro I: 160 m2;\n• pedreiro II: 200 m2;\n• pedreiro III: 180 m2;\n• pedreiro IV: 90 m2;\n• pedreiro V: 169 m2.\nO proprietário avaliou as medidas apresentadas nesses\norçamentos e contratou o pedreiro que apresentou a medida da\nárea que permite realizar essa construção com o menor custo.\nO pedreiro contratado foi o",
+      "options": [
+        {
+          "label": "A",
+          "content": "I."
+        },
+        {
+          "label": "B",
+          "content": "II."
+        },
+        {
+          "label": "C",
+          "content": "III."
+        },
+        {
+          "label": "D",
+          "content": "IV."
+        },
+        {
+          "label": "E",
+          "content": "V."
+        }
+      ],
+      "correctOptionLabel": "C",
+      "sourcePage": 30,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q177-p030-02.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 177, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 30,
+          "sourceCrop": {
+            "x": 30.7,
+            "y": 550.95,
+            "width": 249.36,
+            "height": 73.2
+          },
+          "sourceHash": "afa5485b49f5a7a2a28d7debf9587f7dc766938b0cdfc19548ab4f8342d94af9"
+        }
+      ]
+    },
+    {
+      "number": 178,
+      "area": "Matemática",
+      "statement": "Dois professores participam de um concurso público\ncom três fases. A primeira fase avalia o desempenho teórico,\na segunda fase refere-se às experiências e aos títulos obtidos\ndurante a vida acadêmica, e a última fase avalia o desempenho\ndidático do participante, sendo as notas obtidas nessas fases\nrepresentadas por F1, F2 e F3, respectivamente. A nota final (NF)\ndos participantes é calculada por:\nNF = 0,4 × F1 + 0,1 × F2 + 0,5 × F3\nO candidato precisa apresentar nota mínima igual a 6,0 em\ncada uma das fases para não ser desclassificado. Em caso de\nempate nas notas finais, o candidato que obtiver a maior nota\nna primeira fase será o primeiro colocado.\nO primeiro participante obteve nota 7,0 na primeira e na\nsegunda fase e nota 10,0 na última fase. O segundo obteve nota\n8,0 em cada uma das duas primeiras fases e ainda participará\nda terceira fase.\nPara alcançar a primeira colocação no concurso, qual é a nota\nmínima que o segundo participante deverá obter na terceira fase?",
+      "options": [
+        {
+          "label": "A",
+          "content": "2,0"
+        },
+        {
+          "label": "B",
+          "content": "4,0"
+        },
+        {
+          "label": "C",
+          "content": "6,0"
+        },
+        {
+          "label": "D",
+          "content": "9,0"
+        },
+        {
+          "label": "E",
+          "content": "9,5"
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 30,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": []
+    },
+    {
+      "number": 179,
+      "area": "Matemática",
+      "statement": "Em uma empresa, existem duas equipes de vendedores:\numa denominada Profissional, formada pelos vendedores\nmais experientes, e outra denominada Iniciante, formada\npelos vendedores que ainda se encontram em fase de\naperfeiçoamento. Durante uma semana, as quantidades de\nunidades vendidas por equipe foram registradas no gráfico.\nVendas: Profissional × Iniciante\nO gerente da empresa pesquisou os dias dessa semana em\nque a equipe Profissional vendeu pelo menos o dobro do que\nvendeu a equipe Iniciante.\nQuantas unidades a equipe Profissional vendeu a mais do que\na equipe Iniciante no total dos dias pesquisados pelo gerente?",
+      "options": [
+        {
+          "label": "A",
+          "content": "10"
+        },
+        {
+          "label": "B",
+          "content": "20"
+        },
+        {
+          "label": "C",
+          "content": "35"
+        },
+        {
+          "label": "D",
+          "content": "45"
+        },
+        {
+          "label": "E",
+          "content": "90"
+        }
+      ],
+      "correctOptionLabel": "D",
+      "sourcePage": 31,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q179-p031-01.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 179, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 31,
+          "sourceCrop": {
+            "x": 27.94,
+            "y": 187.79,
+            "width": 240.72,
+            "height": 258.84
+          },
+          "sourceHash": "13855b2e1308f4599ada151bcbec38e8939bc9c29344fe254f5213fcbbd94de1"
+        }
+      ]
+    },
+    {
+      "number": 180,
+      "area": "Matemática",
+      "statement": "No piso de uma sala, há obstáculos. Cada obstáculo tem\numa cor: azul, cinza ou alaranjado. Um robô foi colocado na\nposição representada pela seta, conforme a figura.\nEsse robô foi programado para, ao iniciar sua movimentação,\nseguir continuamente sempre no sentido que aponta a seta.\nEle tem um sensor que, ao tocar em um obstáculo, identifica\nsua cor. Se a cor é cinza, o robô gira 90° no sentido horário;\nse a cor é alaranjado, gira 90° no sentido anti-horário, e se a\ncor for azul, gira 180°.\nPara sair dessa sala, em quantos obstáculos ele tocará?",
+      "options": [
+        {
+          "label": "A",
+          "content": "11"
+        },
+        {
+          "label": "B",
+          "content": "8"
+        },
+        {
+          "label": "C",
+          "content": "7"
+        },
+        {
+          "label": "D",
+          "content": "6"
+        },
+        {
+          "label": "E",
+          "content": "1"
+        }
+      ],
+      "correctOptionLabel": "A",
+      "sourcePage": 31,
+      "sourceDocumentHash": "3d63b84c36d9d8e2333cd4ccb9f8386cc235b1ac2de38549c0ed94aae9716982",
+      "assets": [
+        {
+          "url": "http://localhost:3001/exam-assets/enem-2025-dia-2-azul/q180-p031-02.png",
+          "placement": "after_statement",
+          "displayOrder": 0,
+          "mimeType": "image/png",
+          "altText": "Figura da questão 180, extraída do caderno azul oficial do ENEM 2025.",
+          "sourcePage": 31,
+          "sourceCrop": {
+            "x": 320.1,
+            "y": 135.54,
+            "width": 182.88,
+            "height": 115.44
+          },
+          "sourceHash": "6299c42e11fda86e15a756b34434e14aaf43adfee87f0ca04f7c723cb0374ad2"
+        }
+      ]
+    }
+  ]
+}

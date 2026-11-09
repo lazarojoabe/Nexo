@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { api, type Dashboard, type EssayDetail, type EssayEvaluation, type EssayHistory, type Exam, type Question, type QuizAnswer, type QuizHistory, type QuizSession, type QuizSummary, type Transcription } from '../lib/api';
 import { ErrorState } from '../components/error-state';
 import { LoadingState } from '../components/loading-state';
@@ -39,6 +39,7 @@ function AuthenticatedHome() {
   const [selected, setSelected] = useState<string>();
   const [answer, setAnswer] = useState<QuizAnswer>();
   const [sendingAnswer, setSendingAnswer] = useState(false);
+  const answerRequestInFlight = useRef(false);
   const [summary, setSummary] = useState<QuizSummary>();
   const [answeredQuestionIds, setAnsweredQuestionIds] = useState<string[]>([]);
   const [flowError, setFlowError] = useState('');
@@ -112,18 +113,15 @@ function AuthenticatedHome() {
 
   async function submitAnswer(optionId: string) {
     const question = questions[questionIndex];
-    if (!session || !question || answer) return;
+    if (!session || !question || answer || answerRequestInFlight.current) return;
+    answerRequestInFlight.current = true;
     setSelected(optionId); setSendingAnswer(true); setFlowError('');
-    try { setAnswer(await api.answer(session.id, question.id, optionId)); setAnsweredQuestionIds((ids) => ids.includes(question.id) ? ids : [...ids, question.id]); } catch (error) { setSelected(undefined); setFlowError(message(error)); } finally { setSendingAnswer(false); }
-  }
-
-  function selectAnswer(optionId: string) {
-    if (!answer) setSelected(optionId);
+    try { setAnswer(await api.answer(session.id, question.id, optionId)); setAnsweredQuestionIds((ids) => ids.includes(question.id) ? ids : [...ids, question.id]); } catch (error) { setSelected(undefined); setFlowError(message(error)); } finally { answerRequestInFlight.current = false; setSendingAnswer(false); }
   }
 
   async function nextQuestion() {
     if (!session) return;
-    if (questionIndex + 1 < questions.length) { setQuestionIndex((index) => index + 1); setSelected(undefined); setAnswer(undefined); return; }
+    if (questionIndex + 1 < questions.length) { answerRequestInFlight.current = false; setQuestionIndex((index) => index + 1); setSelected(undefined); setAnswer(undefined); return; }
     try { setSummary(await api.results(session.id)); void loadDashboard(); void loadQuizHistory(); } catch (error) { setFlowError(message(error)); }
   }
 
@@ -134,7 +132,7 @@ function AuthenticatedHome() {
   }
 
   function goToQuestion(nextIndex: number) {
-    setQuestionIndex(nextIndex); setSelected(undefined); setAnswer(undefined);
+    answerRequestInFlight.current = false; setQuestionIndex(nextIndex); setSelected(undefined); setAnswer(undefined);
   }
 
   function retryExam() { if (exam) void startExam(exam, questions[0]?.area); }
@@ -220,7 +218,7 @@ function AuthenticatedHome() {
   return <div className="app-shell"><header className="app-header"><div className="brand-lockup"><img className="brand-logo" src="/icon.svg" alt="" /><span>nexo</span></div><div className="account-panel"><span className="account-copy"><b>{user ? accountName(user) : 'Estudante'}</b><small>{user?.email}</small></span><button type="button" onClick={() => void leaveAccount()} aria-label="Sair da conta">Sair</button></div></header><main>
     {view === 'home' && <HomeView greeting={greeting} dashboard={dashboard} error={dashboardError} quizHistory={quizHistory} quizHistoryError={quizHistoryError} loadingQuizHistory={loadingQuizHistory} onRetry={() => void loadDashboard()} onRetryQuizHistory={() => void loadQuizHistory()} onExams={() => void openExams()} onEssay={chooseEssay} onResume={(id) => void resumeQuiz(id)} onOpenQuizHistory={(id, complete) => void resumeQuiz(id, complete)} />}
     {view === 'exams' && <ScreenHeader title="Provas" onBack={backHome}>{loadingExams ? <LoadingState label="Carregando provas…" /> : flowError ? <ErrorState message={flowError} retry={() => void openExams()} /> : <ExamSelector exams={exams} startingExamId={startingExamId} onStart={(item, area) => void startExam(item, area)} />}</ScreenHeader>}
-    {view === 'quiz' && <ScreenHeader title="Resolver prova" onBack={() => setView('exams')}>{flowError && <ErrorState message={flowError} />}{exam && <QuizSessionView exam={exam} questions={questions} index={questionIndex} selected={selected} feedback={answer} sending={sendingAnswer} summary={summary} answeredQuestionIds={answeredQuestionIds} onSelect={selectAnswer} onConfirm={() => { if (selected) void submitAnswer(selected); }} onSkip={() => void nextQuestion()} onFinish={() => void finishQuiz()} onGoToQuestion={goToQuestion} onNext={() => void nextQuestion()} onRetry={retryExam} onChooseExam={() => void openExams()} />}</ScreenHeader>}
+    {view === 'quiz' && <ScreenHeader title="Resolver prova" onBack={() => setView('exams')}>{flowError && <ErrorState message={flowError} />}{exam && <QuizSessionView exam={exam} questions={questions} index={questionIndex} selected={selected} feedback={answer} sending={sendingAnswer} summary={summary} answeredQuestionIds={answeredQuestionIds} onSelect={(optionId) => void submitAnswer(optionId)} onSkip={() => void nextQuestion()} onFinish={() => void finishQuiz()} onGoToQuestion={goToQuestion} onNext={() => void nextQuestion()} onRetry={retryExam} onChooseExam={() => void openExams()} />}</ScreenHeader>}
     {view === 'essay' && <ScreenHeader title="Minha redação" onBack={backHome}><EssayView phase={essayPhase} topic={topic} essayFiles={essayFiles} uploadedCount={uploadedCount} uploading={uploading} consent={consent} transcribing={transcribing} transcription={transcription} text={transcribedText} savingText={savingText} evaluation={evaluation} evaluating={evaluating} discarding={discardingEssay} error={essayError} history={essayHistory} historyLoading={loadingEssayHistory} onTopic={setTopic} onCreate={() => void createEssay()} onFiles={setEssayFiles} onFileValidationError={setEssayError} onUpload={() => void uploadPages()} onConsent={setConsent} onTranscribe={() => void transcribeEssay()} onText={setTranscribedText} onConfirm={() => void confirmText()} onEvaluate={() => void evaluateEssay()} onMinimize={minimizeEvaluation} onDiscard={() => void discardEssay()} onOpenHistory={(id) => void openHistoryEssay(id)} onNew={resetEssay} /></ScreenHeader>}
   </main>{evaluationMinimized && (evaluating || evaluation || essayError) && <EvaluationBackgroundStatus evaluating={evaluating} ready={Boolean(evaluation)} error={essayError} onOpen={resumeEvaluation} />}<nav className="bottom-nav" aria-label="Navegação principal"><button className={view === 'home' ? 'active' : ''} onClick={backHome}><Icon name="home" size={20} /><span>Início</span></button><button className={view === 'exams' || view === 'quiz' ? 'active' : ''} onClick={() => void openExams()}><Icon name="book" size={20} /><span>Provas</span></button><button className={view === 'essay' ? 'active' : ''} onClick={chooseEssay}><Icon name="pen" size={20} /><span>Redação</span></button></nav></div>;
 }

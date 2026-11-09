@@ -12,9 +12,9 @@ export function QuestionCard({ question, exam, index, total, selected, feedback,
     <p className="question-source">{exam ? `ENEM ${exam.year} · Dia ${exam.day} · Caderno ${exam.color}` : question.source}</p>
     {beforeStatement.length > 0 ? <QuestionAssets assets={beforeStatement} /> : question.imageUrl && <AssetImage className="question-image" url={question.imageUrl} alt="Imagem complementar da questão" />}
     {text.context && <section className="question-context" aria-label="Texto-base"><span>Texto-base</span><QuestionParagraphs value={text.context} /></section>}
-    <h1 className="question-statement">{text.prompt}</h1>{afterStatement.length > 0 && <QuestionAssets assets={afterStatement} />}<p className="question-instruction">Selecione uma alternativa e confirme sua resposta.</p>
+    <h1 className="question-statement">{text.prompt}</h1>{afterStatement.length > 0 && <QuestionAssets assets={afterStatement} />}<p className="question-instruction">Toque em uma alternativa para receber a correção e a resolução.</p>
     <div className="answer-list">{question.options.map((option) => <AnswerOption key={option.id} label={option.label} content={option.content} assets={assets.filter((asset) => asset.placement === 'option' && asset.optionLabel === option.label)} selected={selected === option.id} correct={feedback?.correctOptionId === option.id} incorrect={Boolean(feedback && selected === option.id && !feedback.correct)} disabled={Boolean(feedback) || sending} onSelect={() => onSelect(option.id)} />)}</div>
-    {feedback && <div className={`answer-feedback ${feedback.correct ? 'positive' : ''}`}><strong>{feedback.correct ? 'Resposta correta.' : 'Resposta incorreta.'}</strong><p>{feedback.explanation}</p></div>}
+    {feedback && <div className={`answer-feedback ${feedback.correct ? 'positive' : ''}`} role="status"><strong>{feedback.correct ? 'Resposta correta. Veja a resolução.' : `Resposta incorreta. A alternativa correta é ${question.options.find((option) => option.id === feedback.correctOptionId)?.label ?? ''}.`}</strong><p>{feedback.explanation}</p>{feedback.resolutionPdfUrl && <a className="resolution-download" href={feedback.resolutionPdfUrl} download>Baixar resolução em PDF</a>}</div>}
   </article>;
 }
 

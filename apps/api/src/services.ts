@@ -7,11 +7,12 @@ import { preAnalyzeEssay } from './essay-engine/pre-analysis';
 import { validateEssayEvaluation } from './essay-engine/evaluation-validation';
 import { ESSAY_AI_PROVIDER, type EssayAiProvider } from './essay-engine/provider';
 import { buildStructuredTranscription } from './handwriting-normalizer';
+import { curatedQuestionResolution } from './curated-question-resolutions';
 import type { HandwritingAiProvider } from './essay-engine/provider';
 
 type Option = { id: string; label: string; content: string };
 type QuestionAsset = { id: string; url: string; placement: 'before_statement' | 'after_statement' | 'option'; optionLabel?: string | null; displayOrder: number; mimeType: string; altText: string };
-type Question = { id: string; number?: number; area: string; statement: string; explanation: string; imageUrl?: string | null; assets: QuestionAsset[]; correctOptionId: string; options: Option[]; source: string };
+type Question = { id: string; number?: number; area: string; statement: string; explanation: string; resolutionPdfUrl?: string; imageUrl?: string | null; assets: QuestionAsset[]; correctOptionId: string; options: Option[]; source: string };
 type MemorySession = { userId?: string; examId?: string; questionIds: string[]; attempts: Map<string, { optionId: string; correct: boolean }>; createdAt: Date };
 type StoredEssayImage = { id: string; storagePath: string; originalStoragePath?: string | null; mimeType: string; size: number; page: number };
 type MemoryEssay = { id: string; userId: string; topic: string; transcription?: string; transcriptionResult?: unknown; confirmedText?: string; consentAt?: Date; status: string; createdAt: Date; evaluatedAt?: Date; images: StoredEssayImage[]; evaluation?: { payload: unknown } };
@@ -56,7 +57,10 @@ export class QuizService implements OnModuleInit {
   async listQuestions(area?: string, examId?: string) {
     if (!this.databaseEnabled || !this.prisma) return this.withoutAnswer(demoQuestion);
     const questions = await this.prisma.question.findMany({ where: { isCancelled: false, ...(area ? { area } : {}), ...(examId ? { examId } : {}) }, include: { options: true, exam: true, assets: { orderBy: [{ placement: 'asc' }, { displayOrder: 'asc' }] } }, orderBy: [{ examId: 'asc' }, { number: 'asc' }] });
-    return questions.map((question) => ({ id: question.id, examId: question.examId, number: question.number, area: question.area, statement: question.statement, explanation: question.explanation ?? 'Explicação ainda não disponível.', imageUrl: normalizeExamAssetUrl(question.imageUrl), assets: question.assets.map(presentQuestionAsset), source: question.exam.sourceVersion ?? 'Material importado', options: question.options.map((option) => ({ id: option.id, label: option.label, content: option.content })) }));
+    return questions.map((question) => {
+      const resolution = curatedQuestionResolution(question.exam, question.number);
+      return { id: question.id, examId: question.examId, number: question.number, area: question.area, statement: question.statement, explanation: resolution?.explanation ?? question.explanation ?? 'Explicação ainda não disponível.', imageUrl: normalizeExamAssetUrl(question.imageUrl), assets: question.assets.map(presentQuestionAsset), source: question.exam.sourceVersion ?? 'Material importado', options: question.options.map((option) => ({ id: option.id, label: option.label, content: option.content })) };
+    });
   }
 
   async question(id: string): Promise<Question> {
@@ -66,7 +70,8 @@ export class QuizService implements OnModuleInit {
     }
     const question = await this.prisma.question.findUnique({ where: { id }, include: { options: true, exam: true, assets: { orderBy: [{ placement: 'asc' }, { displayOrder: 'asc' }] } } });
     if (!question || question.isCancelled) throw new NotFoundException('Questão não encontrada.');
-    return { id: question.id, number: question.number, area: question.area, statement: question.statement, explanation: question.explanation ?? 'Explicação ainda não disponível.', imageUrl: normalizeExamAssetUrl(question.imageUrl), assets: question.assets.map(presentQuestionAsset), correctOptionId: question.correctOptionId, source: question.exam.sourceVersion ?? 'Material importado', options: question.options.map((option) => ({ id: option.id, label: option.label, content: option.content })) };
+    const resolution = curatedQuestionResolution(question.exam, question.number);
+    return { id: question.id, number: question.number, area: question.area, statement: question.statement, explanation: resolution?.explanation ?? question.explanation ?? 'Explicação ainda não disponível.', resolutionPdfUrl: resolution?.pdfUrl, imageUrl: normalizeExamAssetUrl(question.imageUrl), assets: question.assets.map(presentQuestionAsset), correctOptionId: question.correctOptionId, source: question.exam.sourceVersion ?? 'Material importado', options: question.options.map((option) => ({ id: option.id, label: option.label, content: option.content })) };
   }
 
   async createSession(questionIds?: string[], examId?: string, userId?: string, area?: string) {
@@ -114,7 +119,7 @@ export class QuizService implements OnModuleInit {
       if (!session || (userId && session.userId !== userId) || !ids.includes(questionId)) throw new NotFoundException('Sessão não encontrada.');
       await this.prisma.questionAttempt.upsert({ where: { sessionId_questionId: { sessionId, questionId } }, update: { optionId, correct: result.correct, answeredAt: new Date() }, create: { sessionId, questionId, optionId, correct: result.correct } });
     }
-    return { ...result, explanation: question.explanation };
+    return { ...result, explanation: question.explanation, resolutionPdfUrl: question.resolutionPdfUrl };
   }
 
   async results(sessionId: string, userId?: string) {

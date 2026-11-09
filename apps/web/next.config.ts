@@ -7,12 +7,15 @@ function origin(value: string | undefined) {
 const apiOrigin = origin(process.env.NEXT_PUBLIC_API_URL);
 const supabaseOrigin = origin(process.env.NEXT_PUBLIC_SUPABASE_URL);
 const connectSources = ["'self'", apiOrigin, supabaseOrigin, 'https://*.supabase.co'].filter(Boolean).join(' ');
+// Exam figures are served by the same configured API origin. Keep this list
+// explicit instead of allowing arbitrary HTTP images.
+const imageSources = ["'self'", 'blob:', 'data:', 'https:', apiOrigin].filter(Boolean).join(' ');
 const scriptSources = process.env.NODE_ENV === 'development' ? "'self' 'unsafe-inline' 'unsafe-eval'" : "'self' 'unsafe-inline'";
 const csp = [
   "default-src 'self'",
   `script-src ${scriptSources}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' blob: data: https:",
+  `img-src ${imageSources}`,
   `connect-src ${connectSources}`,
   "font-src 'self' data:",
   "object-src 'none'",

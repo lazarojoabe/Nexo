@@ -10,7 +10,7 @@ export class ApiError extends Error {
 export type Exam = { id: string; year: number; day: number; color: string; language?: string | null; version: string; source: string; sourceUrl?: string; questionCount: number; areas: Array<{ name: string; questionCount: number }> };
 export type QuestionAsset = { id: string; url: string; placement: 'before_statement' | 'after_statement' | 'option'; optionLabel?: string | null; displayOrder: number; mimeType: 'image/png' | 'image/jpeg' | 'image/webp' | string; altText: string };
 export type Question = { id: string; examId?: string; number?: number; area: string; statement: string; explanation: string; imageUrl?: string | null; assets?: QuestionAsset[]; source: string; options: Array<{ id: string; label: string; content: string }> };
-export type QuizAnswer = { correct: boolean; correctOptionId: string; explanation: string };
+export type QuizAnswer = { correct: boolean; correctOptionId: string; explanation: string; resolutionPdfUrl?: string };
 export type QuizSession = { id: string; examId?: string; questionIds: string[]; attempts?: Array<{ questionId: string; optionId: string; correct: boolean }> };
 export type QuizSummary = { total: number; answered: number; correct: number; attempts: Array<{ questionId: string; optionId: string; correct: boolean }>; areas: Array<{ area: string; total: number; answered: number; correct: number; accuracy: number | null }> };
 export type QuizHistory = { summary: { sessions: number; completed: number; answered: number; correct: number; percentage: number | null }; sessions: Array<{ id: string; examId?: string; createdAt: string; total: number; answered: number; correct: number; percentage: number | null; complete: boolean }> };

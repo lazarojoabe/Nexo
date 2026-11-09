@@ -14,6 +14,14 @@ export function ExamSelector({ exams, startingExamId, onStart }: { exams: Exam[]
   const groups = useMemo(() => groupExams(exams), [exams]);
   const filters = useMemo(() => ({ years: distinct(groups.map((exam) => String(exam.year))), days: distinct(groups.map((exam) => String(exam.day))), colors: distinct(groups.map((exam) => exam.color)) }), [groups]);
   const visible = groups.filter((exam) => (!year || String(exam.year) === year) && (!day || String(exam.day) === day) && (!color || exam.color === color));
+  function chooseArea(group: ExamGroup, area: string) {
+    // Day 2 has a single Portuguese variant. Going directly to the session
+    // avoids presenting an unhelpful language dialog (and also supports
+    // imports that explicitly store the language as "pt" or "pt-BR").
+    const [onlyVariant] = group.variants;
+    if (group.variants.length === 1) { onStart(onlyVariant, area); return; }
+    setPending({ group, area });
+  }
 
   return <section className="exam-selector" aria-labelledby="exam-title">
     <p className="eyebrow">PROVAS IMPORTADAS</p><h1 id="exam-title">Escolha sua prova</h1><p className="muted-copy">Selecione o ano e o conteúdo. Cada sessão reúne todas as questões disponíveis daquele bloco.</p>
@@ -25,7 +33,7 @@ export function ExamSelector({ exams, startingExamId, onStart }: { exams: Exam[]
     <div className="exam-list">{visible.map((group) => <article className="exam-card exam-card-content" key={group.id}>
       <div><p className="exam-year">ENEM {group.year}</p><h2>Dia {group.day} · Caderno {group.color}</h2><p>Escolha o conteúdo para abrir uma sessão completa.</p><small>{group.source}</small></div>
       <div className="content-choices" aria-label={`Conteúdos da prova ENEM ${group.year}, dia ${group.day}`}>
-        {group.areas.map((area) => <button key={area.name} type="button" disabled={!area.questionCount} onClick={() => setPending({ group, area: area.name })}><span>{area.name}</span><small>{area.questionCount} questões <Icon name="arrow" size={14} /></small></button>)}
+        {group.areas.map((area) => <button key={area.name} type="button" disabled={!area.questionCount} onClick={() => chooseArea(group, area.name)}><span>{area.name}</span><small>{area.questionCount} questões <Icon name="arrow" size={14} /></small></button>)}
       </div>
     </article>)}</div>
     {!visible.length && <p className="empty-state">Nenhuma prova corresponde aos filtros selecionados.</p>}

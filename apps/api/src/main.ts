@@ -41,7 +41,7 @@ async function bootstrap() {
   if (process.env.NODE_ENV === 'production' && !configuredOrigins.length) throw new Error('WEB_ORIGIN deve ser configurada em produção.');
   const localOrigins = process.env.NODE_ENV === 'production' ? [] : ['http://localhost:3000', 'http://localhost:3002', 'http://127.0.0.1:3002'];
   const allowedOrigins = new Set([...localOrigins, ...configuredOrigins]);
-  const isLocalPreview = (origin: string) => /^http:\/\/(?:localhost|127\.0\.0\.1|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(?::\d+)?$/.test(origin);
+  const isLocalPreview = (origin: string) => /^http:\/\/(?:localhost|127\.0\.0\.1|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(?::\d+)?$/.test(origin);
   app.enableCors({
     origin: (origin: string | undefined, callback: (error: Error | null, allow?: boolean) => void) => {
       const permitted = !origin || allowedOrigins.has(origin) || (process.env.NODE_ENV !== 'production' && isLocalPreview(origin));
